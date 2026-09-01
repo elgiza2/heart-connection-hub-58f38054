@@ -63,26 +63,26 @@ Deno.serve(async (req) => {
     });
   }
 
-  const authHeader = req.headers.get("Authorization") || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
-  if (!token) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...fastCorsHeaders, "Content-Type": "application/json" },
+  // Same identity contract as `chat-alibaba`: a signed-in user OR a guest
+  // fingerprint header is enough. The anon key alone is treated as a guest.
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  let userId: string | null = null;
+  if (token && token !== anonKey && supabaseUrl && anonKey) {
+    const authClient = createClient(supabaseUrl, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
+    const { data } = await authClient.auth.getUser(token);
+    userId = data.user?.id ?? null;
   }
-  const authClient = createClient(
-    Deno.env.get("SUPABASE_URL") || "",
-    Deno.env.get("SUPABASE_ANON_KEY") || "",
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
-  const { data: authData, error: authError } = await authClient.auth.getUser(token);
-  if (authError || !authData.user) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...fastCorsHeaders, "Content-Type": "application/json" },
-    });
+  if (!userId && !req.headers.get("x-anon-fingerprint")) {
+    return new Response(
+      JSON.stringify({ error: "Guest identity required", code: "auth_required" }),
+      { status: 403, headers: { ...fastCorsHeaders, "Content-Type": "application/json" } },
+    );
   }
+
 
   const key = apiKey();
   if (!key) {
