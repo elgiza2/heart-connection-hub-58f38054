@@ -24,7 +24,7 @@ export default function PasswordsPage() {
     try {
       setRows(await listCredentials());
     } catch {
-      toast.error("مش قادر أجيب الباسوردات");
+      toast.error("Couldn't load your passwords");
     } finally {
       setLoading(false);
     }
@@ -37,15 +37,15 @@ export default function PasswordsPage() {
   const copy = async (value: string) => {
     try {
       await navigator.clipboard.writeText(value);
-      toast.success("تم النسخ");
+      toast.success("Copied");
     } catch {
-      toast.error("النسخ مش متاح");
+      toast.error("Copying isn't available");
     }
   };
 
   const add = async () => {
     if (!draft.site.trim() || !draft.login_email.trim() || !draft.password.trim()) {
-      toast.error("املا الموقع والإيميل والباسورد");
+      toast.error("Fill in the site, email and password");
       return;
     }
     try {
@@ -54,7 +54,7 @@ export default function PasswordsPage() {
       setAdding(false);
       await load();
     } catch {
-      toast.error("مش قادر أحفظ");
+      toast.error("Couldn't save");
     }
   };
 
@@ -64,18 +64,18 @@ export default function PasswordsPage() {
   };
 
   return (
-    <SubShell title="الباسوردات">
+    <SubShell title="Passwords">
       <p className="px-1 text-[13px] leading-relaxed text-[color:var(--mn-faint)]">
-        كل حساب بيعمله الوكيل بيتسجّل بإيميل ميغسي بتاعك وبباسورد قوي، وبيتحفظ هنا
-        علشان ترجع له في أي وقت.
+        Every account the agent creates is registered with your Megsy email and a
+        strong password, and it is saved here so you can come back to it anytime.
       </p>
 
       <section className="overflow-hidden rounded-[20px] bg-[var(--mn-card)]">
         {loading ? (
-          <div className="px-5 py-[18px] text-[14px] text-[color:var(--mn-faint)]">بأحمّل…</div>
+          <div className="px-5 py-[18px] text-[14px] text-[color:var(--mn-faint)]">Loading…</div>
         ) : rows.length === 0 ? (
           <div className="px-5 py-[18px] text-[14px] text-[color:var(--mn-faint)]">
-            مفيش باسوردات محفوظة لسه.
+            No saved passwords yet.
           </div>
         ) : (
           rows.map((row, i) => (
@@ -88,7 +88,7 @@ export default function PasswordsPage() {
                   </span>
                   <button
                     type="button"
-                    aria-label="إظهار الباسورد"
+                    aria-label="Show password"
                     onClick={() => setShown((s) => ({ ...s, [row.id]: !s[row.id] }))}
                     className="text-[color:var(--mn-faint)] transition-colors hover:text-[color:var(--mn-fg)]"
                   >
@@ -96,7 +96,7 @@ export default function PasswordsPage() {
                   </button>
                   <button
                     type="button"
-                    aria-label="نسخ الباسورد"
+                    aria-label="Copy password"
                     onClick={() => void copy(row.password)}
                     className="text-[color:var(--mn-faint)] transition-colors hover:text-[color:var(--mn-fg)]"
                   >
@@ -104,7 +104,7 @@ export default function PasswordsPage() {
                   </button>
                   <button
                     type="button"
-                    aria-label="حذف"
+                    aria-label="Delete"
                     onClick={() => void remove(row.id)}
                     className="text-[color:var(--mn-faint)] transition-colors hover:text-destructive"
                   >
@@ -124,24 +124,24 @@ export default function PasswordsPage() {
       {adding ? (
         <section className="flex flex-col gap-2 rounded-[20px] bg-[var(--mn-card)] p-4">
           <Input
-            placeholder="الموقع (example.com)"
+            placeholder="Site (example.com)"
             value={draft.site}
             onChange={(e) => setDraft((d) => ({ ...d, site: e.target.value }))}
           />
           <Input
-            placeholder="الإيميل"
+            placeholder="Email"
             value={draft.login_email}
             onChange={(e) => setDraft((d) => ({ ...d, login_email: e.target.value }))}
           />
           <div className="flex items-center gap-2">
             <Input
-              placeholder="الباسورد"
+              placeholder="Password"
               value={draft.password}
               onChange={(e) => setDraft((d) => ({ ...d, password: e.target.value }))}
             />
             <button
               type="button"
-              aria-label="توليد باسورد"
+              aria-label="Generate password"
               onClick={() => setDraft((d) => ({ ...d, password: generatePassword() }))}
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[color:var(--mn-faint)] hover:text-[color:var(--mn-fg)]"
             >
@@ -150,14 +150,14 @@ export default function PasswordsPage() {
           </div>
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={() => void add()} className="text-[14px] text-primary">
-              حفظ
+              Save
             </button>
             <button
               type="button"
               onClick={() => setAdding(false)}
               className="text-[14px] text-[color:var(--mn-faint)]"
             >
-              إلغاء
+              Cancel
             </button>
           </div>
         </section>
@@ -167,7 +167,7 @@ export default function PasswordsPage() {
           onClick={() => setAdding(true)}
           className="flex items-center gap-2 self-start px-1 text-[14px] text-primary"
         >
-          <Plus className="h-4 w-4" /> إضافة باسورد
+          <Plus className="h-4 w-4" /> Add password
         </button>
       )}
     </SubShell>

@@ -395,4 +395,19 @@ export const EGYPTIAN_PAGES_3: Record<string, string> = {
     "استرجع اشتراك Megsy AI على الجهاز ده بمراجعة الباقة المسجّلة لحسابك.",
   "Learn about Megsy AI's security practices, data protection, encryption, and compliance commitments. Your data safety is our priority.":
     "اعرف ممارسات الأمان في Megsy AI وحماية البيانات والتشفير والالتزام بالمعايير. أمان بياناتك أولويتنا.",
+  // ------------------------------------------------------------------ الباسوردات
+  "Passwords": "الباسوردات",
+  "Every account the agent creates is registered with your Megsy email and a strong password, and it is saved here so you can come back to it anytime.":
+    "كل حساب بيعمله الوكيل بيتسجّل بإيميل ميغسي بتاعك وبباسورد قوي، وبيتحفظ هنا علشان ترجع له في أي وقت.",
+  "No saved passwords yet.": "مفيش باسوردات محفوظة لسه.",
+  "Add password": "إضافة باسورد",
+  "Show password": "إظهار الباسورد",
+  "Copy password": "نسخ الباسورد",
+  "Generate password": "توليد باسورد",
+  "Site (example.com)": "الموقع (example.com)",
+  "Couldn\u2019t load your passwords": "مش قادر أجيب الباسوردات",
+  "Couldn't load your passwords": "مش قادر أجيب الباسوردات",
+  "Copying isn't available": "النسخ مش متاح",
+  "Fill in the site, email and password": "املا الموقع والإيميل والباسورد",
+  "Couldn't save": "مش قادر أحفظ",
 };
