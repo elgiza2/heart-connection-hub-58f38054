@@ -168,7 +168,7 @@ function makeTextCall(admin: any): CallFn {
   };
 }
 
-function makeRawCall(admin: any) {
+function makeRawCall(admin: any): RawCall {
   return async (models: string[], payload: Record<string, unknown>) => {
     const result = await callAlibaba(admin, models, { ...payload, stream: false });
     if (!result) return null;
