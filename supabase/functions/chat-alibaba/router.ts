@@ -21,9 +21,8 @@ export type AgentProfile = {
 
 /** Coding runs on Kimi (Moonshot, hosted by Alibaba) with Qwen coder fallbacks. */
 const CODER_MODELS = [
-  "kimi/kimi-k3",
   "kimi-k3",
-  "kimi-k2-thinking",
+  "kimi-k2.7-code",
   "qwen3-coder-plus",
   "qwen3.8-max",
   "qwen-max",

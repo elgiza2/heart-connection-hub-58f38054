@@ -220,36 +220,6 @@ Deno.serve(async (req) => {
     userId = data.user?.id ?? null;
   }
 
-  if (body.action === "key_health") {
-    // Diagnostics only: key sources, prefixes and upstream status — never values.
-    const keys = await modelKeys(admin);
-    const report: Record<string, unknown>[] = [];
-    for (const entry of keys) {
-      const probe = await fetch(ENDPOINTS[0], {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
-        body: JSON.stringify({
-          model: String((body as any).model || "qwen-flash"),
-          messages: [{ role: "user", content: "hi" }],
-          max_tokens: 8,
-        }),
-      });
-      const detail = (await probe.text().catch(() => "")).slice(0, 200);
-      report.push({
-        source: entry.id ? `db:${entry.id}` : "secret",
-        prefix: entry.key.slice(0, 8),
-        status: probe.status,
-        detail: probe.ok ? "ok" : detail,
-      });
-    }
-    return json({
-      env_names: Object.keys(Deno.env.toObject()).filter((n) =>
-        /DASHSCOPE|ALIBABA|QWEN|KIMI|MOONSHOT|MODEL_?STUDIO/i.test(n)
-      ),
-      keys: report,
-    });
-  }
-
   if (body.action === "ingest_attachment") return json({ ok: true });
   if (body.action === "personalization_suggest") {
     if (!userId) return json({ error: "Authentication required", code: "auth_required" }, 403);
