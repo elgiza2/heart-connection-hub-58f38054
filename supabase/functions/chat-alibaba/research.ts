@@ -84,9 +84,9 @@ needed=true when the answer depends on current events, prices, releases, people,
 needed=false for chit-chat, math, translation, coding help, opinion or rewriting.
 Give 1-3 short high-signal queries in the language most likely to hold the sources.`;
 
-async function planQueries(question: string): Promise<string[]> {
+async function planQueries(question: string, force = false): Promise<string[]> {
   const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
-  if (!key) return heuristicQueries(question);
+  if (!key) return force ? [question.slice(0, 200)] : heuristicQueries(question);
   try {
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -104,20 +104,21 @@ async function planQueries(question: string): Promise<string[]> {
         ],
       }),
     });
-    if (!res.ok) return heuristicQueries(question);
+    if (!res.ok) return force ? [question.slice(0, 200)] : heuristicQueries(question);
     const data = await res.json() as { choices?: { message?: { content?: string } }[] };
     const raw = data.choices?.[0]?.message?.content ?? "";
     const parsed = JSON.parse(raw.replace(/^```json\s*|\s*```$/g, "")) as {
       needed?: boolean;
       queries?: unknown;
     };
-    if (!parsed.needed) return [];
+    if (!parsed.needed && !force) return [];
     const queries = Array.isArray(parsed.queries)
       ? parsed.queries.filter((q): q is string => typeof q === "string" && q.trim().length > 2)
       : [];
+    if (!queries.length && force) return [question.slice(0, 200)];
     return queries.slice(0, 3);
   } catch {
-    return heuristicQueries(question);
+    return force ? [question.slice(0, 200)] : heuristicQueries(question);
   }
 }
 
