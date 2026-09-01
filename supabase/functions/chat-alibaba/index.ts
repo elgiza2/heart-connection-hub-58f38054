@@ -414,7 +414,7 @@ Deno.serve(async (req) => {
   }
   if (!result.response.body) return json({ error: "Chat service temporarily unavailable" }, 503);
 
-  const usedModel = result.model ?? models[0];
+  const usedModel = result.model ?? (result.format === "responses" ? "openai/gpt-5.6-sol" : models[0]);
   if (result.keyId) {
     void admin.from("alibaba_keys").update({ last_used_at: new Date().toISOString() }).eq("id", result.keyId);
   }
