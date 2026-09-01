@@ -48,7 +48,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: "integrations", label: "Integrations", path: "/chat?integrations=1", Icon: IntegrationsIcon },
       { id: "mcp", label: "MCP Servers", path: "/settings/mcp", Icon: IntegrationsIcon },
-      { id: "desktop-bridge", label: "My computer", path: "/settings/desktop-bridge", Icon: Monitor },
+      
     ],
   },
   {
