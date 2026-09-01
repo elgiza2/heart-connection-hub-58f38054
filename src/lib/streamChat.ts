@@ -410,7 +410,7 @@ export async function streamChat({
     let resp: Response | null = null;
     // Headers watchdog: if the full chat function does not even answer with
     // headers in time, stop waiting and let the fast lane rescue the turn.
-    const HEADERS_TIMEOUT_MS = deepResearch ? 120_000 : 15_000;
+    const HEADERS_TIMEOUT_MS = deepResearch ? 120_000 : 30_000;
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const headersCtl = new AbortController();
       const onOuterAbort = () => headersCtl.abort();
