@@ -78,6 +78,7 @@ function envKeys(): string[] {
   };
   for (const name of preferred) push(Deno.env.get(name));
   for (const [name, value] of Object.entries(Deno.env.toObject())) {
+    if (/TOKEN|TELEGRAM|BOT|SECRET|WEBHOOK/i.test(name)) continue;
     if (/DASHSCOPE|ALIBABA|QWEN|KIMI|MOONSHOT|MODEL_?STUDIO/i.test(name)) push(value);
   }
   return out;
