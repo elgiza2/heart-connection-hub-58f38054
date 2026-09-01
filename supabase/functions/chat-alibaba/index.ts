@@ -254,6 +254,15 @@ Deno.serve(async (req) => {
   const routed = routeProfile(question, body.agent);
   const call: CallFn = makeTextCall(admin);
 
+  // Short, single-intent turns skip the planner round-trip entirely: keyword
+  // routing is already right for them and the saved call is ~1-3 seconds off
+  // the time-to-first-token.
+  const trivialTurn = !body.agent?.trim() &&
+    question.length <= 240 &&
+    !/\n/.test(question.trim()) &&
+    !/(?:خطة|خطه|قارن|حلل|تقرير|دراسة|ثم|بعدين|plan|compare|analy[sz]e|report|research|refactor|step by step|and then)/i
+      .test(question);
+
   // The pre-work (semantic plan → research pre-pass → parallel specialists →
   // upstream connect) can take tens of seconds. We therefore open the SSE
   // response IMMEDIATELY and run everything inside the stream, sending frames
