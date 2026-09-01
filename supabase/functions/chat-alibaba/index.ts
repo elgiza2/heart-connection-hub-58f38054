@@ -8,6 +8,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { lastUserText, research, researchContext } from "./research.ts";
 import { profileModels, profileSystem, routeProfile } from "./router.ts";
+import { type CallFn, deliveryContract, plan, runTeam } from "./orchestrator.ts";
+
 
 const headers = {
   ...corsHeaders,
@@ -124,6 +126,10 @@ async function callAlibaba(
           if (response.ok) return { response, keyId: entry.id, format: "chat", model };
           const detail = (await response.text().catch(() => "")).slice(0, 500);
           console.error(`chat-alibaba upstream ${model} [${response.status}]: ${detail}`);
+          // Retire a rejected key so later turns stop paying its latency.
+          if (response.status === 401 && entry.id && /invalid_api_key|Incorrect API key/i.test(detail)) {
+            void admin.from("alibaba_keys").update({ status: "invalid" }).eq("id", entry.id);
+          }
           if (isModelError(response.status, detail)) continue models;
           if (![401, 403, 429].includes(response.status) && response.status < 500) return null;
         } catch (error) {
@@ -135,8 +141,56 @@ async function callAlibaba(
   return null;
 }
 
+/**
+ * Streams a Responses-API call and returns only its final text. Used by the
+ * manager/worker calls when no Alibaba key can serve the request.
+ */
+async function gatewayText(messages: Message[], maxTokens = 1400): Promise<string> {
+  const upstream = await callGateway(messages, "openai/gpt-5.6-luna");
+  if (!upstream?.response.ok || !upstream.response.body) return "";
+  const reader = upstream.response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+  while (text.length < maxTokens * 8) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const raw = line.slice(5).trim();
+      if (!raw || raw === "[DONE]") continue;
+      try {
+        const event = JSON.parse(raw) as any;
+        if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
+          text += event.delta;
+        }
+      } catch { /* ignore partial frames */ }
+    }
+  }
+  await reader.cancel().catch(() => {});
+  return text.trim();
+}
 
-async function callGateway(messages: Message[]): Promise<ChatUpstream | null> {
+/** Non-streaming text helper: Alibaba first, Lovable AI Gateway as the fallback. */
+function makeTextCall(admin: any): CallFn {
+  return async (models, payload) => {
+    const result = await callAlibaba(admin, models, { ...payload, stream: false });
+    if (result) {
+      const data = await result.response.json().catch(() => null) as any;
+      const content = data?.choices?.[0]?.message?.content;
+      if (typeof content === "string" && content.trim()) return content.trim();
+    }
+    const messages = Array.isArray((payload as any).messages) ? (payload as any).messages as Message[] : [];
+    if (!messages.length) return "";
+    return gatewayText(messages, Number((payload as any).max_tokens) || 1400);
+  };
+}
+
+
+async function callGateway(messages: Message[], model = "openai/gpt-5.6-sol"): Promise<ChatUpstream | null> {
   const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
   if (!key) return null;
   try {
@@ -148,7 +202,7 @@ async function callGateway(messages: Message[]): Promise<ChatUpstream | null> {
         "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "openai/gpt-5.6-sol",
+        model,
         input: messages,
         stream: true,
         store: false,
@@ -278,7 +332,15 @@ Deno.serve(async (req) => {
   }
 
   const question = lastUserText(messages);
-  const profile = routeProfile(question, body.agent);
+  const routed = routeProfile(question, body.agent);
+  const call: CallFn = makeTextCall(admin);
+
+  // 1) Semantic plan (overrides keyword routing unless an agent was forced).
+  const turn = body.agent?.trim()
+    ? { profile: routed, complexity: "standard" as const, subtasks: [], deliverable: "" }
+    : await plan(call, question, routed);
+  const profile = turn.profile;
+
   const tierBoost = body.tier === "ultra" || body.tier === "pro";
   // A client-side model choice only overrides the generalist; specialists keep
   // their own model ladder (coding stays on Kimi).
@@ -306,14 +368,27 @@ Deno.serve(async (req) => {
     }
   }
 
+  // 2) Parallel specialist workers for multi-part jobs.
+  let teamBriefs = "";
+  if (turn.subtasks.length) {
+    try {
+      teamBriefs = await runTeam(call, turn, question, liveContext, (frame) => preFrames.push(frame));
+    } catch (error) {
+      console.error("chat-alibaba team run failed", error);
+    }
+  }
+
   const system = [
     SYSTEM,
     profileSystem(profile),
     typeof body.customSystem === "string" ? body.customSystem : "",
     liveContext,
+    teamBriefs,
+    deliveryContract(turn),
   ]
     .filter(Boolean)
     .join("\n\n");
+
   let result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
     stream: true,
     stream_options: { include_usage: true },
@@ -339,7 +414,7 @@ Deno.serve(async (req) => {
   }
   if (!result.response.body) return json({ error: "Chat service temporarily unavailable" }, 503);
 
-  const usedModel = result.model ?? models[0];
+  const usedModel = result.model ?? (result.format === "responses" ? "openai/gpt-5.6-sol" : models[0]);
   if (result.keyId) {
     void admin.from("alibaba_keys").update({ last_used_at: new Date().toISOString() }).eq("id", result.keyId);
   }
