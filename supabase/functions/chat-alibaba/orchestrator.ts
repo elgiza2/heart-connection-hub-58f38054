@@ -82,7 +82,9 @@ Rules:
 - standard = one deliverable for one specialist. At most 1 subtask.
 - complex = the request names TWO OR MORE distinct deliverables, or needs different specialties (e.g. research + numbers + code + copy). This is the common case for long requests — do not downgrade it. Give 2-4 subtasks.
 - Subtasks run in PARALLEL, so each must be independent and self-contained, with no reference to another subtask's output and nothing to ask the user.
-- Split by deliverable, never into "step 1 / step 2" of the same deliverable.
+- Split by deliverable, never into "step 1 / step 2" of the same deliverable.`;
+
+
 
 /** Semantic plan for the turn; falls back to the keyword-routed profile. */
 export async function plan(
