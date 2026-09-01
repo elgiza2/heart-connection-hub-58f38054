@@ -208,7 +208,7 @@ async function personalization(admin: ReturnType<typeof createClient>, userId: s
   const prompt = `Infer a conservative personalization profile from these memories. Do not invent facts.
 Return JSON only with keys call_name, profession, about, interests (array), ai_traits, custom_instructions.
 Memories: ${JSON.stringify(memories ?? []).slice(0, 10000)}`;
-  let result = await callAlibaba(admin, {
+  const result = await callAlibaba(admin, {
     model: "qwen-plus",
     stream: false,
     temperature: 0.2,
@@ -267,7 +267,7 @@ Deno.serve(async (req) => {
   const system = [SYSTEM, typeof body.customSystem === "string" ? body.customSystem : ""]
     .filter(Boolean)
     .join("\n\n");
-  const result = await callAlibaba(admin, {
+  let result = await callAlibaba(admin, {
     model,
     stream: true,
     stream_options: { include_usage: true },
