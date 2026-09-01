@@ -52,7 +52,9 @@ import { AuiProvider } from "./adapters/aui/AuiProvider";
 const RTL_UI_LANGS = new Set(["ar", "ar-eg", "he", "fa"]);
 const SIDEBAR_EDGE_SWIPE_ZONE = 36;
 /** A sideways swipe must not steal the gesture from a horizontal scroller
- *  (mode chips, code blocks, tables) or from an element that drags itself. */
+ *  (mode chips, code blocks, tables) or from an element that drags itself.
+ *  A scroller only blocks when it can actually scroll in the swipe direction —
+ *  a carousel resting at its start must not kill the sidebar gesture. */
 function blocksSidebarSwipe(target: EventTarget | null, startX: number, rtl: boolean): boolean {
   let node = target as HTMLElement | null;
   // Anywhere on the surface may start the gesture, but the edge strip always wins.
@@ -63,13 +65,23 @@ function blocksSidebarSwipe(target: EventTarget | null, startX: number, rtl: boo
     if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) return true;
     const style = window.getComputedStyle(node);
     const overflowX = style.overflowX;
-    if ((overflowX === "auto" || overflowX === "scroll") && node.scrollWidth > node.clientWidth + 4)
-      return true;
-    if (style.touchAction.includes("none") || style.touchAction === "pan-x") return true;
+    if (
+      (overflowX === "auto" || overflowX === "scroll") &&
+      node.scrollWidth > node.clientWidth + 4
+    ) {
+      const max = node.scrollWidth - node.clientWidth;
+      const offset = Math.abs(node.scrollLeft);
+      // Opening swipe goes right in LTR (needs room to scroll back left) and
+      // left in RTL (needs room left ahead of the current offset).
+      const canScrollInSwipeDirection = rtl ? max - offset > 1 : offset > 1;
+      if (canScrollInSwipeDirection) return true;
+    }
+    if (style.touchAction === "none" || style.touchAction === "pan-x") return true;
     node = node.parentElement;
   }
   return false;
 }
+
 const SIDEBAR_OPEN_SNAP = 0.22;
 const SIDEBAR_CLOSE_SNAP = 0.64;
 const SIDEBAR_FLING_VELOCITY = 520;
