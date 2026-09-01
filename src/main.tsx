@@ -208,42 +208,31 @@ const __reportThrottled = (err: unknown, source: string) => {
   void reportError(err, { source });
 };
 
-// Only reload on true stale-chunk / module-load failures. DOM-mutation errors
-// (insertBefore / removeChild / "not a child of this node") are usually caused
-// by browser translation or transient React reconcile races — they must NOT
-// trigger a full page reload, or the user experiences a hard refresh on every
-// route change on mobile.
+// AUTOMATIC PAGE RELOADS ARE DISABLED APP-WIDE.
+// Chunk/module-load failures are recovered by `lazyWithRetry` (re-import with
+// backoff). If they still fail we surface a manual "Reload" toast — the app
+// must never refresh itself under the user (especially not while chatting).
 const __TRANSIENT_RE =
   /(Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk \d+ failed|ChunkLoadError|Loading CSS chunk)/i;
 const __IGNORED_BROWSER_NOISE_RE = /ResizeObserver loop completed with undelivered notifications/i;
-const __RELOAD_KEY = "__megsy_global_reloaded_at";
-// A single transient chunk error is NOT a reason to reload: `lazyWithRetry`
-// already re-imports the failed chunk (3 attempts with backoff) and usually
-// succeeds, so reloading here was throwing away a recoverable state and made
-// the whole app feel like it randomly refreshed itself — including right after
-// sending the first chat message, which lazy-loads several chunks at once.
-// We only reload when the failures keep coming inside a short window.
-let __transientHits = 0;
-let __transientSince = 0;
+let __transientNoticeAt = 0;
 const __maybeReload = (err: unknown) => {
   const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err ?? "");
   if (!__TRANSIENT_RE.test(msg)) return false;
   const now = Date.now();
-  if (now - __transientSince > 15_000) {
-    __transientSince = now;
-    __transientHits = 0;
+  if (now - __transientNoticeAt > 60_000) {
+    __transientNoticeAt = now;
+    void import("sonner")
+      .then(({ toast }) => {
+        toast("A new version is available", {
+          description: "Reload when you're ready — nothing is refreshed automatically.",
+          duration: 12_000,
+          action: { label: "Reload", onClick: () => window.location.reload() },
+        });
+      })
+      .catch(() => {});
   }
-  __transientHits += 1;
-  if (__transientHits < 3) return true; // swallow; the retry path handles it
-  try {
-    const last = Number(sessionStorage.getItem(__RELOAD_KEY) || 0);
-    if (now - last < 60_000) return false;
-    sessionStorage.setItem(__RELOAD_KEY, String(now));
-    setTimeout(() => window.location.reload(), 60);
-    return true;
-  } catch {
-    return false;
-  }
+  return true;
 };
 
 window.addEventListener("error", (e) => {

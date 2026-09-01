@@ -49,7 +49,7 @@ const shouldAutoRecover = (err: unknown): boolean => {
   return AUTO_RECOVER_PATTERNS.some((re) => re.test(msg));
 };
 
-const RELOAD_FLAG = "__megsy_eb_reloaded_at";
+
 const RECOVERY_FLAG = "__megsy_eb_recovery_count";
 const RECOVERY_WINDOW_MS = 10_000;
 const RECOVERY_MAX = 3;
@@ -75,24 +75,12 @@ class ErrorBoundary extends Component<Props, State> {
       componentStack: info.componentStack?.slice(0, 1500) ?? null,
     });
 
-    // Transient browser-translation / chunk-load errors: try to silently recover
-    // instead of showing the error UI. We reload at most once per minute to
-    // avoid an infinite reload loop if the error is actually persistent.
+    // Transient browser-translation / chunk-load errors: silently retry the
+    // render. We never reload the page automatically — the user decides when
+    // to refresh (via the "Try again" button below).
     if (isTransient(error)) {
-      try {
-        const last = Number(sessionStorage.getItem(RELOAD_FLAG) || 0);
-        const now = Date.now();
-        if (now - last > 60_000) {
-          sessionStorage.setItem(RELOAD_FLAG, String(now));
-          // Reset state immediately so we never flash the fallback UI for
-          // transient chunk errors before the reload kicks in.
-          this.setState({ hasError: false, error: undefined });
-          setTimeout(() => window.location.reload(), 60);
-          return;
-        }
-      } catch {
-        // sessionStorage may be unavailable — fall through to fallback UI.
-      }
+      this.setState({ hasError: false, error: undefined });
+      return;
     }
 
     // Minified React render errors (loops, hook order, unmount): try to

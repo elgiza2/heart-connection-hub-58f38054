@@ -30,6 +30,12 @@ import {
 } from "@/routes/routeHelpers";
 import { AppRoutes } from "@/routes/AppRoutes";
 import { applyTheme } from "@/lib/theme";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
+
+/** Watches background jobs / agent runs and notifies the user when they finish. */
+const BackgroundJobNotifier = lazyWithRetry(
+  () => import("@/lib/notifications/BackgroundJobNotifier"),
+);
 
 /** Theme: light (white + pink) by default, dark available; auth screens always dark. */
 const useAppChrome = () => {
@@ -180,6 +186,7 @@ const App = () => {
                       <CommandPalette />
                       <ShortcutsHelp />
                       <CostConfirmationHost />
+                      <BackgroundJobNotifier />
                     </Suspense>
 
                     <Suspense fallback={<LazyFallback />}>

@@ -137,6 +137,11 @@ async function requireAccessToken(): Promise<string> {
 export async function startJob(kind: JobKind, payload: any): Promise<{ jobId: string }> {
   const token = await requireAccessToken();
   const path = KIND_TO_PATH[kind];
+  // Background work keeps running server-side; ask once for permission so we
+  // can notify the user when it finishes even if they left the tab.
+  void import("@/lib/notifyJobComplete")
+    .then((m) => m.ensureNotificationPermission())
+    .catch(() => {});
   // Idempotency key: `fetchWithRetry` re-sends the POST on 502/503/504 from
   // the functions proxy. Without this header a transient timeout could enqueue
   // the same paid job twice (double image/video/deep-research charges). Server
