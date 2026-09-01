@@ -400,10 +400,6 @@ Deno.serve(async (req) => {
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
     messages: [{ role: "system", content: system }, ...messages],
   });
-  if (!result) {
-    result = await callGateway([{ role: "system", content: system }, ...messages]);
-  }
-
   if (!result) return json({ error: "Chat service temporarily unavailable" }, 503);
   if (!result.response.ok) {
     const detail = await result.response.text().catch(() => "");
