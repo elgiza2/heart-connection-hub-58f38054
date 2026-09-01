@@ -307,7 +307,7 @@ export async function research(
     }
   }
 
-  if (!results.length) {
+  if (results.length < 4) {
     const batches = await Promise.all(queries.map((query) => freeSearch(query)));
     for (const batch of batches) {
       for (const item of batch) {

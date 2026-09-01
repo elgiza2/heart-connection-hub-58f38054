@@ -168,6 +168,14 @@ function makeTextCall(admin: any): CallFn {
   };
 }
 
+function makeRawCall(admin: any) {
+  return async (models: string[], payload: Record<string, unknown>) => {
+    const result = await callAlibaba(admin, models, { ...payload, stream: false });
+    if (!result) return null;
+    return await result.response.json().catch(() => null);
+  };
+}
+
 async function personalization(admin: any, userId: string) {
   const { data: memories } = await admin
     .from("agent_memory")
@@ -263,6 +271,7 @@ Deno.serve(async (req) => {
         (frame) => preFrames.push(frame),
         profile.research === "always",
         call,
+        makeRawCall(admin),
       );
       liveContext = researchContext(findings, queries, digest);
     } catch (error) {
