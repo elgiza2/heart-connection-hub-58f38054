@@ -277,15 +277,26 @@ Deno.serve(async (req) => {
     return json({ error: "Guest identity required", code: "auth_required" }, 403);
   }
 
-  const model = chooseModel(body);
-  const preFrames: Record<string, unknown>[] = [];
+  const question = lastUserText(messages);
+  const profile = routeProfile(question, body.agent);
+  const tierBoost = body.tier === "ultra" || body.tier === "pro";
+  const candidates = profileModels(profile, body.model);
+  const models = tierBoost && profile.id === "general" ? ["qwen-max", ...candidates] : candidates;
+
+  const preFrames: Record<string, unknown>[] = [
+    { status: "thinking", agent: profile.id, agent_label: profile.labelAr },
+  ];
   let liveContext = "";
-  if (body.searchEnabled !== false) {
+  const wantsResearch = profile.research === "always"
+    ? body.searchEnabled !== false
+    : profile.research === "auto" && body.searchEnabled !== false;
+  if (wantsResearch) {
     try {
       const { findings, queries, digest } = await research(
         admin,
-        lastUserText(messages),
+        question,
         (frame) => preFrames.push(frame),
+        profile.research === "always",
       );
       liveContext = researchContext(findings, queries, digest);
     } catch (error) {
@@ -295,24 +306,25 @@ Deno.serve(async (req) => {
 
   const system = [
     SYSTEM,
+    profileSystem(profile),
     typeof body.customSystem === "string" ? body.customSystem : "",
     liveContext,
   ]
     .filter(Boolean)
     .join("\n\n");
-  let result = await callAlibaba(admin, {
-    model,
+  let result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
     stream: true,
     stream_options: { include_usage: true },
     enable_search: body.searchEnabled === true && !liveContext,
     enable_thinking: false,
-    temperature: 0.45,
+    temperature: profile.temperature,
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
     messages: [{ role: "system", content: system }, ...messages],
   });
   if (!result) {
     result = await callGateway([{ role: "system", content: system }, ...messages]);
   }
+
   if (!result) return json({ error: "Chat service temporarily unavailable" }, 503);
   if (!result.response.ok) {
     const detail = await result.response.text().catch(() => "");
