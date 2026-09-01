@@ -8,6 +8,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { lastUserText, research, researchContext } from "./research.ts";
 import { profileModels, profileSystem, routeProfile } from "./router.ts";
+import { type CallFn, deliveryContract, plan, runTeam } from "./orchestrator.ts";
+
 
 const headers = {
   ...corsHeaders,
@@ -278,7 +280,15 @@ Deno.serve(async (req) => {
   }
 
   const question = lastUserText(messages);
-  const profile = routeProfile(question, body.agent);
+  const routed = routeProfile(question, body.agent);
+  const call: CallFn = (models, payload) => callAlibaba(admin, models, payload);
+
+  // 1) Semantic plan (overrides keyword routing unless an agent was forced).
+  const turn = body.agent?.trim()
+    ? { profile: routed, complexity: "standard" as const, subtasks: [], deliverable: "" }
+    : await plan(call, question, routed);
+  const profile = turn.profile;
+
   const tierBoost = body.tier === "ultra" || body.tier === "pro";
   // A client-side model choice only overrides the generalist; specialists keep
   // their own model ladder (coding stays on Kimi).
@@ -306,14 +316,27 @@ Deno.serve(async (req) => {
     }
   }
 
+  // 2) Parallel specialist workers for multi-part jobs.
+  let teamBriefs = "";
+  if (turn.subtasks.length) {
+    try {
+      teamBriefs = await runTeam(call, turn, question, liveContext, (frame) => preFrames.push(frame));
+    } catch (error) {
+      console.error("chat-alibaba team run failed", error);
+    }
+  }
+
   const system = [
     SYSTEM,
     profileSystem(profile),
     typeof body.customSystem === "string" ? body.customSystem : "",
     liveContext,
+    teamBriefs,
+    deliveryContract(turn),
   ]
     .filter(Boolean)
     .join("\n\n");
+
   let result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
     stream: true,
     stream_options: { include_usage: true },
