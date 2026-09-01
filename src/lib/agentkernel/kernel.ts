@@ -13,6 +13,9 @@ import type { LongRun } from "@/lib/longrun/types";
 import { loginIdentityFor } from "./credentials";
 import { listMail } from "@/lib/mail/mailClient";
 import { askJson, askModel } from "./llm";
+import { CATALOG_SIZE, catalogCategories } from "@/lib/agentTools/catalog";
+import { runCatalogTool, searchToolsFor } from "@/lib/agentTools/runtime";
+import { renderSubAgents, runSubAgent } from "@/lib/agentTools/subagents";
 import {
   fetchUrl,
   filesToArtifacts,
@@ -21,6 +24,7 @@ import {
   writeFile,
   type ToolContext,
 } from "./tools";
+
 
 
 const AUTO_CONTINUE_MS = 60_000;
@@ -100,14 +104,26 @@ interface Plan {
   risk: "low" | "medium" | "high";
 }
 
+/** Live clock + inventory, so plans never assume an old year or a tiny toolset. */
+const nowBrief = () => {
+  const now = new Date();
+  return `Today is ${now.toISOString().slice(0, 10)} and the current year is ${now.getUTCFullYear()} — never treat anything from an earlier year as current.`;
+};
+
 const PLAN_SYSTEM = `You plan a task an autonomous agent will execute in the user's browser.
-Available tools: run_code (sandboxed JS), fetch_url (read a public page as text),
+${nowBrief()}
+Core tools: run_code (sandboxed JS), fetch_url (read a public page as text),
 write_file / read_file (task workspace), remember (save a durable fact),
+tool_search + tool_call (a catalog of ${CATALOG_SIZE} tools across ${catalogCategories().length} domains:
+${catalogCategories().slice(0, 12).map((c) => c.category).join(", ")} …),
+spawn_agent (delegate a sub-task to a specialist),
 ask_user (pause and ask), finish (deliver the result).
+Assume a tool exists for almost anything — plan the real work, not a reduced version of it.
 Reply with JSON only: {"steps":["...", "..."],"risk":"low|medium|high"}
 3 to 8 short imperative steps, in the same language the user used.
 risk is "high" when the task involves payments, deletions, sending messages on the
 user's behalf, or credentials; "medium" when it changes data the user owns; else "low".`;
+
 
 async function makePlan(goal: string, memory: string): Promise<Plan> {
   const parsed = await askJson<{ steps?: unknown; risk?: unknown }>(PLAN_SYSTEM, [
@@ -134,9 +150,21 @@ function riskFloor(goal: string): "low" | "high" {
 /* ------------------------------------------------------------------ executing */
 
 const EXEC_SYSTEM = `You are an autonomous agent executing a task end to end, like a senior human operator.
+${nowBrief()}
 Pick exactly ONE next action and reply with JSON only:
-{"thought":"one short sentence","tool":"run_code|fetch_url|login_identity|check_mail|write_file|read_file|remember|ask_user|finish","args":{...}}
+{"thought":"one short sentence","tool":"tool_search|tool_call|spawn_agent|run_code|fetch_url|login_identity|check_mail|write_file|read_file|remember|ask_user|finish","args":{...}}
 Args by tool:
+- tool_search: {"need":"what you want to do, plain language"}
+  -> shortlist of ids from a catalog of ${CATALOG_SIZE} real tools. Search FIRST whenever
+     you think "I have no tool for this" — you almost certainly do.
+- tool_call: {"id":"github.search","args":{...}}  -> runs a catalog tool.
+     Common arg shapes: http tools {"url"|"path","method","body"}; web tools {"query"} or {"url"};
+     code tools {"code"}; model tools {"prompt"}; file tools {"path","content"}.
+- spawn_agent: {"agent":"researcher","task":"one focused sub-task"}
+  -> runs a specialist to completion and returns its report. Specialists:
+${renderSubAgents()}
+     Delegate whenever a sub-task is a whole job on its own (deep research, coding,
+     data crunching, a website operation, final writing, review).
 - run_code: {"code":"async JS; console.log results"}
 - fetch_url: {"url":"https://..."}
 - login_identity: {"site":"example.com","url":"https://example.com/signup"}
@@ -151,14 +179,20 @@ Args by tool:
 - finish: {"summary":"what you delivered, in the user's language"}
 
 How you behave:
+- You are a manager with a large toolbox and a team of specialists. There is no fixed
+  menu of supported tasks: decompose whatever was asked and execute it to the end.
 - NEVER ask the user for an email or a password: call login_identity and use it.
 - When something blocks you (error page, dead selector, rate limit, missing data),
   do NOT stop the task. Think it through in "thought": name the obstacle, then take a
-  DIFFERENT action towards the same goal — another URL, another source, another method.
+  DIFFERENT action towards the same goal — another tool from tool_search, another
+  source, another method, or a specialist via spawn_agent.
+- A sub-agent's report is raw material, not the answer: review it, fill gaps, and for
+  anything important have the "reviewer" specialist check it before you finish.
 - Only ask_user for things no software can do for you: a CAPTCHA you cannot pass, a
   2FA code that never lands in the mailbox, a payment, or an irreversible action.
 - Deliver real artifacts with write_file when the task produces a document or code.
 - Call finish only when the task is genuinely complete, with evidence in the log.`;
+
 
 interface Action {
   thought?: string;
@@ -577,10 +611,33 @@ export async function tick(runId: string): Promise<RunRow | null> {
 
       let output = "";
       let ok = true;
-      if (tool === "run_code") {
+      if (tool === "tool_search") {
+        const res = searchToolsFor(String(args.need ?? args.query ?? run.goal ?? ""));
+        ok = res.ok;
+        output = res.output;
+      } else if (tool === "tool_call") {
+        const res = await runCatalogTool(
+          String(args.id ?? args.tool ?? ""),
+          (args.args ?? args.input ?? {}) as Record<string, any>,
+          { ctx, userId, runId },
+        );
+        ok = res.ok;
+        output = res.output;
+      } else if (tool === "spawn_agent") {
+        const sub = await runSubAgent(String(args.agent ?? args.slug ?? "researcher"), String(args.task ?? run.goal ?? ""), {
+          ctx,
+          userId,
+          runId,
+          agentSlug: String(args.agent ?? "researcher"),
+          onStep: (label, detail) => void event(runId, "tool", label, detail),
+        });
+        ok = !!sub.report;
+        output = `SUB-AGENT ${sub.slug} (${sub.steps.length} steps)\n${sub.report}`;
+      } else if (tool === "run_code") {
         const res = await runCode(String(args.code ?? ""));
         ok = res.ok;
         output = res.output;
+
       } else if (tool === "fetch_url") {
         const res = await fetchUrl(String(args.url ?? ""));
         ok = res.ok;
