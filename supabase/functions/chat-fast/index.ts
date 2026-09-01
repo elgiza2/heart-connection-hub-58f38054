@@ -270,15 +270,21 @@ Deno.serve(async (req) => {
     });
   }
 
-  const system = [FAST_SYSTEM, typeof body.customSystem === "string" ? body.customSystem : ""]
+  const system = [fastSystem(), typeof body.customSystem === "string" ? body.customSystem : ""]
     .filter(Boolean)
     .join("\n\n");
+
+  // Thinking is on by default so the UI's "Thinking" panel has content on the
+  // fast lane too; the budget stays tiny to keep simple replies near-instant.
+  // Machine callers (dev agent) can opt out with `thinking: false`.
+  const thinking = body.thinking !== false;
 
   const payload = {
     model: typeof body.model === "string" && body.model ? body.model : "qwen-flash",
     stream: true,
     stream_options: { include_usage: true },
-    enable_thinking: false,
+    enable_thinking: thinking,
+    ...(thinking ? { thinking_budget: 256 } : {}),
     temperature: 0.6,
     // Chat replies stay short; forced callers (dev agent) may ask for more so
     // long code files are not cut off mid-file.
