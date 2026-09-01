@@ -27,6 +27,7 @@ You can work with software repositories, web research, documents, data, media, w
 type Message = { role: "system" | "user" | "assistant"; content: unknown };
 type RequestBody = {
   action?: string;
+  agent?: string;
   messages?: Message[];
   model?: string;
   tier?: string;
@@ -110,7 +111,7 @@ async function callAlibaba(
   payload: Record<string, unknown>,
 ): Promise<(ChatUpstream & { model: string }) | null> {
   const keys = await modelKeys(admin);
-  for (const model of models) {
+  models: for (const model of models) {
     for (const entry of keys) {
       for (const endpoint of ENDPOINTS) {
         try {
@@ -122,7 +123,7 @@ async function callAlibaba(
           if (response.ok) return { response, keyId: entry.id, format: "chat", model };
           const detail = (await response.text().catch(() => "")).slice(0, 500);
           console.error(`chat-alibaba upstream ${model} [${response.status}]: ${detail}`);
-          if (isModelError(response.status, detail)) break;
+          if (isModelError(response.status, detail)) continue models;
           if (![401, 403, 429].includes(response.status) && response.status < 500) return null;
         } catch (error) {
           console.error("chat-alibaba upstream request failed", error);
