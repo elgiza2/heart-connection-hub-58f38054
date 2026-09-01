@@ -287,9 +287,15 @@ Deno.serve(async (req) => {
       try {
         if (body.resume_id) send({ event: "resume_id", resumeId: body.resume_id });
 
-        // 1) Semantic plan (overrides keyword routing unless an agent was forced).
-        const turn = body.agent?.trim()
-          ? { profile: routed, complexity: "standard" as const, subtasks: [], deliverable: "" }
+        // 1) Semantic plan (overrides keyword routing unless an agent was forced
+        //    or the turn is trivial — both skip the extra model round-trip).
+        const turn = body.agent?.trim() || trivialTurn
+          ? {
+            profile: routed,
+            complexity: (trivialTurn ? "simple" : "standard") as "simple" | "standard",
+            subtasks: [],
+            deliverable: "",
+          }
           : await plan(call, question, routed);
         const profile = turn.profile;
         send({ status: "thinking", agent: profile.id, agent_label: profile.labelAr });
