@@ -142,7 +142,11 @@ async function callAlibaba(
           const response = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
-            body: JSON.stringify({ ...payload, model }),
+            body: JSON.stringify({
+              ...payload,
+              ...(model.startsWith("kimi-") ? { temperature: undefined } : {}),
+              model,
+            }),
           });
           if (response.ok) return { response, keyId: entry.id, model };
           const detail = (await response.text().catch(() => "")).slice(0, 500);
@@ -317,7 +321,7 @@ Deno.serve(async (req) => {
       }
       : undefined,
     enable_thinking: false,
-    ...(usedModel.startsWith("kimi-") ? {} : { temperature: profile.temperature }),
+    temperature: profile.temperature,
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
     messages: [{ role: "system", content: system }, ...messages],
   });
