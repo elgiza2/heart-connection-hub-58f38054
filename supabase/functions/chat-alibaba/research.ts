@@ -130,36 +130,73 @@ function heuristicQueries(question: string): string[] {
  * HTML endpoint so live research keeps working on the project's own infrastructure
  * without any third-party AI gateway.
  */
-async function freeSearch(query: string, count = 10): Promise<Finding[]> {
-  try {
-    const res = await fetch("https://html.duckduckgo.com/html/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "Mozilla/5.0 (compatible; MegsyAgent/2026)",
-      },
-      body: new URLSearchParams({ q: query }).toString(),
-    });
-    if (!res.ok) return [];
-    const html = await res.text();
-    const out: Finding[] = [];
-    const pattern =
-      /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
-    for (const match of html.matchAll(pattern)) {
-      const strip = (value: string) =>
-        value.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'")
-          .replace(/&quot;/g, '"').replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
-      let url = match[1];
-      const redirect = url.match(/[?&]uddg=([^&]+)/);
-      if (redirect) url = decodeURIComponent(redirect[1]);
-      if (!/^https?:\/\//.test(url)) continue;
-      out.push({ title: strip(match[2]) || url, url, snippet: strip(match[3]), excerpt: "" });
-      if (out.length >= count) break;
-    }
-    return out;
-  } catch {
-    return [];
+function stripTags(value: string) {
+  return value
+    .replace(/<!\[CDATA\[|\]\]>/g, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#x27;|&#39;|&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Parses an RSS/Atom feed of search results into findings. */
+function parseFeed(xml: string, count: number): Finding[] {
+  const out: Finding[] = [];
+  for (const item of xml.matchAll(/<item[\s\S]*?<\/item>/g)) {
+    const block = item[0];
+    const url = stripTags(block.match(/<link>([\s\S]*?)<\/link>/)?.[1] ?? "");
+    if (!/^https?:\/\//.test(url)) continue;
+    const title = stripTags(block.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? "") || url;
+    const snippet = stripTags(block.match(/<description>([\s\S]*?)<\/description>/)?.[1] ?? "");
+    out.push({ title, url, snippet: snippet.slice(0, 400), excerpt: "" });
+    if (out.length >= count) break;
   }
+  return out;
+}
+
+/**
+ * Keyless live search. Bing's RSS endpoint covers the general web and Google
+ * News RSS covers fresh reporting; both answer without an API key, which keeps
+ * research working on the project's own infrastructure only.
+ */
+async function freeSearch(query: string, count = 10): Promise<Finding[]> {
+  const endpoints = [
+    `https://www.bing.com/search?format=rss&count=${count}&q=${encodeURIComponent(query)}`,
+    `https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=${encodeURIComponent(query)}`,
+  ];
+  const batches = await Promise.all(
+    endpoints.map(async (url) => {
+      try {
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131 Safari/537.36",
+            Accept: "application/rss+xml, application/xml, text/xml, */*",
+          },
+        });
+        if (!res.ok) return [];
+        return parseFeed(await res.text(), count);
+      } catch {
+        return [];
+      }
+    }),
+  );
+  const seen = new Set<string>();
+  const out: Finding[] = [];
+  for (const batch of batches) {
+    for (const item of batch) {
+      if (seen.has(item.url)) continue;
+      seen.add(item.url);
+      out.push(item);
+      if (out.length >= count) return out;
+    }
+  }
+  return out;
 }
 
 /** Runs the planned searches, de-duplicates by URL and reads the top pages. */

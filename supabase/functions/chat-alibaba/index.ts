@@ -54,22 +54,40 @@ function json(value: unknown, status = 200) {
   });
 }
 
-function envKey(): string | null {
-  for (const name of [
+/**
+ * The Model Studio key kept as a Supabase function secret. Any name that looks
+ * like an Alibaba/DashScope/Qwen/Kimi key is accepted, so the secret works
+ * whatever the user named it.
+ */
+function envKeys(): string[] {
+  const preferred = [
     "DASHSCOPE_API_KEY",
     "ALIBABA_API_KEY",
+    "ALIBABA_KEY",
     "QWEN_API_KEY",
     "ALIBABA_DASHSCOPE_API_KEY",
     "DASHSCOPE_KEY",
-  ]) {
-    const value = Deno.env.get(name)?.trim();
-    if (value) return value;
+    "MODEL_STUDIO_API_KEY",
+    "KIMI_API_KEY",
+    "MOONSHOT_API_KEY",
+  ];
+  const out: string[] = [];
+  const push = (value?: string) => {
+    const key = value?.trim();
+    if (key && key.length > 16 && !out.includes(key)) out.push(key);
+  };
+  for (const name of preferred) push(Deno.env.get(name));
+  for (const [name, value] of Object.entries(Deno.env.toObject())) {
+    if (/TOKEN|TELEGRAM|BOT|SECRET|WEBHOOK/i.test(name)) continue;
+    if (/DASHSCOPE|ALIBABA|QWEN|KIMI|MOONSHOT|MODEL_?STUDIO/i.test(name)) push(value);
   }
-  return null;
+  return out;
 }
 
 async function modelKeys(admin: any) {
-  const result: Array<{ id?: string; key: string }> = [];
+  // The function secret comes first: it is the key the workspace owner set, and
+  // trying it before the DB rows keeps a stale/invalid row from adding latency.
+  const result: Array<{ id?: string; key: string }> = envKeys().map((key) => ({ key }));
   const { data } = await admin
     .from("alibaba_keys")
     .select("id,api_key")
@@ -79,10 +97,11 @@ async function modelKeys(admin: any) {
     .limit(6);
   for (const row of (data ?? []) as any[]) {
     const key = typeof row.api_key === "string" ? row.api_key.trim() : "";
-    if (key) result.push({ id: row.id, key });
+    // Skip junk rows (e.g. a "/stats" placeholder) that only produce 401s.
+    if (key.length > 16 && !result.some((entry) => entry.key === key)) {
+      result.push({ id: row.id, key });
+    }
   }
-  const fallback = envKey();
-  if (fallback && !result.some((entry) => entry.key === fallback)) result.push({ key: fallback });
   return result;
 }
 
