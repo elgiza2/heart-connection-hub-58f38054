@@ -84,7 +84,9 @@ function envKeys(): string[] {
 }
 
 async function modelKeys(admin: any) {
-  const result: Array<{ id?: string; key: string }> = [];
+  // The function secret comes first: it is the key the workspace owner set, and
+  // trying it before the DB rows keeps a stale/invalid row from adding latency.
+  const result: Array<{ id?: string; key: string }> = envKeys().map((key) => ({ key }));
   const { data } = await admin
     .from("alibaba_keys")
     .select("id,api_key")
@@ -94,10 +96,11 @@ async function modelKeys(admin: any) {
     .limit(6);
   for (const row of (data ?? []) as any[]) {
     const key = typeof row.api_key === "string" ? row.api_key.trim() : "";
-    if (key) result.push({ id: row.id, key });
+    // Skip junk rows (e.g. a "/stats" placeholder) that only produce 401s.
+    if (key.length > 16 && !result.some((entry) => entry.key === key)) {
+      result.push({ id: row.id, key });
+    }
   }
-  const fallback = envKey();
-  if (fallback && !result.some((entry) => entry.key === fallback)) result.push({ key: fallback });
   return result;
 }
 
