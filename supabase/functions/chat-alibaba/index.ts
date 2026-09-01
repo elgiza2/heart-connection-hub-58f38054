@@ -17,9 +17,11 @@ const headers = {
     "authorization, x-client-info, apikey, content-type, x-anon-fingerprint",
 };
 
+// Only the international Model Studio endpoint accepts the workspace key stored
+// in Supabase (`alibaba_keys`). The Beijing endpoint rejects it with 401, so it
+// is intentionally not tried. No other AI provider is used by this function.
 const ENDPOINTS = [
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
-  "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
 ];
 
 const SYSTEM = `You are MEGSY, an autonomous general-purpose AI agent.
