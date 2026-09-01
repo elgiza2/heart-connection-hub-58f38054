@@ -126,90 +126,56 @@ function heuristicQueries(question: string): string[] {
 }
 
 /**
- * Gateway-hosted web search, used when no Brave key is configured.
- *
- * Runs the queries through the Lovable AI Gateway's native web-search tool and
- * harvests the URL citations the model actually used, so the chat answer still
- * gets fresh, attributable facts.
+ * Keyless web search, used when no Brave key is configured. Scrapes the DuckDuckGo
+ * HTML endpoint so live research keeps working on the project's own infrastructure
+ * without any third-party AI gateway.
  */
-async function gatewaySearch(
-  queries: string[],
-): Promise<{ digest: string; sources: { title: string; url: string }[] }> {
-  const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
-  if (!key) return { digest: "", sources: [] };
+async function freeSearch(query: string, count = 10): Promise<Finding[]> {
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+    const res = await fetch("https://html.duckduckgo.com/html/", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": key,
-        "X-Lovable-AIG-SDK": "fetch",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0 (compatible; MegsyAgent/2026)",
       },
-      body: JSON.stringify({
-        model: "openai/gpt-5.6-luna",
-        stream: true,
-        store: false,
-        tools: [{ type: "web_search_preview" }],
-        instructions:
-          "Search the web now. Return dated, specific facts as short bullets with the exact source URL after each bullet. Today is " +
-          new Date().toISOString().slice(0, 10) +
-          ". Never answer from memory alone; if a fact is unverified, omit it.",
-        input: queries.join("\n"),
-      }),
+      body: new URLSearchParams({ q: query }).toString(),
     });
-    if (!res.ok || !res.body) return { digest: "", sources: [] };
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let digest = "";
-    const sources = new Map<string, string>();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-      for (const line of lines) {
-        if (!line.startsWith("data:")) continue;
-        const raw = line.slice(5).trim();
-        if (!raw || raw === "[DONE]") continue;
-        let event: Record<string, any>;
-        try {
-          event = JSON.parse(raw);
-        } catch {
-          continue;
-        }
-        if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
-          digest += event.delta;
-        }
-        if (event.type === "response.output_text.annotation.added") {
-          const annotation = event.annotation ?? {};
-          if (annotation.url) sources.set(String(annotation.url), String(annotation.title ?? annotation.url));
-        }
-      }
+    if (!res.ok) return [];
+    const html = await res.text();
+    const out: Finding[] = [];
+    const pattern =
+      /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+    for (const match of html.matchAll(pattern)) {
+      const strip = (value: string) =>
+        value.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'")
+          .replace(/&quot;/g, '"').replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+      let url = match[1];
+      const redirect = url.match(/[?&]uddg=([^&]+)/);
+      if (redirect) url = decodeURIComponent(redirect[1]);
+      if (!/^https?:\/\//.test(url)) continue;
+      out.push({ title: strip(match[2]) || url, url, snippet: strip(match[3]), excerpt: "" });
+      if (out.length >= count) break;
     }
-    for (const match of digest.matchAll(/https?:\/\/[^\s)\]]+/g)) {
-      if (!sources.has(match[0])) sources.set(match[0], match[0]);
-    }
-    return {
-      digest: digest.slice(0, 12_000),
-      sources: [...sources.entries()].slice(0, 15).map(([url, title]) => ({ title, url })),
-    };
-  } catch (error) {
-    console.error("gateway web search failed", error);
-    return { digest: "", sources: [] };
+    return out;
+  } catch {
+    return [];
   }
 }
 
 /** Runs the planned searches, de-duplicates by URL and reads the top pages. */
+export type PlannerCall = (
+  models: string[],
+  payload: Record<string, unknown>,
+) => Promise<string>;
+
 export async function research(
   admin: SupabaseClient,
   question: string,
   onEvent: (frame: Record<string, unknown>) => void,
   force = false,
+  call?: PlannerCall,
 ): Promise<{ findings: Finding[]; queries: string[]; digest: string }> {
-  const queries = await planQueries(question, force);
+  const queries = await planQueries(call, question, force);
   if (!queries.length) return { findings: [], queries: [], digest: "" };
 
   const callId = `web_search-${Date.now()}`;
