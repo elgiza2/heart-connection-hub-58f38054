@@ -7,7 +7,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { lastUserText, research, researchContext } from "./research.ts";
-import type { RawCall } from "./research.ts";
+import type { PlannerCall, RawCall } from "./research.ts";
 import { profileModels, profileSystem, routeProfile } from "./router.ts";
 import { type CallFn, deliveryContract, plan, runTeam } from "./orchestrator.ts";
 
