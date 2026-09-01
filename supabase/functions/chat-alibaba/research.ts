@@ -184,13 +184,12 @@ export async function research(
   });
 
   const key = await braveKey(admin);
-  let top: Finding[] = [];
-  let digest = "";
+  const digest = "";
+  const seen = new Set<string>();
+  const results: Finding[] = [];
 
   if (key) {
     const batches = await Promise.all(queries.map((query) => braveSearch(key, query)));
-    const seen = new Set<string>();
-    const results: Finding[] = [];
     for (const batch of batches) {
       for (const item of batch) {
         const url = (item.url ?? "").trim();
@@ -199,18 +198,25 @@ export async function research(
         results.push({ title: item.title ?? url, url, snippet: item.description ?? "", excerpt: "" });
       }
     }
-    top = results.slice(0, 12);
-    const pages = await Promise.all(top.slice(0, 6).map((item) => readPage(item.url)));
-    pages.forEach((text, index) => {
-      top[index].excerpt = text;
-    });
   }
 
-  if (!top.length) {
-    const gateway = await gatewaySearch(queries);
-    digest = gateway.digest;
-    top = gateway.sources.map((item) => ({ ...item, snippet: "", excerpt: "" }));
+  if (!results.length) {
+    const batches = await Promise.all(queries.map((query) => freeSearch(query)));
+    for (const batch of batches) {
+      for (const item of batch) {
+        if (seen.has(item.url)) continue;
+        seen.add(item.url);
+        results.push(item);
+      }
+    }
   }
+
+  const top = results.slice(0, 12);
+  const pages = await Promise.all(top.slice(0, 6).map((item) => readPage(item.url)));
+  pages.forEach((text, index) => {
+    if (text) top[index].excerpt = text;
+  });
+
 
   onEvent({
     tool_event: {
