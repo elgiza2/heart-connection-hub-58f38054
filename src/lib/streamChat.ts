@@ -269,6 +269,7 @@ export async function streamChat({
         onDelta,
         onModel,
         onUsage,
+        onReasoning,
         force: true,
       });
       return outcome === "answered" && receivedAnyContent;
@@ -302,6 +303,7 @@ export async function streamChat({
         onDelta,
         onModel,
         onUsage,
+        onReasoning,
       });
       if (outcome === "answered") {
         await onDone();

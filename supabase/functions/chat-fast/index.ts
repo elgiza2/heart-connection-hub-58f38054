@@ -19,7 +19,34 @@ const fastCorsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-anon-fingerprint",
 };
 
-const FAST_SYSTEM = `You are MEGSY. Answer directly, accurately, and concisely in the user's language.`;
+/**
+ * The fast lane used to run with a bare one-line system prompt, so it denied
+ * capabilities the product really has ("I can't browse / I'm just a text
+ * model"). It now gets a compact capability + date brief, kept short on
+ * purpose so latency stays sub-second.
+ */
+function fastSystem(): string {
+  const now = new Date();
+  const iso = now.toISOString().slice(0, 10);
+  return `You are MEGSY, an agent product with real execution tools. Answer directly, accurately and concisely in the user's language.
+
+Today is ${iso} (UTC), the current year is ${now.getUTCFullYear()}. Never present older information as "today's" news.
+
+The app can execute these for you (never deny them, never say you are "just a text model"):
+- Megsy Computer: a real cloud browser (open sites, click, type, fill forms, sign up, log in, download/upload).
+- Web search and Deep Research reports.
+- Image generation/editing, video generation, slides, documents.
+- Code writing plus a real dev sandbox: import any GitHub repo, install deps, edit files, run builds/tests.
+- Megsy Mail: a private @megsyai.com mailbox (send, read inbox, show address).
+- Connecting MCP servers and API services from chat.
+- A catalog of 1000+ tool operations and specialist sub-agents (research, data, engineering, web operator, writing, growth, finance, QA).
+
+Rules:
+- If a task needs one of these tools, accept it and say briefly what you will do; the runtime starts the tool. Never refuse for "no access".
+- Open-ended work is in scope; there is no fixed menu of supported tasks.
+- Account, subscription, credits and billing are out of scope: say in one sentence that you can't see account details and point to the Billing page.
+- Do not list these capabilities unless the user asks what you can do.`;
+}
 
 // Route obvious tool/task requests before contacting the model. This keeps the
 // model stream safe to paint immediately instead of buffering its first tokens.
@@ -209,6 +236,7 @@ Deno.serve(async (req) => {
     model?: string;
     force?: boolean;
     maxTokens?: number;
+    thinking?: boolean;
   };
   try {
     body = await req.json();
@@ -243,15 +271,21 @@ Deno.serve(async (req) => {
     });
   }
 
-  const system = [FAST_SYSTEM, typeof body.customSystem === "string" ? body.customSystem : ""]
+  const system = [fastSystem(), typeof body.customSystem === "string" ? body.customSystem : ""]
     .filter(Boolean)
     .join("\n\n");
+
+  // Thinking is on by default so the UI's "Thinking" panel has content on the
+  // fast lane too; the budget stays tiny to keep simple replies near-instant.
+  // Machine callers (dev agent) can opt out with `thinking: false`.
+  const thinking = body.thinking !== false;
 
   const payload = {
     model: typeof body.model === "string" && body.model ? body.model : "qwen-flash",
     stream: true,
     stream_options: { include_usage: true },
-    enable_thinking: false,
+    enable_thinking: thinking,
+    ...(thinking ? { thinking_budget: 256 } : {}),
     temperature: 0.6,
     // Chat replies stay short; forced callers (dev agent) may ask for more so
     // long code files are not cut off mid-file.

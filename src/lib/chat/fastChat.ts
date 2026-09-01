@@ -53,6 +53,7 @@ export async function tryFastChat({
   onDelta,
   onModel,
   onUsage,
+  onReasoning,
   force,
 }: {
   messages: FastMsg[];
@@ -62,6 +63,8 @@ export async function tryFastChat({
   onDelta: (chunk: string) => void;
   onModel?: (model: string) => void;
   onUsage?: (usage: Record<string, number>) => void;
+  /** Thinking/reasoning deltas (the fast model streams `reasoning_content`). */
+  onReasoning?: (chunk: string) => void;
   /** Answer even when the turn looks complex (used as a rescue path). */
   force?: boolean;
 }): Promise<FastChatOutcome> {
@@ -120,7 +123,15 @@ export async function tryFastChat({
       if (parsed?.escalate) throw new Error("__ESCALATE__");
       if (parsed?.event === "escalate") throw new Error("__ESCALATE__");
       if (parsed?.usage && typeof parsed.usage === "object") onUsage?.(parsed.usage);
-      const content = parsed?.choices?.[0]?.delta?.content;
+      const delta = parsed?.choices?.[0]?.delta;
+      const reasoning =
+        (delta?.reasoning_content as string | undefined) ??
+        (delta?.reasoning as string | undefined);
+      if (typeof reasoning === "string" && reasoning) {
+        sawAnyPayload = true;
+        onReasoning?.(reasoning);
+      }
+      const content = delta?.content;
       if (typeof content === "string" && content) handleContent(content);
     } catch (e) {
       if ((e as Error)?.message === "__ESCALATE__") throw e;
