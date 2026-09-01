@@ -410,7 +410,7 @@ export async function streamChat({
     let resp: Response | null = null;
     // Headers watchdog: if the full chat function does not even answer with
     // headers in time, stop waiting and let the fast lane rescue the turn.
-    const HEADERS_TIMEOUT_MS = deepResearch ? 120_000 : 15_000;
+    const HEADERS_TIMEOUT_MS = deepResearch ? 120_000 : 30_000;
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const headersCtl = new AbortController();
       const onOuterAbort = () => headersCtl.abort();
@@ -559,7 +559,10 @@ export async function streamChat({
     let idleTimer: ReturnType<typeof setTimeout> | null = null;
     // Before the first visible token we are much less patient: a silent
     // stream means the turn is stuck, and the fast lane can rescue it.
-    const FIRST_CONTENT_TIMEOUT_MS = deepResearch ? 240_000 : isVideoTurn ? 10 * 60_000 : 18_000;
+    // The server heartbeats every 5s while planning/researching, and every
+    // heartbeat resets this timer — so this window only has to cover a truly
+    // silent stream, not the whole pre-work phase.
+    const FIRST_CONTENT_TIMEOUT_MS = deepResearch ? 240_000 : isVideoTurn ? 10 * 60_000 : 45_000;
     const resetIdle = () => {
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(
