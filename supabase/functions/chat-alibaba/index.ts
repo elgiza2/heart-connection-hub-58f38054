@@ -45,7 +45,6 @@ type RequestBody = {
 type ChatUpstream = {
   response: Response;
   keyId?: string;
-  format: "chat" | "responses";
 };
 
 function json(value: unknown, status = 200) {
