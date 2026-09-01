@@ -7,6 +7,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { lastUserText, research, researchContext } from "./research.ts";
+import { profileModels, profileSystem, routeProfile } from "./router.ts";
 
 const headers = {
   ...corsHeaders,
@@ -27,6 +28,7 @@ You can work with software repositories, web research, documents, data, media, w
 type Message = { role: "system" | "user" | "assistant"; content: unknown };
 type RequestBody = {
   action?: string;
+  agent?: string;
   messages?: Message[];
   model?: string;
   tier?: string;
@@ -63,7 +65,7 @@ function envKey(): string | null {
   return null;
 }
 
-async function modelKeys(admin: ReturnType<typeof createClient>) {
+async function modelKeys(admin: any) {
   const result: Array<{ id?: string; key: string }> = [];
   const { data } = await admin
     .from("alibaba_keys")
@@ -72,19 +74,13 @@ async function modelKeys(admin: ReturnType<typeof createClient>) {
     .in("category", ["qwen", "memory", "text"])
     .order("last_used_at", { ascending: true, nullsFirst: true })
     .limit(6);
-  for (const row of data ?? []) {
+  for (const row of (data ?? []) as any[]) {
     const key = typeof row.api_key === "string" ? row.api_key.trim() : "";
     if (key) result.push({ id: row.id, key });
   }
   const fallback = envKey();
   if (fallback && !result.some((entry) => entry.key === fallback)) result.push({ key: fallback });
   return result;
-}
-
-function chooseModel(body: RequestBody): string {
-  const requested = typeof body.model === "string" ? body.model.trim() : "";
-  if (/^qwen-[a-z0-9.-]+$/i.test(requested)) return requested;
-  return body.tier === "ultra" || body.tier === "pro" ? "qwen-max" : "qwen-plus";
 }
 
 function normalizeMessages(input: Message[]): Message[] | null {
@@ -98,29 +94,47 @@ function normalizeMessages(input: Message[]): Message[] | null {
   return output;
 }
 
+/** True when the upstream rejected the request because the model is unavailable. */
+function isModelError(status: number, detail: string): boolean {
+  return (
+    status === 404 ||
+    /model|not_?found|not exist|unsupported|no access|InvalidParameter/i.test(detail)
+  );
+}
+
+/**
+ * Calls Alibaba Model Studio, trying each candidate model in turn (Qwen and the
+ * third-party models Alibaba hosts) and each active key, across both regions.
+ */
 async function callAlibaba(
-  admin: ReturnType<typeof createClient>,
+  admin: any,
+  models: string[],
   payload: Record<string, unknown>,
-): Promise<ChatUpstream | null> {
-  for (const entry of await modelKeys(admin)) {
-    for (const endpoint of ENDPOINTS) {
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
-          body: JSON.stringify(payload),
-        });
-        if (response.ok) return { response, keyId: entry.id, format: "chat" };
-        const detail = (await response.text().catch(() => "")).slice(0, 500);
-        console.error(`chat-alibaba upstream [${response.status}]: ${detail}`);
-        if (![401, 403, 429].includes(response.status) && response.status < 500) return null;
-      } catch (error) {
-        console.error("chat-alibaba upstream request failed", error);
+): Promise<(ChatUpstream & { model: string }) | null> {
+  const keys = await modelKeys(admin);
+  models: for (const model of models) {
+    for (const entry of keys) {
+      for (const endpoint of ENDPOINTS) {
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
+            body: JSON.stringify({ ...payload, model }),
+          });
+          if (response.ok) return { response, keyId: entry.id, format: "chat", model };
+          const detail = (await response.text().catch(() => "")).slice(0, 500);
+          console.error(`chat-alibaba upstream ${model} [${response.status}]: ${detail}`);
+          if (isModelError(response.status, detail)) continue models;
+          if (![401, 403, 429].includes(response.status) && response.status < 500) return null;
+        } catch (error) {
+          console.error("chat-alibaba upstream request failed", error);
+        }
       }
     }
   }
   return null;
 }
+
 
 async function callGateway(messages: Message[]): Promise<ChatUpstream | null> {
   const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
@@ -199,7 +213,7 @@ function emitGatewayLine(
   }
 }
 
-async function personalization(admin: ReturnType<typeof createClient>, userId: string) {
+async function personalization(admin: any, userId: string) {
   const { data: memories } = await admin
     .from("agent_memory")
     .select("key,value")
@@ -209,8 +223,7 @@ async function personalization(admin: ReturnType<typeof createClient>, userId: s
   const prompt = `Infer a conservative personalization profile from these memories. Do not invent facts.
 Return JSON only with keys call_name, profession, about, interests (array), ai_traits, custom_instructions.
 Memories: ${JSON.stringify(memories ?? []).slice(0, 10000)}`;
-  const result = await callAlibaba(admin, {
-    model: "qwen-plus",
+  const result = await callAlibaba(admin, ["qwen-plus", "qwen-max"], {
     stream: false,
     temperature: 0.2,
     response_format: { type: "json_object" },
@@ -264,15 +277,28 @@ Deno.serve(async (req) => {
     return json({ error: "Guest identity required", code: "auth_required" }, 403);
   }
 
-  const model = chooseModel(body);
-  const preFrames: Record<string, unknown>[] = [];
+  const question = lastUserText(messages);
+  const profile = routeProfile(question, body.agent);
+  const tierBoost = body.tier === "ultra" || body.tier === "pro";
+  // A client-side model choice only overrides the generalist; specialists keep
+  // their own model ladder (coding stays on Kimi).
+  const candidates = profileModels(profile, profile.id === "general" ? body.model : undefined);
+  const models = tierBoost && profile.id === "general" ? ["qwen-max", ...candidates] : candidates;
+
+  const preFrames: Record<string, unknown>[] = [
+    { status: "thinking", agent: profile.id, agent_label: profile.labelAr },
+  ];
   let liveContext = "";
-  if (body.searchEnabled !== false) {
+  const wantsResearch = profile.research === "always"
+    ? body.searchEnabled !== false
+    : profile.research === "auto" && body.searchEnabled !== false;
+  if (wantsResearch) {
     try {
       const { findings, queries, digest } = await research(
         admin,
-        lastUserText(messages),
+        question,
         (frame) => preFrames.push(frame),
+        profile.research === "always",
       );
       liveContext = researchContext(findings, queries, digest);
     } catch (error) {
@@ -282,24 +308,25 @@ Deno.serve(async (req) => {
 
   const system = [
     SYSTEM,
+    profileSystem(profile),
     typeof body.customSystem === "string" ? body.customSystem : "",
     liveContext,
   ]
     .filter(Boolean)
     .join("\n\n");
-  let result = await callAlibaba(admin, {
-    model,
+  let result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
     stream: true,
     stream_options: { include_usage: true },
     enable_search: body.searchEnabled === true && !liveContext,
     enable_thinking: false,
-    temperature: 0.45,
+    temperature: profile.temperature,
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
     messages: [{ role: "system", content: system }, ...messages],
   });
   if (!result) {
     result = await callGateway([{ role: "system", content: system }, ...messages]);
   }
+
   if (!result) return json({ error: "Chat service temporarily unavailable" }, 503);
   if (!result.response.ok) {
     const detail = await result.response.text().catch(() => "");
@@ -312,6 +339,7 @@ Deno.serve(async (req) => {
   }
   if (!result.response.body) return json({ error: "Chat service temporarily unavailable" }, 503);
 
+  const usedModel = result.model ?? models[0];
   if (result.keyId) {
     void admin.from("alibaba_keys").update({ last_used_at: new Date().toISOString() }).eq("id", result.keyId);
   }
@@ -323,7 +351,11 @@ Deno.serve(async (req) => {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: "thinking", model })}\n\n`));
+      controller.enqueue(
+        encoder.encode(
+          `data: ${JSON.stringify({ status: "thinking", model: usedModel, agent: profile.id })}\n\n`,
+        ),
+      );
       if (body.resume_id) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: "resume_id", resumeId: body.resume_id })}\n\n`));
       }
@@ -354,7 +386,8 @@ Deno.serve(async (req) => {
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
-      "x-model-used": model,
+      "x-model-used": usedModel,
+      "x-agent-used": profile.id,
     },
   });
 });
