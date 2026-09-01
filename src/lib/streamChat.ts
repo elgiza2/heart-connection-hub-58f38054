@@ -560,8 +560,8 @@ export async function streamChat({
     // Before the first visible token we are much less patient: a silent
     // stream means the turn is stuck, and the fast lane can rescue it.
     // The server heartbeats every 5s while planning/researching, and every
-    // heartbeat resets this timer — so this window only has to cover a真 silent
-    // stream, not the whole pre-work phase.
+    // heartbeat resets this timer — so this window only has to cover a truly
+    // silent stream, not the whole pre-work phase.
     const FIRST_CONTENT_TIMEOUT_MS = deepResearch ? 240_000 : isVideoTurn ? 10 * 60_000 : 45_000;
     const resetIdle = () => {
       if (idleTimer) clearTimeout(idleTimer);
