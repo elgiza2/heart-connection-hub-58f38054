@@ -16,10 +16,15 @@
 
 import { AGENTS, type AgentProfile } from "./router.ts";
 
+/**
+ * Non-streaming text call used by the manager and the workers. The host wires it
+ * to Alibaba Model Studio with an automatic gateway fallback, so the internal
+ * team keeps working even when no DashScope key is usable.
+ */
 export type CallFn = (
   models: string[],
   payload: Record<string, unknown>,
-) => Promise<{ response: Response; model: string } | null>;
+) => Promise<string>;
 
 export type Subtask = { agent: string; goal: string };
 export type TurnPlan = {
@@ -33,18 +38,19 @@ const PLANNER_MODELS = ["qwen-flash", "qwen-turbo", "qwen-plus"];
 const WORKER_TIMEOUT_MS = 55_000;
 const MAX_SUBTASKS = 4;
 
-/** Reads the assistant text out of an OpenAI-compatible non-streaming reply. */
 async function callText(
   call: CallFn,
   models: string[],
   payload: Record<string, unknown>,
 ): Promise<string> {
-  const result = await call(models, { ...payload, stream: false });
-  if (!result) return "";
-  const data = await result.response.json().catch(() => null) as any;
-  const content = data?.choices?.[0]?.message?.content;
-  return typeof content === "string" ? content.trim() : "";
+  try {
+    return (await call(models, payload)).trim();
+  } catch (error) {
+    console.error("chat-alibaba worker call failed", error);
+    return "";
+  }
 }
+
 
 function parseJson(raw: string): any {
   const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
