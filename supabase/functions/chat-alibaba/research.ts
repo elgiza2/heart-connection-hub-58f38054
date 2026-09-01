@@ -226,11 +226,9 @@ async function nativeSearch(
     const data = await raw(["qwen-plus", "qwen-flash", "qwen-max"], {
       enable_search: true,
       search_options: {
-        forced_search: true,
+        // Chat Completions currently supports the agent strategy and sources.
+        search_strategy: "agent",
         enable_source: true,
-        enable_citation: true,
-        citation_format: "[<number>]",
-        search_strategy: "pro",
       },
       messages: [
         {

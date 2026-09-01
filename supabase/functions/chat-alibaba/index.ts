@@ -139,11 +139,16 @@ async function callAlibaba(
     for (const entry of keys) {
       for (const endpoint of ENDPOINTS) {
         try {
+          const requestPayload = model.startsWith("qwen")
+            ? payload
+            : Object.fromEntries(
+              Object.entries(payload).filter(([name]) => name !== "enable_search" && name !== "search_options"),
+            );
           const response = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
             body: JSON.stringify({
-              ...payload,
+              ...requestPayload,
               ...(model.startsWith("kimi-") ? { temperature: undefined } : {}),
               model,
             }),
@@ -313,11 +318,8 @@ Deno.serve(async (req) => {
     enable_search: body.searchEnabled === true,
     search_options: body.searchEnabled === true
       ? {
-        forced_search: !liveContext,
+        search_strategy: "agent",
         enable_source: true,
-        enable_citation: true,
-        citation_format: "[<number>]",
-        search_strategy: "pro",
       }
       : undefined,
     enable_thinking: false,
