@@ -55,7 +55,19 @@ export function registerAppServiceWorker(): void {
       // Dynamic import so vite-plugin-pwa's virtual module is only pulled
       // in when we actually register.
       const mod = await import("virtual:pwa-register");
-      mod.registerSW({ immediate: true });
+      const update = mod.registerSW({
+        immediate: true,
+        // Never reload automatically. Offer a manual action instead.
+        onNeedRefresh() {
+          void import("sonner").then(({ toast }) => {
+            toast("A new version of Megsy is ready", {
+              description: "Update when you're ready — your work stays open.",
+              duration: 15_000,
+              action: { label: "Update", onClick: () => void update(true) },
+            });
+          }).catch(() => {});
+        },
+      });
     } catch {
       // Fallback: direct registration if the virtual module isn't present.
       try {
