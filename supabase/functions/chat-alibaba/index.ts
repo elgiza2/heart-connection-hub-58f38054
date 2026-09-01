@@ -190,7 +190,7 @@ function makeTextCall(admin: any): CallFn {
 }
 
 
-async function callGateway(messages: Message[]): Promise<ChatUpstream | null> {
+async function callGateway(messages: Message[], model = "openai/gpt-5.6-sol"): Promise<ChatUpstream | null> {
   const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
   if (!key) return null;
   try {
