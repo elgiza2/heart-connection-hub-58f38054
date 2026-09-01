@@ -38,6 +38,9 @@ export function normalizeMediaPlan(plan: string | null | undefined): MediaPlanTi
   return "free";
 }
 
+/** Fallback MC cost for a premium video model with no explicit price row. */
+export const DEFAULT_VIDEO_CREDIT_COST = 10;
+
 /** MC cost shown on a media model card. 0 means free/unlimited. */
 export function mediaModelCost(model: { credits?: number }, unlimited: boolean): number {
   return unlimited ? 0 : Number(model?.credits || 0);
@@ -50,6 +53,7 @@ export function mediaModelBadge(
 ): string {
   if (isUnlimitedMediaModel(model)) return "Unlimited";
   if (kind === "image") return "Unlimited";
-  const cost = Number(model?.credits || 0);
-  return cost > 0 ? `${cost} MC` : "Included";
+  // Paid video model: always price it, never show it as included.
+  const cost = Number(model?.credits || 0) || DEFAULT_VIDEO_CREDIT_COST;
+  return `${cost} MC`;
 }

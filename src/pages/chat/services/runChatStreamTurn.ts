@@ -604,6 +604,7 @@ export async function runChatStreamTurn(opts: RunChatStreamTurnOptions): Promise
     model: activeModel,
     tier: megsyTier as "lite" | "pro" | "max",
     searchEnabled: smartSearch,
+    searchExplicit: searchEnabled,
     deepResearch: isDeepResearch,
     background: false,
     // Deep Research is handled by our own internal agent now — no external

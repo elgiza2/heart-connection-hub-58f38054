@@ -217,12 +217,26 @@ const __TRANSIENT_RE =
   /(Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk \d+ failed|ChunkLoadError|Loading CSS chunk)/i;
 const __IGNORED_BROWSER_NOISE_RE = /ResizeObserver loop completed with undelivered notifications/i;
 const __RELOAD_KEY = "__megsy_global_reloaded_at";
+// A single transient chunk error is NOT a reason to reload: `lazyWithRetry`
+// already re-imports the failed chunk (3 attempts with backoff) and usually
+// succeeds, so reloading here was throwing away a recoverable state and made
+// the whole app feel like it randomly refreshed itself — including right after
+// sending the first chat message, which lazy-loads several chunks at once.
+// We only reload when the failures keep coming inside a short window.
+let __transientHits = 0;
+let __transientSince = 0;
 const __maybeReload = (err: unknown) => {
   const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err ?? "");
   if (!__TRANSIENT_RE.test(msg)) return false;
+  const now = Date.now();
+  if (now - __transientSince > 15_000) {
+    __transientSince = now;
+    __transientHits = 0;
+  }
+  __transientHits += 1;
+  if (__transientHits < 3) return true; // swallow; the retry path handles it
   try {
     const last = Number(sessionStorage.getItem(__RELOAD_KEY) || 0);
-    const now = Date.now();
     if (now - last < 60_000) return false;
     sessionStorage.setItem(__RELOAD_KEY, String(now));
     setTimeout(() => window.location.reload(), 60);

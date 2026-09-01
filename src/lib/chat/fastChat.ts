@@ -16,13 +16,18 @@ export function isFastLaneEligible(opts: {
   messages: FastMsg[];
   chatMode?: string;
   deepResearch?: boolean;
-  searchEnabled?: boolean;
+  /** Kept for callers; web search alone no longer blocks the fast lane. */
+  searchExplicit?: boolean;
   computerUseEnabled?: boolean;
   activeAgent?: string;
   activeSkill?: unknown;
 }): boolean {
   const { messages } = opts;
-  if (opts.deepResearch || opts.searchEnabled || opts.computerUseEnabled) return false;
+  // NOTE: the search flag must NOT block the fast lane. The web-search toggle
+  // is on by default and the auto heuristic fires on trivial turns ("2+2?"),
+  // so this used to send every simple message down the slow path (~9s).
+  // `chat-fast` escalates by itself whenever a turn really needs live data.
+  if (opts.deepResearch || opts.computerUseEnabled) return false;
   if (opts.activeAgent || opts.activeSkill) return false;
   // The chat page sends `normal` for a plain turn; `chat` is the legacy name.
   const mode = String(opts.chatMode || "normal").toLowerCase();

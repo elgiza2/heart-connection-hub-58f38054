@@ -108,7 +108,12 @@ export default function MediaModelPickerSheet({
             )}
             {filtered.map((m) => {
               const active = m.slug === selectedSlug;
-              const modelIsFree = isFreeModel(m.slug || m.id);
+              // Video is paid across the board — only DeAPI-served video models
+              // stay free. Images keep the broader free list.
+              const modelIsFree =
+                mode === "video"
+                  ? isUnlimitedMediaModel(m)
+                  : isFreeModel(m.slug || m.id);
               const locked = !modelIsFree && !paid;
               return (
                 <button
