@@ -1047,7 +1047,7 @@ export async function tickAgentic(supabase: SupabaseClient, run: RunRow): Promis
           ? `${describeAction(action.tool, action.input)} did not succeed — diagnosing`
           : `Finished: ${describeAction(action.tool, action.input)}`,
       "observation",
-      outcome.observation.slice(0, 4000),
+      outcome.observation.slice(0, 16000),
       {
         event_type: failed ? "TOOL_FAILED" : "TOOL_COMPLETED",
         tool: action.tool,

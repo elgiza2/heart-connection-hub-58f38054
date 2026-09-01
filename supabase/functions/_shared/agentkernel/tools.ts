@@ -35,7 +35,54 @@ async function braveKey(supabase: SupabaseClient): Promise<string | null> {
   return (data as { api_key?: string } | null)?.api_key?.trim() || Deno.env.get("BRAVE_API_KEY") || null;
 }
 
-/** Web search used as pre-execution research. Returns a compact digest. */
+async function braveSearch(key: string, query: string, count: number) {
+  try {
+    const response = await fetch(
+      `https://api.search.brave.com/res/v1/web/search?count=${count}&q=${encodeURIComponent(query)}`,
+      { headers: { Accept: "application/json", "X-Subscription-Token": key } },
+    );
+    if (!response.ok) return [];
+    const data = (await response.json()) as {
+      web?: { results?: { title?: string; url?: string; description?: string }[] };
+    };
+    return data.web?.results ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Fetches a page and returns a readable text excerpt (best effort). */
+async function readPage(url: string, maxChars = 3_000): Promise<string> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12_000);
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; MegsyAgent/1.0)" },
+    });
+    clearTimeout(timer);
+    if (!res.ok) return "";
+    const html = await res.text();
+    return html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;|&amp;|&quot;|&#39;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, maxChars);
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Web research used as pre-execution research.
+ *
+ * Instead of a single 5-result snippet list, this runs the query from several
+ * angles, de-duplicates by domain, and reads the top pages so the agent works
+ * from real page content rather than search-result blurbs.
+ */
 export async function webSearch(supabase: SupabaseClient, query: string): Promise<string> {
   const key = await braveKey(supabase);
   if (!key) {
@@ -46,23 +93,39 @@ export async function webSearch(supabase: SupabaseClient, query: string): Promis
       query,
     );
   }
-  try {
-    const response = await fetch(
-      `https://api.search.brave.com/res/v1/web/search?count=5&q=${encodeURIComponent(query)}`,
-      { headers: { Accept: "application/json", "X-Subscription-Token": key } },
-    );
-    if (!response.ok) return "";
-    const data = (await response.json()) as {
-      web?: { results?: { title?: string; url?: string; description?: string }[] };
-    };
-    return (data.web?.results ?? [])
-      .slice(0, 5)
-      .map((item) => `- ${item.title ?? ""} — ${item.url ?? ""}\n  ${item.description ?? ""}`)
-      .join("\n");
-  } catch {
-    return "";
+
+  const angles = [query, `${query} latest news`, `${query} details facts`];
+  const batches = await Promise.all(angles.map((q) => braveSearch(key, q, 10)));
+
+  const seen = new Set<string>();
+  const results: { title: string; url: string; description: string }[] = [];
+  for (const batch of batches) {
+    for (const item of batch) {
+      const url = (item.url ?? "").trim();
+      if (!url || seen.has(url)) continue;
+      seen.add(url);
+      results.push({
+        title: item.title ?? "",
+        url,
+        description: item.description ?? "",
+      });
+    }
   }
+  if (!results.length) return "";
+
+  const top = results.slice(0, 18);
+  const pages = await Promise.all(top.slice(0, 6).map((item) => readPage(item.url)));
+
+  const digest = top
+    .map((item, index) => {
+      const body = pages[index] ? `\n  EXCERPT: ${pages[index]}` : "";
+      return `- ${item.title} — ${item.url}\n  ${item.description}${body}`;
+    })
+    .join("\n");
+
+  return digest;
 }
+
 
 /** Stores an artifact for the run and returns its public URL. */
 export async function writeFile(

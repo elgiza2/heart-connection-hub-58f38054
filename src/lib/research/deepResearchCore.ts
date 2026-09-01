@@ -23,12 +23,13 @@ function researchInstructions(query: string, depth: string): string {
   const Arabic = /[\u0600-\u06FF]/.test(query);
   const scale =
     depth === "pro"
-      ? { searches: "at least 5", words: "at least 1,500 words", sections: "4-6" }
+      ? { searches: "at least 8", words: "at least 1,800 words", sections: "5-7" }
       : depth === "ultra8x" || depth === "ultra4x"
-        ? { searches: "at least 12", words: "at least 4,000 words", sections: "8-12" }
+        ? { searches: "at least 20", words: "at least 4,500 words", sections: "8-12" }
         : depth === "ultra2x"
-          ? { searches: "at least 8", words: "at least 2,800 words", sections: "6-9" }
-          : { searches: "at least 6", words: "at least 2,200 words", sections: "5-8" };
+          ? { searches: "at least 14", words: "at least 3,000 words", sections: "6-9" }
+          : { searches: "at least 10", words: "at least 2,400 words", sections: "5-8" };
+
   const depthGuide =
     depth === "ultra8x" || depth === "ultra4x"
       ? "Search exhaustively from many independent angles and prioritize primary sources."
@@ -47,7 +48,9 @@ function researchInstructions(query: string, depth: string): string {
     "Cite factual claims using the citations returned by web search. Finish with a Sources section listing every source actually used as markdown links; the reader UI will move all links and citation markers out of the prose.",
     "When live search returns a direct, authentic, non-logo image URL that clearly depicts the exact subject, place exactly one markdown image immediately below the title. Never invent an image URL and never use a generic or decorative image.",
     "Explicitly identify uncertainty or disagreement between sources. If evidence is insufficient, say exactly what could not be verified instead of pretending the research succeeded.",
+    "Write one single clean report. Never expose your plan, search steps, tool traces or internal status lines, never repeat the same summary twice, and never mix languages: headings, body and table cells must all be in the report language.",
     `Write the complete report in ${Arabic ? "Arabic" : "the same language as the user's request"}.`,
+
   ].join("\n");
 }
 

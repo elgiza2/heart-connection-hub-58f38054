@@ -22,8 +22,9 @@ import {
 // The coder model needs 50-130s per reply, so a slice must be able to hold
 // at least one full call (the API route allows 300s).
 const SLICE_MS = 240_000;
-const MAX_TOOLS_PER_SLICE = 6;
-const MAX_BUILD_FIXES = 3;
+const MAX_TOOLS_PER_SLICE = 14;
+const MAX_BUILD_FIXES = 5;
+
 
 export type Intent = "create" | "edit" | "question" | "deploy";
 
