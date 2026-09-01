@@ -7,6 +7,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { lastUserText, research, researchContext } from "./research.ts";
+import { profileModels, profileSystem, routeProfile } from "./router.ts";
 
 const headers = {
   ...corsHeaders,
@@ -337,6 +338,7 @@ Deno.serve(async (req) => {
   }
   if (!result.response.body) return json({ error: "Chat service temporarily unavailable" }, 503);
 
+  const usedModel = result.model ?? models[0];
   if (result.keyId) {
     void admin.from("alibaba_keys").update({ last_used_at: new Date().toISOString() }).eq("id", result.keyId);
   }
@@ -348,7 +350,11 @@ Deno.serve(async (req) => {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: "thinking", model })}\n\n`));
+      controller.enqueue(
+        encoder.encode(
+          `data: ${JSON.stringify({ status: "thinking", model: usedModel, agent: profile.id })}\n\n`,
+        ),
+      );
       if (body.resume_id) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: "resume_id", resumeId: body.resume_id })}\n\n`));
       }
@@ -379,7 +385,8 @@ Deno.serve(async (req) => {
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
-      "x-model-used": model,
+      "x-model-used": usedModel,
+      "x-agent-used": profile.id,
     },
   });
 });

@@ -211,8 +211,9 @@ export async function research(
   admin: SupabaseClient,
   question: string,
   onEvent: (frame: Record<string, unknown>) => void,
+  force = false,
 ): Promise<{ findings: Finding[]; queries: string[]; digest: string }> {
-  const queries = await planQueries(question);
+  const queries = await planQueries(question, force);
   if (!queries.length) return { findings: [], queries: [], digest: "" };
 
   const callId = `web_search-${Date.now()}`;
