@@ -159,7 +159,7 @@ async function callAlibaba(
 }
 
 /** Non-streaming text helper for the manager and the parallel workers. */
-function makeTextCall(admin: any): CallFn {
+function makeTextCall(admin: any): PlannerCall {
   return async (models, payload) => {
     const result = await callAlibaba(admin, models, { ...payload, stream: false });
     if (!result) return "";
