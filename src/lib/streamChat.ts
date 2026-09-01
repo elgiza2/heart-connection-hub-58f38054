@@ -62,6 +62,7 @@ export async function streamChat({
   model,
   tier,
   searchEnabled,
+  searchExplicit,
   deepResearch,
   chatMode,
   user_id,
@@ -92,6 +93,8 @@ export async function streamChat({
   model?: string;
   tier?: "lite" | "pro" | "max";
   searchEnabled?: boolean;
+  /** User explicitly toggled web search on for this turn. */
+  searchExplicit?: boolean;
   deepResearch?: boolean;
   chatMode?: string;
   user_id?: string;
@@ -285,7 +288,7 @@ export async function streamChat({
         messages,
         chatMode,
         deepResearch,
-        searchEnabled,
+        searchExplicit,
         computerUseEnabled,
         activeAgent,
         activeSkill,

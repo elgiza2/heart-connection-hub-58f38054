@@ -12,7 +12,6 @@
  * Response: OpenAI-style SSE chunks, terminated by `data: [DONE]`.
  */
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const fastCorsHeaders = {
   ...corsHeaders,
@@ -24,12 +23,34 @@ const FAST_SYSTEM = `You are MEGSY. Answer directly, accurately, and concisely i
 
 // Route obvious tool/task requests before contacting the model. This keeps the
 // model stream safe to paint immediately instead of buffering its first tokens.
+// Kept deliberately narrow: every false positive costs the user a full-path
+// round trip (seconds) on a turn the fast model could have answered instantly.
 const COMPLEX_INTENT =
-  /(?:https?:\/\/|ابحث|بحث (?:في|على) (?:الويب|النت)|الطقس|طقس|الأخبار|اخبار|سعر (?:اليوم|الآن)|حالي[ةاً]|افتح (?:موقع|رابط)|شغ[ّ]?ل (?:كود|أمر)|نف[ّ]?ذ|أنشئ (?:صورة|فيديو|ملف|عرض|جدول)|اصنع (?:صورة|فيديو)|ارسل (?:بريد|إيميل)|البريد|الإيميل|التقويم|حجز|اربط|تكامل|مرفق|ملف|pdf|excel|powerpoint|image|video|audio|browse|search (?:the )?web|weather|news|current price|latest|run (?:code|command)|terminal|send (?:an )?email|calendar|connector|integration)/i;
+  /(?:https?:\/\/|ابحث|بحث (?:في|على) (?:الويب|النت)|الطقس|طقس|الأخبار|اخبار|سعر (?:اليوم|الآن)|افتح (?:موقع|رابط)|شغ[ّ]?ل (?:كود|أمر)|نف[ّ]?ذ|أنشئ (?:صورة|فيديو|ملف|عرض|جدول)|اصنع (?:صورة|فيديو)|ارسل (?:بريد|إيميل)|التقويم|اربط|تكامل|مرفق|browse|search (?:the )?web|weather|latest news|run (?:code|command)|terminal|send (?:an )?email|(?:generate|create|make|draw|render)\s+(?:an?\s+)?(?:image|video|audio|clip|picture|poster|pdf|slide)|connector|integration)/i;
 
 function needsFullChat(messages: Msg[]): boolean {
   const lastUser = [...messages].reverse().find((message) => message.role === "user");
   return typeof lastUser?.content === "string" && COMPLEX_INTENT.test(lastUser.content);
+}
+
+/**
+ * Identity is read from the JWT payload locally instead of calling
+ * `auth.getUser()`. The fast lane exposes no user data and performs no
+ * privileged work — it only needs "is this a signed-in caller or a guest" —
+ * so paying a network round trip (plus the supabase-js cold-start import)
+ * before the first token is pure latency.
+ */
+function userIdFromJwt(token: string): string | null {
+  try {
+    const part = token.split(".")[1];
+    if (!part) return null;
+    const json = atob(part.replace(/-/g, "+").replace(/_/g, "/"));
+    const claims = JSON.parse(json) as { sub?: string; exp?: number };
+    if (claims.exp && claims.exp * 1000 < Date.now()) return null;
+    return typeof claims.sub === "string" ? claims.sub : null;
+  } catch {
+    return null;
+  }
 }
 
 const ENDPOINTS = [
@@ -65,17 +86,9 @@ Deno.serve(async (req) => {
 
   // Same identity contract as `chat-alibaba`: a signed-in user OR a guest
   // fingerprint header is enough. The anon key alone is treated as a guest.
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
   const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
-  let userId: string | null = null;
-  if (token && token !== anonKey && supabaseUrl && anonKey) {
-    const authClient = createClient(supabaseUrl, anonKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const { data } = await authClient.auth.getUser(token);
-    userId = data.user?.id ?? null;
-  }
+  const userId = token && token !== anonKey ? userIdFromJwt(token) : null;
   if (!userId && !req.headers.get("x-anon-fingerprint")) {
     return new Response(
       JSON.stringify({ error: "Guest identity required", code: "auth_required" }),

@@ -35,17 +35,14 @@ export const FREE_IMAGE_MODEL_IDS = [
   "z-image-turbo",
 ];
 
+/**
+ * Video is a paid capability: ONLY DeAPI-served video models are free.
+ * Every other video model requires a paid plan and burns credits.
+ */
 export const FREE_VIDEO_MODEL_IDS = [
   "deapi-ltx-video",
   "deapi-ltx-2-3",
   "deapi-minimax-h3",
-  "seedance-2-5",
-  "wan-t2v-turbo",
-  "wan-t2v-plus",
-  "wan-i2v-flash",
-  "happyhorse-t2v",
-  "happyhorse-i2v",
-  "happyhorse-r2v",
 ];
 
 export const isFreeModel = (modelId: string): boolean => {
