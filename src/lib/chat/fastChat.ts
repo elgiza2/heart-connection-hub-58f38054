@@ -35,7 +35,7 @@ export function isFastLaneEligible(opts: {
     if (/\[tool:|\bESCALATE\b/.test(m.content)) return false;
     total += m.content.length;
   }
-  return total > 0 && total < 6000;
+  return total > 0 && total < 20000;
 }
 
 export type FastChatOutcome = "answered" | "escalate";
