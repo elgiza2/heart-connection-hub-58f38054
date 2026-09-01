@@ -21,11 +21,11 @@ export type AgentProfile = {
 
 /** Coding runs on Kimi (Moonshot, hosted by Alibaba) with Qwen coder fallbacks. */
 const CODER_MODELS = [
+  "kimi/kimi-k3",
   "kimi-k3",
-  "Moonshot-Kimi-K3-Instruct",
   "kimi-k2-thinking",
-  "Moonshot-Kimi-K2-Instruct",
   "qwen3-coder-plus",
+  "qwen3.8-max",
   "qwen-max",
 ];
 
@@ -44,7 +44,7 @@ const PROFILES: Record<string, AgentProfile> = {
     id: "researcher",
     label: "Researcher",
     labelAr: "وكيل البحث",
-    models: ["qwen-max", "qwen-plus"],
+    models: ["qwen3.8-max", "qwen3.7-max", "qwen-max", "qwen-plus"],
     temperature: 0.35,
     research: "always",
     persona:
@@ -54,7 +54,7 @@ const PROFILES: Record<string, AgentProfile> = {
     id: "analyst",
     label: "Analyst",
     labelAr: "وكيل التحليل",
-    models: ["qwen3-max", "qwen-max", "deepseek-v3.1", "qwen-plus"],
+    models: ["qwen3.8-max", "deepseek-v4-pro", "qwen3.7-max", "qwen-max", "qwen-plus"],
     temperature: 0.25,
     research: "auto",
     persona:
@@ -64,7 +64,7 @@ const PROFILES: Record<string, AgentProfile> = {
     id: "writer",
     label: "Writer",
     labelAr: "وكيل الكتابة",
-    models: ["qwen-max", "qwen-plus"],
+    models: ["qwen3.8-max", "qwen3.7-max", "qwen-max", "qwen-plus"],
     temperature: 0.7,
     research: "auto",
     persona:
@@ -74,7 +74,7 @@ const PROFILES: Record<string, AgentProfile> = {
     id: "operator",
     label: "Operator",
     labelAr: "وكيل التنفيذ",
-    models: ["qwen-max", "qwen-plus"],
+    models: ["qwen3.8-max", "qwen3.7-max", "qwen-max", "qwen-plus"],
     temperature: 0.3,
     research: "auto",
     persona:
@@ -84,7 +84,7 @@ const PROFILES: Record<string, AgentProfile> = {
     id: "general",
     label: "Generalist",
     labelAr: "الوكيل العام",
-    models: ["qwen-plus", "qwen-max"],
+    models: ["qwen3.8-flash", "qwen3.8-max", "qwen-plus", "qwen-max"],
     temperature: 0.45,
     research: "auto",
     persona:
