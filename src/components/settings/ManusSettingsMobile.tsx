@@ -101,7 +101,7 @@ const ManusSettingsMobile = () => {
     { icon: Bell, label: "Notifications", path: "/notifications" },
     { icon: Database, label: "Data controls", path: "/settings/data" },
     { icon: PanelBottom, label: "Cloud browser", path: "/settings/cloud-browser" },
-    { icon: Monitor, label: "Desktop bridge", path: "/settings/desktop-bridge" },
+    
     { icon: Puzzle, label: "Skills", path: "/settings/skills" },
     { icon: Plug, label: "Integrations", path: "/chat?integrations=1" },
   ];
