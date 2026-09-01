@@ -100,6 +100,34 @@ function verifiedUserId(token: string): string | null {
 }
 
 
+/**
+ * Guest budget: signed-out visitors chat freely, but within limits so the fast
+ * lane can't be farmed. Sliding window per fingerprint/IP bucket.
+ */
+const GUEST_WINDOW_MS = 60 * 60 * 1000;
+const GUEST_MAX_PER_WINDOW = 25;
+const GUEST_MAX_PER_MINUTE = 6;
+const guestHits = new Map<string, number[]>();
+
+function guestAllowance(bucket: string): { ok: boolean; retryAfterSeconds: number } {
+  const now = Date.now();
+  if (guestHits.size > 5000) guestHits.clear();
+  const hits = (guestHits.get(bucket) || []).filter((t) => now - t < GUEST_WINDOW_MS);
+  const lastMinute = hits.filter((t) => now - t < 60_000);
+  if (lastMinute.length >= GUEST_MAX_PER_MINUTE) {
+    guestHits.set(bucket, hits);
+    return { ok: false, retryAfterSeconds: 30 };
+  }
+  if (hits.length >= GUEST_MAX_PER_WINDOW) {
+    guestHits.set(bucket, hits);
+    const oldest = hits[0] ?? now;
+    return { ok: false, retryAfterSeconds: Math.max(30, Math.ceil((GUEST_WINDOW_MS - (now - oldest)) / 1000)) };
+  }
+  hits.push(now);
+  guestHits.set(bucket, hits);
+  return { ok: true, retryAfterSeconds: 0 };
+}
+
 const ENDPOINTS = [
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
   "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
