@@ -126,14 +126,21 @@ export async function plan(
       }))
     : [];
 
-  return {
-    // Keyword routing is a strong signal for code; keep it when the planner is vague.
+  // Two or more independent parts is a complex turn regardless of the label the
+  // planner attached to it.
+  const effective = subtasks.length >= 2 ? "complex" : complexity;
+  const turn: TurnPlan = {
     profile: AGENTS[lead] ?? fallback,
-    complexity,
-    subtasks: complexity === "complex" ? subtasks : subtasks.slice(0, 1),
+    complexity: effective,
+    subtasks: effective === "complex" ? subtasks : subtasks.slice(0, 1),
     deliverable: typeof parsed.deliverable === "string" ? parsed.deliverable.slice(0, 300) : "",
   };
+  console.log(
+    `chat-alibaba plan: lead=${turn.profile.id} complexity=${turn.complexity} subtasks=${turn.subtasks.length}`,
+  );
+  return turn;
 }
+
 
 async function runWorker(
   call: CallFn,
