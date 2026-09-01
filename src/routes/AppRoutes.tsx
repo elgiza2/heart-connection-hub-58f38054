@@ -168,7 +168,7 @@ export const AppRoutes = ({ currentUserId }: { currentUserId: string | null }) =
     <Route path="/settings/privacy" element={<ProtectedRoute><SettingsPrivacyPage /></ProtectedRoute>} />
     <Route path="/settings/capabilities" element={<ProtectedRoute><CapabilitiesPage /></ProtectedRoute>} />
     <Route path="/settings/cloud-browser" element={<ProtectedRoute><CloudBrowserPage /></ProtectedRoute>} />
-    <Route path="/test" element={<ProtectedRoute><DesktopBridgePage /></ProtectedRoute>} />
+    <Route path="/settings/desktop-bridge" element={<ProtectedRoute><DesktopBridgePage /></ProtectedRoute>} />
     <Route path="/settings/system-status" element={<ProtectedRoute><SystemStatusPage /></ProtectedRoute>} />
 
     {/* ── Research previews ─────────────────────────────────── */}

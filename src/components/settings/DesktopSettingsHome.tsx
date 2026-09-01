@@ -92,7 +92,7 @@ export function DesktopSettingsHome() {
         { icon: (p) => <Brain {...p} />, label: tx("Memory"), path: "/settings/memory" },
         { icon: IntegrationsIcon, label: tx("Integrations"), path: "/chat?integrations=1" },
         { icon: IntegrationsIcon, label: tx("MCP Servers"), path: "/settings/mcp" },
-        
+        { icon: (p) => <Monitor {...p} />, label: tx("My computer"), path: "/settings/desktop-bridge" },
         {
           icon: (p) => <Globe {...p} />,
           label: tx("Language"),
