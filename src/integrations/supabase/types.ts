@@ -6425,6 +6425,116 @@ export type Database = {
         }
         Relationships: []
       }
+      local_device_commands: {
+        Row: {
+          created_at: string
+          device_id: string
+          error: string | null
+          id: string
+          kind: string
+          origin: string
+          payload: Json
+          result: Json | null
+          status: string
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          error?: string | null
+          id?: string
+          kind: string
+          origin?: string
+          payload?: Json
+          result?: Json | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          error?: string | null
+          id?: string
+          kind?: string
+          origin?: string
+          payload?: Json
+          result?: Json | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "local_device_commands_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "local_devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      local_devices: {
+        Row: {
+          agent_version: string | null
+          allowlist: Json
+          capabilities: Json
+          created_at: string
+          hostname: string | null
+          id: string
+          last_seen_at: string | null
+          name: string
+          os: string
+          pair_code: string | null
+          pair_expires_at: string | null
+          permission_mode: string
+          status: string
+          token_hash: string | null
+          user_id: string
+          work_dir: string | null
+        }
+        Insert: {
+          agent_version?: string | null
+          allowlist?: Json
+          capabilities?: Json
+          created_at?: string
+          hostname?: string | null
+          id?: string
+          last_seen_at?: string | null
+          name?: string
+          os?: string
+          pair_code?: string | null
+          pair_expires_at?: string | null
+          permission_mode?: string
+          status?: string
+          token_hash?: string | null
+          user_id: string
+          work_dir?: string | null
+        }
+        Update: {
+          agent_version?: string | null
+          allowlist?: Json
+          capabilities?: Json
+          created_at?: string
+          hostname?: string | null
+          id?: string
+          last_seen_at?: string | null
+          name?: string
+          os?: string
+          pair_code?: string | null
+          pair_expires_at?: string | null
+          permission_mode?: string
+          status?: string
+          token_hash?: string | null
+          user_id?: string
+          work_dir?: string | null
+        }
+        Relationships: []
+      }
       long_run_events: {
         Row: {
           action: string | null
