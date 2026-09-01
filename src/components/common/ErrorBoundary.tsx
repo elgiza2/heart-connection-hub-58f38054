@@ -49,7 +49,7 @@ const shouldAutoRecover = (err: unknown): boolean => {
   return AUTO_RECOVER_PATTERNS.some((re) => re.test(msg));
 };
 
-const RELOAD_FLAG = "__megsy_eb_reloaded_at";
+
 const RECOVERY_FLAG = "__megsy_eb_recovery_count";
 const RECOVERY_WINDOW_MS = 10_000;
 const RECOVERY_MAX = 3;

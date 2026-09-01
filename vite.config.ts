@@ -686,7 +686,10 @@ export default defineConfig({
 
     transcribeDevPlugin(),
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt" (not autoUpdate): the service worker must never take control
+      // mid-session and reload the page under the user. Updates are applied on
+      // the next natural visit, or when the user taps our manual toast.
+      registerType: "prompt",
       injectRegister: null,
       strategies: "generateSW",
       filename: "sw.js",
@@ -724,8 +727,8 @@ export default defineConfig({
           /^https:\/\/[^/]+\.supabase\.in\//,
         ],
         cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: true,
+        clientsClaim: false,
+        skipWaiting: false,
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         runtimeCaching: [
           {
