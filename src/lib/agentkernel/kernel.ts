@@ -30,9 +30,9 @@ import {
 const AUTO_CONTINUE_MS = 60_000;
 const MAX_ACTIONS_PER_TICK = 6;
 const TICK_DEADLINE_MS = 40_000;
-const MAX_STEPS = 600;
+const MAX_STEPS = 5000;
 const MAX_REVIEW_ROUNDS = 3;
-const DEFAULT_BUDGET_MS = 6 * 60 * 60 * 1000;
+const DEFAULT_BUDGET_MS = 24 * 60 * 60 * 1000;
 
 /** Tools whose arguments must never be echoed into the public trace. */
 const REDACTED_TOOLS = new Set(["remember", "login_identity"]);
