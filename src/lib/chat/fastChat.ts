@@ -27,10 +27,12 @@ export function isFastLaneEligible(opts: {
   // The chat page sends `normal` for a plain turn; `chat` is the legacy name.
   const mode = String(opts.chatMode || "normal").toLowerCase();
   if (mode !== "chat" && mode !== "normal") return false;
-  if (!messages.length || messages.length > 30) return false;
+  if (!messages.length || messages.length > 60) return false;
   let total = 0;
   for (const m of messages) {
     if (typeof m.content !== "string") return false;
+    // Never fast-lane a turn that already carries a tool/task trace.
+    if (/\[tool:|\bESCALATE\b/.test(m.content)) return false;
     total += m.content.length;
   }
   return total > 0 && total < 6000;
