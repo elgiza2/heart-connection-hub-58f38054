@@ -77,9 +77,12 @@ Available specialists: ${AGENT_IDS.join(", ")}.
  - general: direct short answers.
 Return JSON ONLY:
 {"lead":"<specialist>","complexity":"simple|standard|complex","deliverable":"<one line describing the exact artifact the user should receive>","subtasks":[{"agent":"<specialist>","goal":"<self-contained instruction>"}]}
-Rules: simple = one short answer, no subtasks. standard = one specialist, at most 1 subtask.
-complex = a real multi-part job: give 2-4 subtasks that are independent of each other (they run in parallel, so no subtask may depend on another's output).
-Subtask goals must be specific and answerable without asking the user anything.`;
+Rules:
+- simple = a single short factual or conversational answer. No subtasks.
+- standard = one deliverable for one specialist. At most 1 subtask.
+- complex = the request names TWO OR MORE distinct deliverables, or needs different specialties (e.g. research + numbers + code + copy). This is the common case for long requests — do not downgrade it. Give 2-4 subtasks.
+- Subtasks run in PARALLEL, so each must be independent and self-contained, with no reference to another subtask's output and nothing to ask the user.
+- Split by deliverable, never into "step 1 / step 2" of the same deliverable.
 
 /** Semantic plan for the turn; falls back to the keyword-routed profile. */
 export async function plan(
