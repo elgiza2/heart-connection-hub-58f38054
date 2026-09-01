@@ -139,39 +139,6 @@ export async function askModel(
 }
 
 
-/**
- * Fallback provider: the Lovable AI Gateway. Used only when no Alibaba key
- * answers, so a rejected or exhausted key never leaves an autonomous task
- * unable to decide its next step.
- */
-async function askGateway(system: string, user: string): Promise<string> {
-  const key = Deno.env.get("LOVABLE_API_KEY");
-  if (!key) return "";
-  try {
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({
-        model: GATEWAY_MODEL,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ] satisfies LlmMessage[],
-      }),
-    });
-    if (!response.ok) {
-      console.error(`agentkernel gateway [${response.status}]: ${await response.text()}`);
-      return "";
-    }
-    const data = (await response.json().catch(() => null)) as
-      | { choices?: { message?: { content?: string } }[] }
-      | null;
-    return data?.choices?.[0]?.message?.content ?? "";
-  } catch (error) {
-    console.error("agentkernel gateway failed", error);
-    return "";
-  }
-}
 
 /** Same call, parsing the first JSON object/array in the reply. */
 export async function askJson<T>(
