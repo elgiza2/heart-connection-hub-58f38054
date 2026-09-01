@@ -143,130 +143,15 @@ async function callAlibaba(
   return null;
 }
 
-/**
- * Streams a Responses-API call and returns only its final text. Used by the
- * manager/worker calls when no Alibaba key can serve the request.
- */
-async function gatewayText(messages: Message[], maxTokens = 1400): Promise<string> {
-  const upstream = await callGateway(messages, "openai/gpt-5.6-luna");
-  if (!upstream?.response.ok || !upstream.response.body) return "";
-  const reader = upstream.response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let text = "";
-  while (text.length < maxTokens * 8) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (!line.startsWith("data:")) continue;
-      const raw = line.slice(5).trim();
-      if (!raw || raw === "[DONE]") continue;
-      try {
-        const event = JSON.parse(raw) as any;
-        if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
-          text += event.delta;
-        }
-      } catch { /* ignore partial frames */ }
-    }
-  }
-  await reader.cancel().catch(() => {});
-  return text.trim();
-}
-
-/** Non-streaming text helper: Alibaba first, Lovable AI Gateway as the fallback. */
+/** Non-streaming text helper for the manager and the parallel workers. */
 function makeTextCall(admin: any): CallFn {
   return async (models, payload) => {
     const result = await callAlibaba(admin, models, { ...payload, stream: false });
-    if (result) {
-      const data = await result.response.json().catch(() => null) as any;
-      const content = data?.choices?.[0]?.message?.content;
-      if (typeof content === "string" && content.trim()) return content.trim();
-    }
-    const messages = Array.isArray((payload as any).messages) ? (payload as any).messages as Message[] : [];
-    if (!messages.length) return "";
-    return gatewayText(messages, Number((payload as any).max_tokens) || 1400);
+    if (!result) return "";
+    const data = await result.response.json().catch(() => null) as any;
+    const content = data?.choices?.[0]?.message?.content;
+    return typeof content === "string" ? content.trim() : "";
   };
-}
-
-
-async function callGateway(messages: Message[], model = "openai/gpt-5.6-sol"): Promise<ChatUpstream | null> {
-  const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
-  if (!key) return null;
-  try {
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": key,
-        "X-Lovable-AIG-SDK": "fetch",
-      },
-      body: JSON.stringify({
-        model,
-        input: messages,
-        stream: true,
-        store: false,
-        reasoning: { effort: "medium", summary: "auto" },
-        include: ["reasoning.encrypted_content"],
-      }),
-    });
-    return { response, format: "responses" };
-  } catch (error) {
-    console.error("chat-alibaba gateway request failed", error);
-    return null;
-  }
-}
-
-function gatewayAsChatStream(body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> {
-  const reader = body.getReader();
-  const decoder = new TextDecoder();
-  const encoder = new TextEncoder();
-  let buffer = "";
-  return new ReadableStream({
-    async pull(controller) {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          if (buffer.trim()) emitGatewayLine(buffer, controller, encoder);
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-          return;
-        }
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        let emitted = false;
-        for (const line of lines) emitted = emitGatewayLine(line, controller, encoder) || emitted;
-        if (emitted) return;
-      }
-    },
-    cancel() {
-      return reader.cancel();
-    },
-  });
-}
-
-function emitGatewayLine(
-  line: string,
-  controller: ReadableStreamDefaultController<Uint8Array>,
-  encoder: TextEncoder,
-): boolean {
-  if (!line.startsWith("data:")) return false;
-  const raw = line.slice(5).trim();
-  if (!raw || raw === "[DONE]") return false;
-  try {
-    const event = JSON.parse(raw) as Record<string, any>;
-    const text = event.type === "response.output_text.delta" ? event.delta : null;
-    const reasoning = event.type === "response.reasoning_summary_text.delta" ? event.delta : null;
-    if (!text && !reasoning) return false;
-    const delta = text ? { content: text } : { reasoning_content: reasoning };
-    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta }] })}\n\n`));
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 async function personalization(admin: any, userId: string) {
