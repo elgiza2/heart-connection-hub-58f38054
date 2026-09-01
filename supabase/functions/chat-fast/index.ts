@@ -34,24 +34,71 @@ function needsFullChat(messages: Msg[]): boolean {
 }
 
 /**
- * Identity is read from the JWT payload locally instead of calling
- * `auth.getUser()`. The fast lane exposes no user data and performs no
- * privileged work — it only needs "is this a signed-in caller or a guest" —
- * so paying a network round trip (plus the supabase-js cold-start import)
- * before the first token is pure latency.
+ * Identity in the fast lane must never rest on an *unverified* JWT payload:
+ * `atob` decoding alone lets anyone forge a `sub` and impersonate a user.
+ *
+ * Contract:
+ *  - the payload is decoded locally for claim sanity checks (exp/iss/role/sub),
+ *  - the signature is confirmed against the auth server, but only via a cached
+ *    result so the hot path stays free of network round trips,
+ *  - an unverified token is downgraded to *guest*, never trusted as a user.
  */
-function userIdFromJwt(token: string): string | null {
+type Claims = { sub?: string; exp?: number; iss?: string; role?: string };
+
+function decodeClaims(token: string): Claims | null {
   try {
     const part = token.split(".")[1];
     if (!part) return null;
-    const json = atob(part.replace(/-/g, "+").replace(/_/g, "/"));
-    const claims = JSON.parse(json) as { sub?: string; exp?: number };
-    if (claims.exp && claims.exp * 1000 < Date.now()) return null;
-    return typeof claims.sub === "string" ? claims.sub : null;
+    const claims = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/"))) as Claims;
+    if (!claims.exp || claims.exp * 1000 < Date.now()) return null;
+    if (typeof claims.sub !== "string" || !claims.sub) return null;
+    if (claims.role && claims.role !== "authenticated") return null;
+    const expectedIss = `${(Deno.env.get("SUPABASE_URL") || "").replace(/\/$/, "")}/auth/v1`;
+    if (claims.iss && expectedIss && claims.iss !== expectedIss) return null;
+    return claims;
   } catch {
     return null;
   }
 }
+
+/** token -> { userId, until } for signature-verified tokens only. */
+const verified = new Map<string, { userId: string; until: number }>();
+const inflight = new Set<string>();
+
+async function confirmSignature(token: string, expectedSub: string): Promise<void> {
+  if (inflight.has(token)) return;
+  inflight.add(token);
+  try {
+    const url = Deno.env.get("SUPABASE_URL");
+    const anon = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!url || !anon) return;
+    const r = await fetch(`${url.replace(/\/$/, "")}/auth/v1/user`, {
+      headers: { apikey: anon, Authorization: `Bearer ${token}` },
+    });
+    if (!r.ok) return;
+    const body = (await r.json()) as { id?: string };
+    if (body?.id && body.id === expectedSub) {
+      if (verified.size > 2000) verified.clear();
+      verified.set(token, { userId: body.id, until: Date.now() + 10 * 60 * 1000 });
+    }
+  } catch {
+    // network blip: stay in guest mode, retry on the next turn
+  } finally {
+    inflight.delete(token);
+  }
+}
+
+/** Returns the user id only when the token's signature was already verified. */
+function verifiedUserId(token: string): string | null {
+  const claims = decodeClaims(token);
+  if (!claims?.sub) return null;
+  const hit = verified.get(token);
+  if (hit && hit.until > Date.now()) return hit.userId;
+  verified.delete(token);
+  void confirmSignature(token, claims.sub);
+  return null;
+}
+
 
 const ENDPOINTS = [
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
