@@ -1,0 +1,3804 @@
+/* Route/theme stylesheets that are never needed for the first painted frame.
+   Loaded on idle from main.tsx, then cached locally by the service worker. */
+@import "./ios-glass.css";
+@import "./ios-feel.css";
+@import "./megsy-workspace.css";
+@import "./megsy-theme.css";
+@import "./portfolio-referrals.css";
+@import "./about-hero.css";
+@import "./settings-amber.css";
+
+@tailwind utilities;
+
+/* ===========================================================
+   Deep Research Report — Editorial Renderer (NYT / Medium style)
+   Universal language support: Arabic, English, CJK, Cyrillic, etc.
+   =========================================================== */
+.research-report {
+  --rr-fg: hsl(var(--foreground));
+  --rr-muted: hsl(var(--foreground) / 0.65);
+  --rr-soft: hsl(var(--foreground) / 0.08);
+  --rr-line: hsl(var(--foreground) / 0.12);
+  --rr-accent: hsl(var(--primary));
+  --rr-accent-soft: hsl(var(--primary) / 0.13);
+  --rr-card: hsl(var(--card) / 0.72);
+  --rr-serif:
+    "Charter", "Iowan Old Style", "Source Serif Pro", "Noto Serif", "PT Serif", "Georgia",
+    "Times New Roman", serif;
+  --rr-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+  --rr-arabic: "Noto Naskh Arabic", "Amiri", "Cairo", "Tajawal", system-ui, sans-serif;
+  --rr-mono: "JetBrains Mono", "SF Mono", "Menlo", "Consolas", monospace;
+
+  color: var(--rr-fg);
+  font-family: var(--rr-sans);
+  font-size: 19.5px;
+  line-height: 1.9;
+  letter-spacing: -0.003em;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1,
+    "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--rr-line);
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(90deg, hsl(var(--foreground) / 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, hsl(var(--foreground) / 0.03) 1px, transparent 1px),
+    linear-gradient(180deg, hsl(var(--card) / 0.78), hsl(var(--background) / 0.62));
+  background-size:
+    34px 34px,
+    34px 34px,
+    auto;
+  box-shadow: 0 24px 80px hsl(var(--foreground) / 0.07);
+}
+
+.research-report--rtl {
+  font-family: var(--rr-arabic);
+  text-align: start;
+  line-height: 2.05;
+}
+
+.research-report :lang(zh),
+.research-report :lang(ja),
+.research-report :lang(ko) {
+  font-family:
+    "PingFang SC", "Hiragino Sans", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  line-height: 1.85;
+}
+
+.research-report > * + * {
+  margin-top: 1.22em;
+}
+.research-report > h1 + *,
+.research-report > h2 + *,
+.research-report > h3 + * {
+  margin-top: 0.7em;
+}
+
+.research-report :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--rr-sans);
+  color: var(--rr-fg);
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  unicode-bidi: plaintext;
+  scroll-margin-top: 5rem;
+}
+.research-report--rtl :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--rr-arabic);
+  letter-spacing: 0;
+  font-weight: 800;
+}
+.research-report h1 {
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  line-height: 1.1;
+  margin: 0.25em 0 0.6em;
+  letter-spacing: -0.03em;
+}
+.research-report h2 {
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  line-height: 1.22;
+  margin: 2.25em 0 0.75em;
+  border: 1px solid var(--rr-line);
+  border-radius: 1rem;
+  padding: 0.7rem 0.95rem;
+  position: relative;
+  background: linear-gradient(135deg, var(--rr-accent-soft), hsl(var(--foreground) / 0.025));
+}
+.research-report h2::before {
+  content: "//";
+  display: inline-block;
+  width: auto;
+  height: auto;
+  background: transparent;
+  border-radius: 0;
+  margin-inline-end: 0.55rem;
+  margin-bottom: 0;
+  color: var(--rr-accent);
+  opacity: 1;
+  font-family: var(--rr-mono);
+}
+.research-report h3 {
+  font-size: clamp(1.25rem, 2.8vw, 1.45rem);
+  line-height: 1.35;
+  margin: 1.8em 0 0.55em;
+}
+.research-report h4 {
+  font-size: 1rem;
+  line-height: 1.45;
+  margin: 1.3em 0 0.45em;
+  color: var(--rr-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.research-report--rtl h4 {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.research-report p {
+  margin: 0;
+  unicode-bidi: plaintext;
+  hyphens: auto;
+}
+.research-report h1 + p {
+  font-size: 1.18em;
+  line-height: 1.6;
+  color: var(--rr-muted);
+  font-weight: 400;
+}
+
+.research-report strong,
+.research-report b {
+  color: var(--rr-accent);
+  font-weight: 850;
+  background: linear-gradient(90deg, var(--rr-accent-soft), transparent);
+  border-radius: 0.35em;
+  padding: 0.03em 0.22em;
+}
+.research-report em,
+.research-report i {
+  font-style: italic;
+}
+.research-report a {
+  color: var(--rr-fg);
+  text-decoration: underline;
+  text-decoration-color: var(--rr-accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+.research-report a:hover {
+  color: var(--rr-accent);
+}
+
+.research-report ul,
+.research-report ol {
+  margin: 0;
+  padding-inline-start: 1.5em;
+}
+.research-report li {
+  margin: 0.55em 0;
+  unicode-bidi: plaintext;
+  padding-inline-start: 0.25em;
+}
+.research-report li::marker {
+  color: var(--rr-accent);
+  font-weight: 700;
+}
+.research-report ul {
+  list-style: disc;
+}
+.research-report ol {
+  list-style: decimal;
+}
+.research-report li > p {
+  display: inline;
+}
+
+.research-report blockquote {
+  margin: 1.5em 0;
+  padding: 1em 1.15em;
+  border: 1px solid var(--rr-line);
+  border-inline-start: 5px solid var(--rr-accent);
+  border-radius: 1rem;
+  font-family: var(--rr-sans);
+  font-style: normal;
+  font-size: 1.15em;
+  line-height: 1.55;
+  color: var(--rr-fg);
+  unicode-bidi: plaintext;
+  background: linear-gradient(135deg, var(--rr-accent-soft), hsl(var(--card) / 0.48));
+}
+.research-report--rtl blockquote {
+  font-family: var(--rr-arabic);
+  font-style: normal;
+}
+.research-report blockquote p {
+  margin: 0.4em 0;
+}
+
+.research-report code {
+  font-family: var(--rr-mono);
+  background: hsl(var(--foreground) / 0.09);
+  border: 1px solid var(--rr-line);
+  color: var(--rr-accent);
+  padding: 0.13em 0.45em;
+  border-radius: 0.45em;
+  font-size: 0.86em;
+  direction: ltr;
+  unicode-bidi: embed;
+}
+.research-report pre {
+  font-family: var(--rr-mono);
+  background: hsl(var(--background) / 0.86);
+  border: 1px solid var(--rr-line);
+  padding: 1.2em 1.3em;
+  border-radius: 1rem;
+  overflow-x: auto;
+  margin: 1.4em 0;
+  direction: ltr;
+  font-size: 0.88em;
+  line-height: 1.65;
+  -webkit-overflow-scrolling: touch;
+}
+.research-report pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 1em;
+}
+
+.research-report hr {
+  margin: 2.5em auto;
+  border: 0;
+  width: 4em;
+  height: 1px;
+  background: var(--rr-fg);
+  opacity: 0.4;
+}
+
+.research-report__table-wrap {
+  margin: 1.6em 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--rr-line);
+  border-radius: 0.85rem;
+  direction: ltr;
+  background: hsl(var(--background));
+}
+.research-report__table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--rr-sans);
+  font-size: 0.92rem;
+  min-width: max-content;
+}
+.research-report__table-wrap th,
+.research-report__table-wrap td {
+  padding: 0.75em 1em;
+  border-bottom: 1px solid var(--rr-line);
+  vertical-align: top;
+  text-align: start;
+  unicode-bidi: plaintext;
+  line-height: 1.55;
+}
+.research-report__table-wrap tr:last-child td {
+  border-bottom: 0;
+}
+.research-report__table-wrap th {
+  background: hsl(var(--foreground) / 0.04);
+  color: var(--rr-fg);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--rr-line);
+}
+.research-report--rtl .research-report__table-wrap th {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.9rem;
+}
+.research-report__table-wrap tr:hover td {
+  background: hsl(var(--foreground) / 0.025);
+}
+
+@media (max-width: 640px) {
+  .research-report {
+    font-size: 16px;
+    line-height: 1.72;
+  }
+  .research-report--rtl {
+    font-size: 16.5px;
+    line-height: 2;
+  }
+  .research-report h2 {
+    margin-top: 1.8em;
+  }
+}
+
+@keyframes rr-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.research-report > * {
+  animation: rr-fade-in 0.5s ease-out both;
+}
+.research-report > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.research-report > *:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.research-report > *:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.research-report > *:nth-child(4) {
+  animation-delay: 0.14s;
+}
+.research-report > *:nth-child(5) {
+  animation-delay: 0.18s;
+}
+.research-report > *:nth-child(6) {
+  animation-delay: 0.22s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .research-report > * {
+    animation: none;
+  }
+}
+
+/* ===== Glow Rotating Border Button ===== */
+@property --glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.glow-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glow-inner, var(--sf-1));
+  color: var(--ink-1);
+  font-weight: 600;
+  font-size: 16px;
+  padding: 14px 32px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  z-index: 0;
+  isolation: isolate;
+  transition: transform 0.2s ease;
+}
+@media (min-width: 768px) {
+  .glow-btn {
+    font-size: 18px;
+  }
+}
+/* Rotating conic ring hugging the button border */
+.glow-btn::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 15px;
+  background: var(
+    --glow-gradient,
+    conic-gradient(from var(--glow-angle), #ffd700, #ff8c00, #ffd700, #ff8c00, #ffd700)
+  );
+  z-index: -2;
+  animation: glow-btn-rotate 4s linear infinite;
+  will-change: transform;
+  filter: blur(0.5px) saturate(1.2);
+}
+/* Soft outer halo — same rotating gradient, blurred, slightly larger */
+.glow-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--glow-inner, var(--sf-1));
+  border-radius: 12px;
+  z-index: -1;
+  box-shadow: 0 0 24px -2px var(--glow-halo, rgba(255, 215, 0, 0.35));
+}
+.glow-btn:hover {
+  transform: scale(1.03);
+}
+.glow-btn:hover::before {
+  animation-duration: 3s;
+}
+.glow-btn:active {
+  transform: scale(0.97);
+}
+.glow-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.glow-btn:disabled:hover {
+  transform: none;
+}
+/* Keep the border rotating continuously even when disabled/loading */
+.glow-btn:disabled::before {
+  animation-duration: 5s;
+}
+
+/* Gold "Unlimited models" pill — compact focal CTA inside pricing cards */
+.umb-pill-v2 {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  height: 34px;
+  padding: 0 10px 0 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 220, 120, 0.7);
+  background:
+    radial-gradient(140% 240% at 0% 0%, #fff4c2 0%, transparent 55%),
+    linear-gradient(135deg, #f5c24a 0%, #d4af37 45%, #b8860b 100%);
+  color: #1a1200;
+  box-shadow:
+    inset 0 1px 0 var(--overlay-white-60),
+    0 0 0 1px rgba(255, 215, 0, 0.15),
+    0 6px 18px -6px rgba(212, 175, 55, 0.55),
+    0 0 22px -4px rgba(255, 215, 0, 0.35);
+}
+.umb-pill-v2 .umb-plus {
+  width: 14px;
+  height: 14px;
+  color: #1a1200;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.4));
+}
+.umb-pill-v2 .umb-label {
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.umb-pill-v2 .umb-logos {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: flex-end;
+  padding-left: 4px;
+  mask-image: linear-gradient(90deg, transparent 0%, var(--sf-1) 10%, var(--sf-1) 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, var(--sf-1) 10%, var(--sf-1) 92%, transparent 100%);
+}
+.umb-pill-v2 .umb-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+
+@keyframes glow-btn-rotate {
+  to {
+    --glow-angle: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glow-btn::before {
+    animation: none;
+  }
+  .glow-btn:hover {
+    transform: none;
+  }
+}
+
+/* Deep Research — magazine reading template */
+.research-report.dropcap > p:first-of-type::first-letter {
+  float: inline-start;
+  font-family: var(--font-display, ui-serif, Georgia, serif);
+  font-weight: 700;
+  font-size: 4.6em;
+  line-height: 0.9;
+  margin-inline-end: 0.12em;
+  margin-block-start: 0.08em;
+  color: hsl(var(--foreground));
+}
+.research-report :is(h2, h3) + p::first-letter {
+  font-size: inherit;
+  float: none;
+  margin: 0;
+}
+.research-report p {
+  text-wrap: pretty;
+}
+
+.research-report.dropcap--dark > p:first-of-type::first-letter {
+  color: var(--ink-1);
+}
+
+@keyframes thinkingShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* iOS-style activity indicator */
+.ios-spinner {
+  transform: translateZ(0);
+}
+.ios-spinner-bar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8%;
+  height: 26%;
+  margin-left: -4%;
+  margin-top: -13%;
+  background: hsl(var(--foreground));
+  border-radius: 9999px;
+  transform-origin: 50% 100%;
+  animation: ios-spinner-fade 1s linear infinite;
+  opacity: 0.15;
+}
+@keyframes ios-spinner-fade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.15;
+  }
+}
+
+/* ============ Liquid Glass (iOS 26 style) ============ */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px var(--overlay-white-10);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    var(--overlay-white-15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    var(--overlay-white-15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+/* legacy shine element kept as a no-op so existing markup doesn't break */
+.liquid-glass__shine {
+  display: none;
+}
+
+
+.liquid-chip {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.62));
+  -webkit-backdrop-filter: blur(14px) saturate(150%) brightness(1.04);
+  backdrop-filter: blur(14px) saturate(150%) brightness(1.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 4px 10px -4px rgba(0, 0, 0, 0.18);
+}
+.liquid-chip:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), var(--overlay-white-70));
+}
+.dark .liquid-chip {
+  background: linear-gradient(180deg, rgba(36, 36, 38, 0.82), rgba(18, 18, 20, 0.66));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 0 0 1px var(--overlay-white-12),
+    0 4px 10px -4px rgba(0, 0, 0, 0.5);
+}
+.dark .liquid-chip:hover {
+  background: linear-gradient(180deg, rgba(48, 48, 50, 0.88), rgba(22, 22, 24, 0.72));
+}
+
+/* ============ Liquid Glass PRO — refractive (SVG filter) ============ */
+.liquid-glass-pro {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      130% 100% at 50% -10%,
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0.28) 55%,
+      var(--overlay-white-18) 100%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.26));
+  -webkit-backdrop-filter: blur(18px) saturate(155%) brightness(1.05);
+  backdrop-filter: blur(18px) saturate(155%) brightness(1.05);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1px 0 var(--overlay-white-12),
+    inset 0 0 0 1px var(--overlay-white-30),
+    0 1px 0 rgba(255, 255, 255, 0.5),
+    0 24px 56px -20px rgba(0, 0, 0, 0.28),
+    0 6px 14px -8px rgba(0, 0, 0, 0.18);
+}
+.dark .liquid-glass-pro {
+  background:
+    radial-gradient(
+      130% 100% at 50% -10%,
+      var(--overlay-white-18),
+      var(--overlay-white-08) 55%,
+      var(--overlay-white-05) 100%
+    ),
+    linear-gradient(180deg, rgba(40, 40, 44, 0.55), rgba(20, 20, 24, 0.42));
+  box-shadow:
+    inset 0 1.5px 0 var(--overlay-white-20),
+    inset 0 -1px 0 var(--overlay-white-06),
+    inset 0 0 0 1px var(--overlay-white-14),
+    0 24px 56px -20px rgba(0, 0, 0, 0.65),
+    0 6px 14px -8px rgba(0, 0, 0, 0.45);
+}
+/* top specular sweep */
+.liquid-glass-pro__shine {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(140% 70% at 50% -20%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(60% 100% at 0% 50%, var(--overlay-white-18), rgba(255, 255, 255, 0) 60%),
+    radial-gradient(60% 100% at 100% 50%, var(--overlay-white-18), rgba(255, 255, 255, 0) 60%);
+  mix-blend-mode: screen;
+  opacity: 0.95;
+}
+.dark .liquid-glass-pro__shine {
+  background:
+    radial-gradient(140% 70% at 50% -20%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(60% 100% at 0% 50%, var(--overlay-white-06), rgba(255, 255, 255, 0) 60%),
+    radial-gradient(60% 100% at 100% 50%, var(--overlay-white-06), rgba(255, 255, 255, 0) 60%);
+  opacity: 0.7;
+}
+/* chromatic aberration along edges */
+.liquid-glass-pro__edge {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    var(--overlay-white-18) 35%,
+    var(--overlay-white-10) 65%,
+    rgba(255, 255, 255, 0.32) 100%
+  );
+  -webkit-mask:
+    linear-gradient(var(--sf-1) 0 0) content-box,
+    linear-gradient(var(--sf-1) 0 0);
+  mask:
+    linear-gradient(var(--sf-1) 0 0) content-box,
+    linear-gradient(var(--sf-1) 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+}
+.dark .liquid-glass-pro__edge {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    var(--overlay-white-06) 40%,
+    var(--overlay-white-04) 70%,
+    var(--overlay-white-14) 100%
+  );
+  opacity: 0.55;
+}
+
+/* Hide scrollbars utility (used in mobile chip rows) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* =========================================================================
+ * Composer Liquid Glass — nikdelvin/liquid-glass V2 recipe (Dec 2025)
+ * Adapted for iOS 26.4+/26.5 "softened" Liquid Glass aesthetic (May 2026)
+ * Pure CSS — works across Chrome/Safari/Firefox without runtime JS
+ * ========================================================================= */
+.composer-liquid-glass {
+  position: relative;
+  isolation: isolate;
+  border-radius: 28px;
+  overflow: hidden;
+  background: rgba(9, 9, 11, 0.3);
+  -webkit-backdrop-filter: blur(22px) saturate(150%) brightness(1.1);
+  backdrop-filter: blur(22px) saturate(150%) brightness(1.1);
+  box-shadow:
+    inset 0 0 4px 0 rgba(250, 250, 250, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 12px 40px -12px var(--overlay-black-55);
+}
+/* Subtle top specular — softened per iOS 26.4 Reduce Bright Effects */
+.composer-liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(120% 50% at 50% -10%, var(--overlay-white-25), transparent 60%);
+  mix-blend-mode: screen;
+  opacity: 0.65;
+  z-index: 1;
+}
+.composer-liquid-glass > * {
+  position: relative;
+  z-index: 3;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .composer-liquid-glass {
+    background: rgba(20, 20, 24, 0.92);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .composer-liquid-glass::before {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .composer-liquid-glass::before {
+    opacity: 0.35;
+  }
+}
+
+/* =========================================================================
+ * iOS 26.5 Glass Chips & Menus (composer-scoped, mobile-safe)
+ * Not prefixed with `liquid-glass-` so the mobile flatten override doesn't
+ * hit these. White-tinted on dark composer surface.
+ * ========================================================================= */
+.ios26-glass-chip {
+  background: var(--overlay-white-08);
+  border: 1px solid var(--overlay-white-14);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 var(--overlay-white-18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+  color: var(--ink-2);
+  transition:
+    background 160ms ease,
+    transform 120ms ease,
+    box-shadow 160ms ease;
+}
+.ios26-glass-chip:hover {
+  background: var(--overlay-white-14);
+}
+.ios26-glass-chip:active {
+  transform: scale(0.96);
+}
+.ios26-glass-chip[data-active="true"],
+.ios26-glass-chip.is-active {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: var(--overlay-white-30);
+}
+
+/* =========================================================================
+ * Section accent — Aurora Spectrum.
+ * --section-accent is an HSL triplet set by <AppLayout> per route:
+ *   chat: 252 92% 67%  ·  images: 338 100% 71%  ·  videos: 187 85% 53%  ·  os: 158 64% 52%
+ * ========================================================================= */
+:root {
+  --section-accent: 252 92% 67%;
+}
+
+.accent-tint {
+  color: hsl(var(--section-accent));
+}
+.accent-ring {
+  box-shadow: 0 0 0 1px hsl(var(--section-accent) / 0.4);
+}
+
+/* Glass + soft accent glow primary button (Generate / Send). */
+.btn-glass-accent {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 14px;
+  padding: 0.7rem 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+  background:
+    radial-gradient(
+      120% 80% at 50% 100%,
+      hsl(var(--section-accent) / 0.45) 0%,
+      hsl(var(--section-accent) / 0) 70%
+    ),
+    linear-gradient(180deg, var(--overlay-white-10), var(--overlay-white-04));
+  border: 1px solid hsl(var(--section-accent) / 0.45);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 10px 28px -10px hsl(var(--section-accent) / 0.55),
+    0 0 0 0 hsl(var(--section-accent) / 0);
+  transition:
+    box-shadow 280ms ease,
+    transform 140ms ease,
+    background 200ms ease,
+    border-color 200ms ease;
+}
+.btn-glass-accent::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    60% 100% at 50% 0%,
+    var(--overlay-white-18),
+    rgba(255, 255, 255, 0) 70%
+  );
+  opacity: 0.6;
+  transition: opacity 240ms ease;
+}
+.btn-glass-accent:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 14px 38px -10px hsl(var(--section-accent) / 0.7),
+    0 0 28px -2px hsl(var(--section-accent) / 0.45);
+  border-color: hsl(var(--section-accent) / 0.65);
+}
+.btn-glass-accent:hover::after {
+  opacity: 1;
+}
+.btn-glass-accent:active {
+  transform: scale(0.97);
+}
+.btn-glass-accent:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: inset 0 1px 0 var(--overlay-white-12);
+}
+
+/* Accent ring used on the active model card in the picker. */
+.ios26-glass-chip.is-active.accent {
+  border-color: hsl(var(--section-accent) / 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 22px -4px hsl(var(--section-accent) / 0.45);
+}
+
+.ios26-glass-menu {
+  background: rgba(22, 22, 26, 0.62);
+  border: 1px solid var(--overlay-white-12);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  backdrop-filter: blur(24px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 18px 44px -14px rgba(0, 0, 0, 0.58),
+    0 5px 14px -8px rgba(0, 0, 0, 0.38);
+  color: var(--ink-2);
+  contain: layout paint;
+  transform: translateZ(0);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .ios26-glass-chip {
+    background: rgba(40, 40, 46, 0.95);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .ios26-glass-menu {
+    background: rgba(22, 22, 26, 0.96);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* =========================================================================
+ * Luma Neutral — Mobile-Only Chat Skin
+ * Overrides apply only at <= 768px so desktop is untouched.
+ * Aesthetic: clean neutral grays, white cards, soft borders, solid black CTAs,
+ * generous rounded corners, no glass blur.
+ * ========================================================================= */
+@media (max-width: 768px) {
+  :root {
+    --luma-surface: 0 0% 100%;
+    --luma-surface-2: 0 0% 96%;
+    --luma-surface-3: 0 0% 92%;
+    --luma-ink: 0 0% 8%;
+    --luma-ink-soft: 0 0% 38%;
+    --luma-border: 0 0% 88%;
+    --luma-border-strong: 0 0% 78%;
+    --luma-radius: 1rem;
+  }
+  .dark {
+    --luma-surface: 0 0% 8%;
+    --luma-surface-2: 0 0% 11%;
+    --luma-surface-3: 0 0% 14%;
+    --luma-ink: 0 0% 96%;
+    --luma-ink-soft: 0 0% 62%;
+    --luma-border: 0 0% 18%;
+    --luma-border-strong: 0 0% 26%;
+  }
+
+  /* Neutralise the legacy glass utilities on mobile.
+     `.liquid-glass` is intentionally excluded — it now uses the lightweight
+     masked-border recipe that performs well on mobile too. */
+  .liquid-glass-subtle,
+  .liquid-glass-button,
+  .liquid-glass-input,
+  .liquid-glass-pill,
+  .liquid-glass-milk {
+    background: hsl(var(--luma-surface)) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid hsl(var(--luma-border)) !important;
+    box-shadow: 0 1px 2px hsl(0 0% 0% / 0.04) !important;
+  }
+  .liquid-glass-button:hover,
+  .liquid-glass-hover:hover {
+    background: hsl(var(--luma-surface-2)) !important;
+  }
+  .liquid-glass__shine,
+  .liquid-glass-pro__shine,
+  .liquid-glass-pro__edge,
+  .liquid-glass-input::before {
+    display: none !important;
+  }
+
+  /* Luma utility classes used by the new mobile components */
+  .luma-card {
+    background: hsl(var(--luma-surface));
+    border: 1px solid hsl(var(--luma-border));
+    border-radius: var(--luma-radius);
+    color: hsl(var(--luma-ink));
+  }
+  .luma-surface {
+    background: hsl(var(--luma-surface));
+    color: hsl(var(--luma-ink));
+  }
+  .luma-icon-btn {
+    height: 2.5rem;
+    width: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: hsl(var(--luma-surface));
+    border: 1px solid hsl(var(--luma-border));
+    color: hsl(var(--luma-ink));
+    transition:
+      background-color 0.15s ease,
+      transform 0.15s ease;
+  }
+  .luma-icon-btn:hover {
+    background: hsl(var(--luma-surface-2));
+  }
+  .luma-icon-btn:active {
+    transform: scale(0.96);
+  }
+
+  .luma-cta {
+    height: 2.75rem;
+    padding: 0 1.25rem;
+    border-radius: 9999px;
+    background: hsl(var(--luma-ink));
+    color: hsl(var(--luma-surface));
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s ease;
+  }
+  .luma-cta:hover {
+    opacity: 0.9;
+  }
+  .luma-cta:disabled {
+    opacity: 0.4;
+  }
+
+  .luma-cta-icon {
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 9999px;
+    background: hsl(var(--luma-ink));
+    color: hsl(var(--luma-surface));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s ease;
+  }
+  .luma-cta-icon:hover {
+    opacity: 0.9;
+  }
+  .luma-cta-icon:disabled {
+    opacity: 0.4;
+  }
+
+  .luma-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    background: hsl(var(--luma-surface-2));
+    color: hsl(var(--luma-ink));
+    border: 1px solid hsl(var(--luma-border));
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .luma-chip[data-active="true"] {
+    background: hsl(var(--luma-ink));
+    color: hsl(var(--luma-surface));
+    border-color: hsl(var(--luma-ink));
+  }
+
+  /* Mobile bubble for user messages — solid neutral */
+  [data-luma-user-bubble] {
+    background: hsl(var(--luma-ink)) !important;
+    color: hsl(var(--luma-surface)) !important;
+    border: none !important;
+    border-radius: 1.25rem !important;
+  }
+}
+
+/* Oil-painted animated background for code pages */
+@keyframes oilDrift {
+  0% {
+    background-position:
+      0% 0%,
+      100% 0%,
+      80% 100%,
+      0% 100%,
+      50% 50%,
+      60% 30%,
+      30% 70%,
+      0% 0%;
+  }
+  50% {
+    background-position:
+      10% 8%,
+      88% 12%,
+      70% 88%,
+      8% 92%,
+      55% 48%,
+      64% 36%,
+      26% 64%,
+      50% 50%;
+  }
+  100% {
+    background-position:
+      0% 0%,
+      100% 0%,
+      80% 100%,
+      0% 100%,
+      50% 50%,
+      60% 30%,
+      30% 70%,
+      0% 0%;
+  }
+}
+.oil-bg {
+  animation: oilDrift 22s ease-in-out infinite;
+}
+
+@keyframes oilSheen {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-2%, 1%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+.oil-sheen {
+  animation: oilSheen 14s ease-in-out infinite;
+}
+
+.megsy-oil-stage {
+  background: hsl(var(--background));
+}
+
+.megsy-oil-field {
+  background-color: var(--sf-1);
+  background-image:
+    radial-gradient(circle at 18% 14%, rgba(28, 112, 255, 0.82) 0 12%, transparent 34%),
+    radial-gradient(circle at 82% 12%, rgba(226, 28, 86, 0.78) 0 10%, transparent 32%),
+    radial-gradient(circle at 50% 42%, rgba(82, 38, 180, 0.74) 0 18%, transparent 46%),
+    radial-gradient(circle at 20% 74%, rgba(10, 93, 142, 0.72) 0 14%, transparent 36%),
+    radial-gradient(circle at 82% 72%, rgba(184, 38, 40, 0.72) 0 16%, transparent 40%),
+    conic-gradient(
+      from 230deg at 48% 46%,
+      rgba(7, 15, 55, 0.96),
+      rgba(19, 89, 214, 0.88),
+      rgba(100, 42, 169, 0.84),
+      rgba(208, 30, 72, 0.82),
+      rgba(129, 58, 28, 0.52),
+      rgba(16, 88, 120, 0.8),
+      rgba(7, 15, 55, 0.96)
+    );
+  background-size:
+    150% 150%,
+    150% 150%,
+    135% 135%,
+    145% 145%,
+    145% 145%,
+    170% 170%;
+  background-blend-mode: screen, screen, overlay, screen, screen, soft-light;
+  filter: saturate(1.35) contrast(1.08);
+}
+
+.megsy-oil-sheen {
+  opacity: 0.62;
+  background:
+    linear-gradient(105deg, transparent 0 24%, var(--overlay-white-18) 38%, transparent 54% 100%),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 210, 170, 0.16), transparent 55%);
+  mix-blend-mode: overlay;
+}
+
+.megsy-oil-grain {
+  opacity: 0.28;
+  background-image:
+    repeating-radial-gradient(
+      circle at 30% 30%,
+      var(--overlay-white-08) 0 1px,
+      transparent 1px 7px
+    ),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.44));
+  mix-blend-mode: soft-light;
+}
+
+/* Override browser autofill on transparent inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  transition: background-color 9999s ease-out 0s !important;
+  caret-color: hsl(var(--foreground)) !important;
+}
+
+/* ============================================================
+   Settings — desktop shell. It must inherit the active app theme;
+   do not redefine palette tokens here or settings will ignore theme changes.
+   ============================================================ */
+.settings-desktop-canvas {
+  font-family: var(--font-body);
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+.settings-desktop-canvas[data-settings-home="true"] {
+  background: transparent !important;
+}
+/* Settings desktop must always use the active theme's foreground tokens,
+   even when the chat section's Claude reskin has forced body color to ink. */
+html[data-section="chat"] body .settings-desktop-canvas,
+html[data-section="chat"] body .settings-desktop-canvas .text-foreground,
+html[data-section="chat"] body .settings-desktop-canvas h1,
+html[data-section="chat"] body .settings-desktop-canvas h2,
+html[data-section="chat"] body .settings-desktop-canvas h3,
+html[data-section="chat"] body .settings-desktop-canvas h4,
+html[data-section="chat"] body .settings-desktop-canvas h5,
+html[data-section="chat"] body .settings-desktop-canvas h6,
+.settings-desktop-canvas,
+.settings-desktop-canvas .text-foreground,
+.settings-desktop-canvas h1,
+.settings-desktop-canvas h2,
+.settings-desktop-canvas h3,
+.settings-desktop-canvas h4,
+.settings-desktop-canvas h5,
+.settings-desktop-canvas h6 {
+  color: hsl(var(--foreground));
+}
+.settings-desktop-canvas .text-muted-foreground {
+  color: hsl(var(--muted-foreground));
+}
+.settings-desktop-canvas .font-display,
+.settings-desktop-canvas h1,
+.settings-desktop-canvas h2,
+.settings-desktop-canvas h3 {
+  font-family: "Sora", system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================
+   Settings — visual cleanup pass.
+   Strip decorative icons and neutralize rainbow color utilities
+   inside the settings content area so every page reads as one
+   calm, monochrome surface that inherits the active theme.
+   ============================================================ */
+
+/* Hide decorative SVG icons. Keep icons that live inside actual
+   interactive controls (buttons, links, labels, form controls,
+   switches, selects) so functional affordances stay intact. */
+.settings-desktop-content :not(.card-carousel-3d, .card-carousel-3d *) > svg,
+.settings-desktop-content svg:not(.card-carousel-3d svg) {
+  color: hsl(var(--muted-foreground)) !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+.settings-desktop-content svg:not(:where(button, a, label, summary, [role="button"], [role="tab"], [role="switch"], [role="checkbox"], [role="menuitem"], [data-state], input, select, textarea, .card-carousel-3d, .card-carousel-3d *) svg) {
+  display: none !important;
+}
+/* Empty icon wrappers collapse so layouts don't leave holes. */
+.settings-desktop-content [class*="rounded"]:has(> svg:only-child),
+.settings-desktop-content [class*="grid"][class*="place-items-center"]:has(> svg:only-child) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Neutralize rainbow Tailwind utilities — backgrounds, text, borders,
+   rings, and gradient stops — to the active theme's neutral tokens. */
+.settings-desktop-content [class*="bg-emerald"],
+.settings-desktop-content [class*="bg-green"],
+.settings-desktop-content [class*="bg-lime"],
+.settings-desktop-content [class*="bg-teal"],
+.settings-desktop-content [class*="bg-cyan"],
+.settings-desktop-content [class*="bg-sky"],
+.settings-desktop-content [class*="bg-blue"],
+.settings-desktop-content [class*="bg-indigo"],
+.settings-desktop-content [class*="bg-violet"],
+.settings-desktop-content [class*="bg-purple"],
+.settings-desktop-content [class*="bg-fuchsia"],
+.settings-desktop-content [class*="bg-pink"],
+.settings-desktop-content [class*="bg-rose"],
+.settings-desktop-content [class*="bg-red"],
+.settings-desktop-content [class*="bg-orange"],
+.settings-desktop-content [class*="bg-amber"],
+.settings-desktop-content [class*="bg-yellow"] {
+  background-color: hsl(var(--muted) / 0.5) !important;
+  background-image: none !important;
+}
+.settings-desktop-content [class*="text-emerald"],
+.settings-desktop-content [class*="text-green"],
+.settings-desktop-content [class*="text-lime"],
+.settings-desktop-content [class*="text-teal"],
+.settings-desktop-content [class*="text-cyan"],
+.settings-desktop-content [class*="text-sky"],
+.settings-desktop-content [class*="text-blue"],
+.settings-desktop-content [class*="text-indigo"],
+.settings-desktop-content [class*="text-violet"],
+.settings-desktop-content [class*="text-purple"],
+.settings-desktop-content [class*="text-fuchsia"],
+.settings-desktop-content [class*="text-pink"],
+.settings-desktop-content [class*="text-rose"],
+.settings-desktop-content [class*="text-red"],
+.settings-desktop-content [class*="text-orange"],
+.settings-desktop-content [class*="text-amber"],
+.settings-desktop-content [class*="text-yellow"] {
+  color: hsl(var(--foreground)) !important;
+}
+.settings-desktop-content [class*="border-emerald"],
+.settings-desktop-content [class*="border-green"],
+.settings-desktop-content [class*="border-lime"],
+.settings-desktop-content [class*="border-teal"],
+.settings-desktop-content [class*="border-cyan"],
+.settings-desktop-content [class*="border-sky"],
+.settings-desktop-content [class*="border-blue"],
+.settings-desktop-content [class*="border-indigo"],
+.settings-desktop-content [class*="border-violet"],
+.settings-desktop-content [class*="border-purple"],
+.settings-desktop-content [class*="border-fuchsia"],
+.settings-desktop-content [class*="border-pink"],
+.settings-desktop-content [class*="border-rose"],
+.settings-desktop-content [class*="border-red"],
+.settings-desktop-content [class*="border-orange"],
+.settings-desktop-content [class*="border-amber"],
+.settings-desktop-content [class*="border-yellow"] {
+  border-color: hsl(var(--border)) !important;
+}
+.settings-desktop-content [class*="ring-emerald"],
+.settings-desktop-content [class*="ring-green"],
+.settings-desktop-content [class*="ring-blue"],
+.settings-desktop-content [class*="ring-indigo"],
+.settings-desktop-content [class*="ring-violet"],
+.settings-desktop-content [class*="ring-purple"],
+.settings-desktop-content [class*="ring-pink"],
+.settings-desktop-content [class*="ring-rose"],
+.settings-desktop-content [class*="ring-amber"],
+.settings-desktop-content [class*="ring-orange"] {
+  --tw-ring-color: hsl(var(--border)) !important;
+}
+/* Kill gradient stops so bg-gradient-* utilities resolve to a flat surface. */
+.settings-desktop-content [class*="from-"],
+.settings-desktop-content [class*="via-"],
+.settings-desktop-content [class*="to-"] {
+  --tw-gradient-from: transparent !important;
+  --tw-gradient-via: transparent !important;
+  --tw-gradient-to: transparent !important;
+  --tw-gradient-stops: transparent !important;
+}
+.settings-desktop-content [class*="bg-gradient"] {
+  background-image: none !important;
+  background-color: hsl(var(--muted) / 0.4) !important;
+}
+/* Decorative blurred glow blobs. */
+.settings-desktop-content [class*="blur-"][class*="absolute"],
+.settings-desktop-content [aria-hidden="true"][class*="blur"] {
+  display: none !important;
+}
+
+/* ============================================
+   Slides: fixed 1920x1080 canvas + semantic type
+   ============================================ */
+.slide-canvas {
+  width: 1920px;
+  height: 1080px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+  /* scale set inline via --slide-scale */
+  transform: translate(-50%, -50%) scale(var(--slide-scale, 1));
+}
+.slide-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.slide-content {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  position: relative;
+
+  --slide-title-lg: 104px;
+  --slide-title: 88px;
+  --slide-subtitle: 52px;
+  --slide-body-lg: 40px;
+  --slide-body: 32px;
+  --slide-caption: 24px;
+  --slide-kicker: 22px;
+  --slide-chrome: 20px;
+}
+.slide-content .slide-title-lg {
+  font-size: var(--slide-title-lg);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+}
+.slide-content .slide-title {
+  font-size: var(--slide-title);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+.slide-content .slide-subtitle {
+  font-size: var(--slide-subtitle);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.slide-content .slide-body-lg {
+  font-size: var(--slide-body-lg);
+  line-height: 1.22;
+}
+.slide-content .slide-body {
+  font-size: var(--slide-body);
+  line-height: 1.28;
+}
+.slide-content .slide-caption {
+  font-size: var(--slide-caption);
+  line-height: 1.25;
+}
+.slide-content .slide-kicker {
+  font-size: var(--slide-kicker);
+  line-height: 1.1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.slide-content .slide-chrome,
+.slide-content .slide-badge,
+.slide-content .slide-page {
+  font-size: var(--slide-chrome);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+/* Density modifiers — applied at the .slide-content level via variant */
+.slide-content[data-density="airy"] {
+  --slide-body: 36px;
+  --slide-title: 96px;
+}
+.slide-content[data-density="dense"] {
+  --slide-body: 28px;
+  --slide-title: 76px;
+  --slide-subtitle: 44px;
+}
+
+/* Ornaments — subtle decorative tokens activated per slide variant */
+.slide-ornament-ribbon::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 8px;
+  width: 100%;
+  background: var(--slide-accent-color, currentColor);
+  opacity: 0.9;
+}
+.slide-ornament-side-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+  background: var(--slide-accent-color, currentColor);
+  opacity: 0.85;
+}
+.slide-ornament-corner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+  background: var(--slide-accent-color, currentColor);
+  opacity: 0.18;
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+}
+.slide-ornament-dots::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    var(--slide-accent-color, currentColor) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 36px 36px;
+  opacity: 0.1;
+}
+.slide-ornament-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--slide-accent-color, currentColor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--slide-accent-color, currentColor) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.06;
+}
+.slide-ornament-arc::after {
+  content: "";
+  position: absolute;
+  right: -160px;
+  bottom: -160px;
+  width: 480px;
+  height: 480px;
+  border-radius: 9999px;
+  background: var(--slide-accent-color, currentColor);
+  opacity: 0.1;
+}
+
+@keyframes unlimited-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ============================================================
+   Step cards (AI tool) — adapted from Uiverse.io by ilkhoeri
+   Vertical stack, purple gradient, animated points + fold.
+   ============================================================ */
+.step-card {
+  --round: 0.9rem;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  width: 100%;
+  min-height: 64px;
+  border-radius: var(--round);
+  border: none;
+  outline: none;
+  padding: 14px 18px;
+  cursor: default;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease;
+  background:
+    radial-gradient(
+      65.28% 65.28% at 50% 100%,
+      rgba(223, 113, 255, 0.55) 0%,
+      rgba(223, 113, 255, 0) 100%
+    ),
+    linear-gradient(0deg, #7a5af8, #7a5af8);
+  box-shadow: 0 10px 30px -18px rgba(122, 90, 248, 0.65);
+}
+.step-card::before,
+.step-card::after {
+  content: "";
+  position: absolute;
+  inset: var(--space);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  border-radius: calc(var(--round) - var(--space));
+  z-index: 0;
+  pointer-events: none;
+}
+.step-card::before {
+  --space: 1px;
+  background: linear-gradient(177.95deg, rgba(255, 255, 255, 0.19) 0%, rgba(255, 255, 255, 0) 100%);
+}
+.step-card::after {
+  --space: 2px;
+  background:
+    radial-gradient(
+      65.28% 65.28% at 50% 100%,
+      rgba(223, 113, 255, 0.55) 0%,
+      rgba(223, 113, 255, 0) 100%
+    ),
+    linear-gradient(0deg, #7a5af8, #7a5af8);
+}
+.step-card .fold {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 1rem;
+  width: 1rem;
+  display: inline-block;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  background: radial-gradient(
+    100% 75% at 55%,
+    rgba(223, 113, 255, 0.85) 0%,
+    rgba(223, 113, 255, 0) 100%
+  );
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+  border-bottom-left-radius: 0.5rem;
+  border-top-right-radius: var(--round);
+}
+.step-card .fold::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150%;
+  height: 150%;
+  transform: rotate(45deg) translateY(-18px);
+  background-color: hsl(var(--background));
+  pointer-events: none;
+}
+.step-card:hover .fold {
+  margin-top: -1rem;
+  margin-right: -1rem;
+}
+[dir="rtl"] .step-card .fold {
+  right: auto;
+  left: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0.5rem;
+  border-top-right-radius: 0;
+  border-top-left-radius: var(--round);
+}
+[dir="rtl"] .step-card:hover .fold {
+  margin-right: 0;
+  margin-left: -1rem;
+}
+
+.step-card .points_wrapper {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.step-card .points_wrapper .point {
+  bottom: -10px;
+  position: absolute;
+  animation: step-floating-points infinite ease-in-out;
+  pointer-events: none;
+  width: 2px;
+  height: 2px;
+  background-color: var(--ink-1);
+  border-radius: 9999px;
+}
+@keyframes step-floating-points {
+  0% {
+    transform: translateY(0);
+  }
+  85% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-55px);
+    opacity: 0;
+  }
+}
+.step-card .points_wrapper .point:nth-child(1) {
+  left: 10%;
+  opacity: 1;
+  animation-duration: 2.35s;
+  animation-delay: 0.2s;
+}
+.step-card .points_wrapper .point:nth-child(2) {
+  left: 30%;
+  opacity: 0.7;
+  animation-duration: 2.5s;
+  animation-delay: 0.5s;
+}
+.step-card .points_wrapper .point:nth-child(3) {
+  left: 25%;
+  opacity: 0.8;
+  animation-duration: 2.2s;
+  animation-delay: 0.1s;
+}
+.step-card .points_wrapper .point:nth-child(4) {
+  left: 44%;
+  opacity: 0.6;
+  animation-duration: 2.05s;
+}
+.step-card .points_wrapper .point:nth-child(5) {
+  left: 50%;
+  opacity: 1;
+  animation-duration: 1.9s;
+}
+.step-card .points_wrapper .point:nth-child(6) {
+  left: 75%;
+  opacity: 0.5;
+  animation-duration: 1.5s;
+  animation-delay: 1.5s;
+}
+.step-card .points_wrapper .point:nth-child(7) {
+  left: 88%;
+  opacity: 0.9;
+  animation-duration: 2.2s;
+  animation-delay: 0.2s;
+}
+.step-card .points_wrapper .point:nth-child(8) {
+  left: 58%;
+  opacity: 0.8;
+  animation-duration: 2.25s;
+  animation-delay: 0.2s;
+}
+.step-card .points_wrapper .point:nth-child(9) {
+  left: 98%;
+  opacity: 0.6;
+  animation-duration: 2.6s;
+  animation-delay: 0.1s;
+}
+.step-card .points_wrapper .point:nth-child(10) {
+  left: 65%;
+  opacity: 1;
+  animation-duration: 2.5s;
+  animation-delay: 0.2s;
+}
+
+.step-card-inner {
+  z-index: 2;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  color: var(--ink-1);
+  font-weight: 500;
+  line-height: 1.55;
+  font-size: 15px;
+}
+.step-card-index {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-1);
+  background: var(--overlay-white-18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 0 0 1px var(--overlay-white-08);
+}
+.step-card-text {
+  flex: 1;
+  color: var(--ink-1);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ============================================================
+   .dark-veil-css — lightweight inline replacement for DarkVeil WebGL
+   Pure CSS: 3 layered radial gradients + slow keyframe drift.
+   GPU-only (transform/opacity), no JS, no canvas, no shader.
+   ============================================================ */
+.dark-veil-css {
+  background-color: var(--sf-1);
+  background-image:
+    radial-gradient(60% 50% at 20% 30%, hsla(265, 70%, 32%, 0.55), transparent 70%),
+    radial-gradient(55% 45% at 80% 20%, hsla(210, 80%, 28%, 0.50), transparent 70%),
+    radial-gradient(70% 60% at 50% 100%, hsla(290, 65%, 22%, 0.55), transparent 75%),
+    radial-gradient(40% 35% at 70% 70%, hsla(195, 70%, 30%, 0.35), transparent 70%);
+  background-repeat: no-repeat;
+  animation: dark-veil-drift 22s ease-in-out infinite alternate;
+  will-change: background-position, filter;
+  filter: saturate(1.05);
+}
+.dark-veil-css::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.025) 1px, transparent 0);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+  opacity: 0.4;
+  pointer-events: none;
+}
+@keyframes dark-veil-drift {
+  0%   { background-position: 0% 0%, 100% 0%, 50% 100%, 70% 70%; filter: saturate(1.05) hue-rotate(0deg); }
+  50%  { background-position: 10% 8%, 90% 12%, 55% 92%, 60% 60%; filter: saturate(1.15) hue-rotate(8deg); }
+  100% { background-position: -5% 12%, 105% -5%, 45% 105%, 80% 75%; filter: saturate(1.05) hue-rotate(-6deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dark-veil-css { animation: none; }
+}
+
+/* Mobile chat animated blue gradient background */
+.chat-mobile-blue-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.chat-mobile-blue-bg::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background:
+    radial-gradient(40% 35% at 20% 25%, hsla(212, 95%, 55%, 0.55), transparent 70%),
+    radial-gradient(45% 40% at 80% 15%, hsla(198, 92%, 50%, 0.50), transparent 70%),
+    radial-gradient(55% 45% at 70% 85%, hsla(225, 85%, 45%, 0.55), transparent 75%),
+    radial-gradient(50% 40% at 15% 80%, hsla(190, 90%, 48%, 0.45), transparent 75%),
+    radial-gradient(35% 30% at 50% 50%, hsla(220, 90%, 60%, 0.35), transparent 70%);
+  background-repeat: no-repeat;
+  filter: blur(40px) saturate(1.2);
+  animation: blue-flow-drift 18s ease-in-out infinite alternate;
+  will-change: transform, background-position;
+}
+.chat-mobile-blue-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, hsla(220, 40%, 4%, 0.55) 0%, hsla(220, 40%, 4%, 0.35) 50%, hsla(220, 40%, 4%, 0.7) 100%);
+}
+@keyframes blue-flow-drift {
+  0%   { transform: translate3d(0%, 0%, 0) rotate(0deg); background-position: 0% 0%, 100% 0%, 70% 100%, 0% 100%, 50% 50%; }
+  50%  { transform: translate3d(2%, -2%, 0) rotate(4deg); background-position: 15% 10%, 85% 20%, 60% 90%, 10% 85%, 55% 45%; }
+  100% { transform: translate3d(-2%, 2%, 0) rotate(-3deg); background-position: -10% 15%, 110% -5%, 80% 105%, -5% 95%, 45% 55%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-mobile-blue-bg::before { animation: none; }
+}
+
+/* Mobile chat input bar animated blue sheen */
+/* Mobile composer glow disabled — plain dark border per user request */
+.chat-mobile-input-glow { position: relative; }
+.chat-mobile-input-glow::before { display: none !important; }
+
+
+/* ───── Auth page animated cosmic background ───── */
+.auth-bg {
+  background-color: var(--sf-1);
+  background-image:
+    radial-gradient(ellipse 90% 70% at 15% 15%, rgba(33,165,236,0.45) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 85% 20%, rgba(144,210,245,0.30) 0%, transparent 50%),
+    radial-gradient(ellipse 100% 80% at 50% 50%, rgba(5,63,86,0.65) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 85%, rgba(33,165,236,0.35) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 70% at 20% 80%, rgba(5,63,86,0.55) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 50% at 60% 10%, rgba(33,165,236,0.30) 0%, transparent 45%);
+  background-size: 200% 200%, 180% 180%, 150% 150%, 200% 200%, 180% 180%, 150% 150%;
+  animation: auth-bg-shift 20s ease-in-out infinite alternate;
+}
+@keyframes auth-bg-shift {
+  0%   { background-position: 0% 0%, 100% 0%, 50% 50%, 100% 100%, 0% 100%, 60% 10%; }
+  50%  { background-position: 30% 20%, 70% 30%, 60% 40%, 60% 80%, 30% 70%, 50% 20%; }
+  100% { background-position: 100% 20%, 0% 30%, 40% 60%, 20% 100%, 100% 80%, 70% 0%; }
+}
+.auth-bg-grain {
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 200px 200px;
+}
+/* Starfield overlay for auth pages */
+.auth-stars {
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.2px 1.2px at 20px 30px, rgba(255,255,255,0.35), transparent),
+    radial-gradient(1px 1px at 50px 80px, var(--overlay-white-25), transparent),
+    radial-gradient(1.5px 1.5px at 120px 40px, var(--overlay-white-30), transparent),
+    radial-gradient(1px 1px at 180px 120px, var(--overlay-white-20), transparent),
+    radial-gradient(1.3px 1.3px at 250px 90px, rgba(255,255,255,0.28), transparent),
+    radial-gradient(1px 1px at 300px 60px, var(--overlay-white-18), transparent),
+    radial-gradient(1.4px 1.4px at 80px 180px, rgba(255,255,255,0.22), transparent),
+    radial-gradient(1px 1px at 160px 200px, var(--overlay-white-15), transparent),
+    radial-gradient(1.2px 1.2px at 220px 160px, var(--overlay-white-25), transparent),
+    radial-gradient(1px 1px at 350px 140px, var(--overlay-white-18), transparent);
+  background-size: 400px 250px, 350px 300px, 420px 220px, 380px 280px, 360px 260px, 330px 310px, 410px 240px, 370px 290px, 340px 270px, 390px 230px;
+  animation: auth-stars-shift 60s linear infinite;
+}
+@keyframes auth-stars-shift {
+  0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  100% { background-position: 400px 250px, 350px 300px, -420px 220px, 380px -280px, -360px 260px, 330px -310px, 410px 240px, -370px 290px, 340px -270px, -390px 230px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-bg { animation: none; }
+  .auth-stars { animation: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Mobile visual audit unification layer
+   Keeps imported pages on one Megsy system: true black background,
+   tokenized surfaces, transparent icon treatments, and stable mobile sizing.
+   ───────────────────────────────────────────────────────────── */
+/* (legacy mobile palette override removed — Obsidian & Silver tokens win) */
+
+body,
+#root,
+[class*="min-h-screen"],
+[class*="min-h-dvh"] {
+  background-color: hsl(var(--background));
+}
+
+.auth-bg,
+.chat-mobile-blue-bg::before,
+.dark-veil-css,
+.ambient-bg {
+  background-color: hsl(var(--background)) !important;
+  background-image:
+    radial-gradient(85% 62% at 18% 10%, hsl(var(--brand-charcoal) / 0.55), transparent 58%),
+    radial-gradient(80% 58% at 88% 16%, hsl(var(--brand-silver) / 0.08), transparent 55%),
+    radial-gradient(95% 72% at 50% 95%, hsl(var(--brand-slate) / 0.22), transparent 62%) !important;
+}
+
+.chat-mobile-blue-bg::after {
+  background: linear-gradient(180deg, hsl(var(--background) / 0.16), hsl(var(--background) / 0.74)) !important;
+}
+
+.auth-stars,
+.auth-bg-grain {
+  opacity: 0.14;
+}
+
+button,
+.glow-btn,
+.fancy-btn,
+.acceptButton,
+.declineButton,
+[role="button"] {
+  border-radius: 12px;
+}
+
+.fancy-btn,
+.fancy-btn::after,
+.fancy-btn-blue,
+.fancy-btn-blue::after,
+.fancy-btn-green,
+.fancy-btn-green::after {
+  background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary))) !important;
+}
+
+.fancy-btn .fold,
+.fancy-btn-blue .fold,
+.fancy-btn-green .fold {
+  background: hsl(var(--brand-silver) / 0.25) !important;
+}
+
+.glow-btn {
+  color: hsl(var(--foreground));
+}
+
+.glow-btn::after {
+  background: hsl(var(--card)) !important;
+}
+
+button > svg,
+a > svg,
+[role="button"] svg,
+.phosphor-icon,
+img[src*="/model-logos/"],
+img[src*="megsy-icon"],
+img[src*="megsy-logo"],
+img[src*="/brands/"] {
+  background: transparent !important;
+}
+
+img,
+video,
+canvas,
+svg {
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  h1,
+  h2,
+  h3,
+  p,
+  a,
+  button,
+  span,
+  li {
+    overflow-wrap: anywhere;
+  }
+
+  .cookie-card {
+    max-width: calc(100vw - 24px);
+    background: hsl(var(--popover) / 0.82) !important;
+    bottom: max(128px, calc(env(safe-area-inset-bottom) + 116px)) !important;
+  }
+
+  /* Prevent any rogue child from causing horizontal scroll on phones.
+     Use `clip` (not `hidden`) so we don't create a nested scrolling
+     context on <html>/<body> — that breaks iOS touch momentum and can
+     make vertical scroll stick/jump. */
+  html, body { max-width: 100vw; }
+  img, video, iframe, canvas, svg { max-width: 100%; height: auto; }
+  table { display: block; max-width: 100%; overflow-x: auto; }
+  pre, code { max-width: 100%; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+}
+
+/* Performance: kill heavy decorative animations on low-end / data-saver devices */
+@media (max-width: 767px) {
+  .auth-bg, .ambient-bg, .chat-mobile-blue-bg::before, .dark-veil-css {
+    animation: none !important;
+  }
+  .auth-stars { display: none !important; }
+}
+
+/* ============================================================
+   NEOBRUTALIST CHAT SURFACE
+   Matches /settings/referrals — INK borders, sticker shadows,
+   bright YELLOW/MINT/LAVENDER accents. Applied to composer,
+   chips, dropdowns, sheets and overlays inside chat pages.
+   ============================================================ */
+
+:root {
+  --neo-ink: hsl(var(--background));
+  --neo-surface: hsl(var(--background));
+  --neo-surface-2: hsl(var(--card));
+  --neo-border: hsl(var(--border));
+  --neo-text: hsl(var(--foreground));
+  --neo-muted: hsl(var(--muted-foreground));
+  --neo-yellow: #3B82F6;
+  --neo-mint: #A8E6CF;
+  --neo-pink: #FFB3D1;
+  --neo-lavender: #C9A8FF;
+  --neo-peach: #FFB088;
+  --chat-claude-bg: hsl(var(--background));
+  --chat-claude-composer: hsl(var(--card));
+  --chat-claude-control: hsl(var(--secondary));
+  --chat-claude-border: hsl(var(--border));
+  --chat-claude-fg: hsl(var(--foreground));
+  --chat-claude-muted: hsl(var(--muted-foreground));
+  --chat-claude-accent: #2DDBA0;
+  --chat-reference-bg: var(--chat-claude-bg);
+}
+
+@media (max-width: 767.98px) {
+  [data-shell="megsy"][data-skin="claude"] {
+    --chat-claude-bg: hsl(var(--background));
+    --chat-reference-bg: hsl(var(--background));
+    background: hsl(var(--background)) !important;
+    background-color: hsl(var(--background)) !important;
+    background-image: none !important;
+  }
+
+  [data-shell="megsy"][data-skin="claude"] .chat-surface-dark,
+  [data-shell="megsy"][data-skin="claude"] [data-chat-main="true"],
+  [data-shell="megsy"][data-skin="claude"] [role="log"],
+  [data-shell="megsy"][data-skin="claude"] [role="log"] > .absolute,
+  [data-shell="megsy"][data-skin="claude"] [role="log"] .md\:hidden {
+    background: hsl(var(--background)) !important;
+    background-color: hsl(var(--background)) !important;
+    background-image: none !important;
+  }
+
+  [data-shell="megsy"][data-skin="claude"] .chat-aurora,
+  [data-shell="megsy"][data-skin="claude"] .chat-mobile-blue-bg,
+  [data-shell="megsy"][data-skin="claude"] .dark-veil-css,
+  [data-shell="megsy"][data-skin="claude"] video[aria-hidden] {
+    display: none !important;
+  }
+}
+
+/* Composer frame + mobile mode chips — one exact color surface, no borders */
+.chat-composer-frame,
+[data-theme="dark"] .chat-composer-frame,
+.mode-chip-btn,
+[data-chips-row] button {
+  background: var(--chat-claude-composer) !important;
+  border: 0 !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  color: var(--chat-claude-fg);
+}
+
+.chat-composer-frame,
+[data-theme="dark"] .chat-composer-frame {
+  border-radius: 24px !important;
+}
+
+.mode-chip-btn,
+[data-chips-row] button {
+  border-radius: 9999px !important;
+}
+
+.mode-chip-btn[aria-pressed="true"],
+[data-chips-row] button[aria-pressed="true"] {
+  background: var(--chat-claude-control) !important;
+  border: 0 !important;
+  color: var(--chat-claude-fg) !important;
+  box-shadow: none !important;
+}
+@media (min-width: 768px) {
+  .chat-composer-frame,
+  [data-theme="dark"] .chat-composer-frame {
+    background: var(--chat-claude-composer) !important;
+    border: 0 !important;
+    border-radius: 24px !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+}
+.chat-composer-frame textarea {
+  color: var(--neo-text) !important;
+  -webkit-text-fill-color: var(--neo-text) !important;
+  caret-color: var(--neo-yellow) !important;
+}
+.chat-composer-frame textarea::placeholder {
+  color: var(--neo-muted) !important;
+  -webkit-text-fill-color: var(--neo-muted) !important;
+  font-weight: 600;
+}
+.composer-card { background: transparent !important; }
+
+/* Send / submit primary action button inside composer — red */
+.chat-composer-frame button[aria-label="Send" i],
+.chat-composer-frame button[aria-label="Send message" i],
+.chat-composer-frame button[type="submit"] {
+  background: hsl(var(--destructive)) !important;
+  color: hsl(var(--destructive-foreground)) !important;
+  border: 2px solid hsl(var(--destructive)) !important;
+  box-shadow: 2px 2px 0 hsl(var(--destructive-foreground) / 0.25) !important;
+  border-radius: 9999px !important;
+}
+.chat-composer-frame button[aria-label="Send" i]:active,
+.chat-composer-frame button[aria-label="Send message" i]:active,
+.chat-composer-frame button[type="submit"]:active {
+  transform: translate(2px, 2px);
+  box-shadow: none !important;
+}
+
+/* Composer send button: always high contrast against the composer surface.
+   Dark theme → white pill with a black arrow. Light theme → black pill with a
+   white arrow (a white pill would be invisible on the white composer). */
+.chat-composer-frame button[data-testid="mobile-composer-send"],
+button[data-testid="mobile-composer-send"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 0 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+.chat-composer-frame button[data-testid="mobile-composer-send"] svg,
+button[data-testid="mobile-composer-send"] svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
+}
+
+.chat-composer-frame button[data-testid="mobile-composer-send"]:disabled,
+button[data-testid="mobile-composer-send"]:disabled {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  opacity: 0.42 !important;
+}
+
+html:not(.dark) .chat-composer-frame button[data-testid="mobile-composer-send"],
+html:not(.dark) button[data-testid="mobile-composer-send"],
+html:not(.dark) .chat-composer-frame button[data-testid="mobile-composer-send"]:disabled,
+html:not(.dark) button[data-testid="mobile-composer-send"]:disabled {
+  background: #17171a !important;
+  background-color: #17171a !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16) !important;
+}
+
+html:not(.dark) .chat-composer-frame button[data-testid="mobile-composer-send"] svg,
+html:not(.dark) button[data-testid="mobile-composer-send"] svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+
+/* Plus / attach circular buttons */
+.chat-composer-frame button[aria-label*="Open attachments" i],
+.chat-composer-frame button[aria-label*="More options" i],
+.chat-composer-frame button[aria-label*="Attach" i] {
+  background: transparent !important;
+  color: var(--neo-text) !important;
+  border: 0px solid transparent !important;
+  border-radius: 9999px !important;
+  box-shadow: none !important;
+}
+
+/* "+" trigger: always icon-only, no wrapper. */
+button[data-plus-trigger],
+button[data-testid="mobile-composer-plus"] {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+button[data-plus-trigger]:hover,
+button[data-testid="mobile-composer-plus"]:hover {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] button[data-plus-trigger] svg,
+html[data-theme="dark"] button[data-testid="mobile-composer-plus"] svg {
+  color: #34d399 !important;
+}
+
+/* Model selector trigger: clean visible pill with a defined border. */
+button[data-tier-trigger] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.375rem !important;
+  height: 2.25rem !important;
+  padding: 0 0.75rem !important;
+  border-radius: 9999px !important;
+  background: hsl(var(--foreground) / 0.04) !important;
+  border: 1.5px solid hsl(var(--foreground) / 0.35) !important;
+  box-shadow: 0 1px 2px hsl(var(--foreground) / 0.08) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+@media (max-width: 767px) {
+  /* Touch target: keep the model pill at least 44px tall on phones. */
+  button[data-tier-trigger] {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+}
+button[data-tier-trigger]:hover {
+  background: hsl(var(--foreground) / 0.08) !important;
+  border-color: hsl(var(--foreground) / 0.5) !important;
+}
+button[data-tier-trigger] > [data-model-label] {
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+
+
+
+
+
+/* Liquid-glass chat composer surface (desktop only) — distorts the chat
+   background and any text that sits behind the sticky composer. */
+@media (min-width: 768px) {
+  .chat-composer-frame.chat-composer-liquid {
+    background: rgba(9, 9, 11, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(150%) brightness(1.1) !important;
+    backdrop-filter: blur(22px) saturate(150%) brightness(1.1) !important;
+    box-shadow:
+      inset 0 0 4px 0 rgba(250, 250, 250, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 12px 40px -12px var(--overlay-black-55) !important;
+    overflow: hidden;
+  }
+  .chat-composer-frame.chat-composer-liquid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(120% 50% at 50% -10%, var(--overlay-white-25), transparent 60%);
+    mix-blend-mode: screen;
+    opacity: 0.65;
+    z-index: 1;
+  }
+  .chat-composer-frame.chat-composer-liquid > * {
+    position: relative;
+    z-index: 3;
+  }
+}
+
+/* Ensure composer edges are visible on mobile inside chat too */
+.chat-composer-frame.chat-composer-liquid {
+  border: 1.5px solid rgba(255, 255, 255, 0.28) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 10px 30px -12px rgba(0, 0, 0, 0.55) !important;
+}
+[data-theme="light"] .chat-composer-frame.chat-composer-liquid {
+  border-color: rgba(0, 0, 0, 0.22) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 10px 30px -14px rgba(0, 0, 0, 0.25) !important;
+}
+
+
+/* Chat options menu — cinematic liquid-glass (spec: liquid-glass-strong). */
+html.dark .chat-options-glass-menu,
+[data-radix-popper-content-wrapper] .chat-options-glass-menu {
+  background: rgba(255, 255, 255, 0.01) !important;
+  background-blend-mode: luminosity;
+  -webkit-backdrop-filter: blur(50px) !important;
+  backdrop-filter: blur(50px) !important;
+  border: none !important;
+  box-shadow:
+    4px 4px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px var(--overlay-white-15) !important;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+html.dark .mobile-more-glass-menu {
+  position: fixed !important;
+  background: var(--overlay-white-03) !important;
+  background-blend-mode: luminosity;
+  -webkit-backdrop-filter: blur(30px) saturate(140%) !important;
+  backdrop-filter: blur(30px) saturate(140%) !important;
+  border: none !important;
+  box-shadow:
+    4px 4px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px var(--overlay-white-15) !important;
+  overflow: hidden;
+  isolation: isolate;
+  contain: paint;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+html.dark .chat-options-glass-menu,
+[data-radix-popper-content-wrapper] .chat-options-glass-menu {
+  position: relative;
+}
+
+/* Gradient hairline border via mask trick */
+html.dark .chat-options-glass-menu::before,
+html.dark .mobile-more-glass-menu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    var(--overlay-white-20) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    var(--overlay-white-20) 80%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+html.dark .mobile-more-glass-menu::before {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    var(--overlay-white-15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    var(--overlay-white-15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+}
+
+html.dark .mobile-more-glass-menu::after {
+  content: none !important;
+}
+
+html.dark .chat-options-glass-menu > *,
+html.dark .mobile-more-glass-menu > * {
+  position: relative;
+  z-index: 2;
+}
+
+.chat-options-glass-item,
+.mobile-more-glass-item {
+  border-radius: 14px;
+}
+
+/* Force readable text inside the dark glass menu regardless of theme */
+html.dark .chat-options-glass-menu,
+html.dark .mobile-more-glass-menu,
+html.dark .chat-options-glass-menu *,
+html.dark .mobile-more-glass-menu * {
+  color: hsl(0 0% 98%) !important;
+}
+html.dark .chat-options-glass-menu .text-destructive,
+html.dark .mobile-more-glass-menu .text-destructive,
+html.dark .chat-options-glass-menu [class*="text-destructive"],
+html.dark .mobile-more-glass-menu [class*="text-destructive"] {
+  color: hsl(0 84% 65%) !important;
+}
+html.dark .chat-options-glass-menu svg,
+html.dark .mobile-more-glass-menu svg {
+  color: hsl(0 0% 92%) !important;
+  opacity: 0.95;
+}
+
+/* Merged glass pill grouping premium + new chat + more, matches composer glass */
+.mobile-header-glass-pill {
+  position: relative;
+  background: var(--overlay-white-03);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
+  backdrop-filter: blur(30px) saturate(140%);
+  box-shadow:
+    4px 4px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px var(--overlay-white-15);
+  isolation: isolate;
+  overflow: hidden;
+}
+.mobile-header-glass-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.2px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    var(--overlay-white-15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    var(--overlay-white-15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+.mobile-header-glass-pill > * {
+  position: relative;
+  z-index: 2;
+}
+
+.chat-options-glass-item:focus,
+.chat-options-glass-item[data-highlighted],
+.mobile-more-glass-item:active {
+  background: hsl(0 0% 100% / 0.08) !important;
+}
+
+/* Force all text on the chat surface to be light/white — no dark text allowed */
+html.dark .chat-surface-dark,
+html.dark .chat-surface-dark * {
+  color: hsl(0 0% 98%) !important;
+}
+html.dark .chat-surface-dark .text-destructive,
+html.dark .chat-surface-dark [class*="text-destructive"] {
+  color: hsl(0 84% 65%) !important;
+}
+html.dark .chat-surface-dark svg {
+  color: hsl(0 0% 95%);
+}
+/* Preserve intentionally-colored buttons: keep text readable on filled backgrounds */
+html.dark .chat-surface-dark .bg-primary,
+html.dark .chat-surface-dark .bg-primary * {
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Popovers, dropdowns, selects — sticker panels */
+[data-radix-popper-content-wrapper] [role="menu"]:not(.chat-options-glass-menu):not(.unified-menu-surface):not([data-tier-menu]):not([data-media-settings-menu]),
+[data-radix-popper-content-wrapper] [role="listbox"]:not(.unified-menu-surface):not([data-tier-menu]):not([data-media-settings-menu]),
+[data-radix-popper-content-wrapper] [data-radix-popover-content]:not(.unified-menu-surface):not([data-tier-menu]):not([data-media-settings-menu]),
+[data-radix-popper-content-wrapper] [data-radix-dropdown-menu-content]:not(.chat-options-glass-menu):not(.unified-menu-surface):not([data-tier-menu]):not([data-media-settings-menu]),
+[data-radix-popper-content-wrapper] [data-radix-select-content]:not(.unified-menu-surface):not([data-tier-menu]):not([data-media-settings-menu]) {
+  background: var(--neo-surface) !important;
+  color: var(--neo-text) !important;
+  border: 2.5px solid var(--neo-ink) !important;
+  border-radius: 20px !important;
+  box-shadow: 4px 4px 0 rgba(59, 130, 246, 0.20) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Bottom sheets / drawers */
+.glass-sheet-content,
+[role="dialog"].glass-sheet-content {
+  background: var(--neo-surface) !important;
+  color: var(--neo-text) !important;
+  border-top: 2.5px solid var(--neo-ink) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Scroll-to-bottom — yellow sticker */
+button[aria-label*="Scroll to bottom" i] {
+  background: var(--neo-yellow) !important;
+  color: var(--neo-ink) !important;
+  border: 2.5px solid var(--neo-ink) !important;
+  box-shadow: 3px 3px 0 var(--neo-ink) !important;
+  border-radius: 9999px !important;
+}
+
+/* User message bubbles — brand primary, high contrast */
+[data-message-role="user"] .message-bubble,
+[data-role="user"] .message-bubble,
+.chat-bubble-user,
+.user-bubble {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: 1px solid hsl(var(--primary) / 0.6) !important;
+  border-radius: 22px 22px 6px 22px !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.06) inset,
+    0 6px 20px -8px hsl(var(--primary) / 0.45) !important;
+  font-weight: 500;
+}
+html[dir="rtl"] [data-message-role="user"] .message-bubble,
+html[dir="rtl"] [data-role="user"] .message-bubble,
+html[dir="rtl"] .chat-bubble-user,
+html[dir="rtl"] .user-bubble {
+  border-radius: 22px 22px 22px 6px !important;
+}
+
+/* Plus sheet contents and any list rows inside chat drawers */
+[data-plus-menu] {
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+}
+[data-plus-menu] input {
+  background: var(--neo-surface-2) !important;
+  color: var(--neo-text) !important;
+  border: 2px solid var(--neo-border) !important;
+  border-radius: 14px !important;
+}
+[data-plus-menu] input::placeholder { color: var(--neo-muted) !important; }
+
+/* Generic buttons in menus/dialogs that remain after component-specific styling */
+[data-plus-menu] button,
+[data-tier-menu] button,
+[role="dialog"] button,
+[data-radix-popper-content-wrapper] button {
+  letter-spacing: 0;
+}
+
+/* Header + three-dot dropdown fields */
+[data-radix-dropdown-menu-content] input,
+[data-radix-popover-content] input {
+  background: var(--neo-surface-2) !important;
+  color: var(--neo-text) !important;
+  border: 2px solid var(--neo-border) !important;
+  border-radius: 14px !important;
+}
+
+/* Model menus must never overflow tiny phones — and keep the 4.5-row peek */
+[data-tier-menu]:not(.tier-menu-card) {
+  max-width: calc(100vw - 16px) !important;
+  max-height: 270px !important;
+  overscroll-behavior: contain;
+}
+
+/* Assistant inline links pop in yellow */
+[data-message-role="assistant"] a,
+[data-role="assistant"] a {
+  color: var(--neo-yellow) !important;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+
+
+/* ============================================================
+   NEOBRUTALIST — FULL CHAT SURFACE COVERAGE
+   Side sheets, drawers, dialogs, sidebars, tabs, switches,
+   sliders, inputs, badges, scrollbars. Every atom in chat.
+   ============================================================ */
+
+/* All sheets / drawers / dialogs adopt the sticker palette */
+[data-radix-dialog-content],
+[data-radix-sheet-content],
+[data-vaul-drawer],
+[role="dialog"]:not(.glass-sheet-content) {
+  background: var(--neo-surface) !important;
+  color: var(--neo-text) !important;
+  border: 2.5px solid var(--neo-ink) !important;
+  box-shadow: 4px 4px 0 rgba(59, 130, 246, 0.20) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+[data-vaul-drawer][data-vaul-drawer-direction="bottom"],
+.glass-sheet-content[data-side="bottom"] {
+  border-radius: 28px 28px 0 0 !important;
+  border-bottom: 0 !important;
+}
+
+/* Sheet / dialog headers and titles */
+[role="dialog"] h1, [role="dialog"] h2, [role="dialog"] h3,
+[data-vaul-drawer] h1, [data-vaul-drawer] h2, [data-vaul-drawer] h3 {
+  color: var(--neo-text) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.01em;
+}
+[role="dialog"] [data-radix-dialog-description],
+[data-vaul-drawer] p.text-muted-foreground {
+  color: var(--neo-muted) !important;
+}
+
+/* Close (X) buttons in dialogs/sheets — yellow sticker */
+[role="dialog"] button[aria-label*="Close" i],
+[data-vaul-drawer] button[aria-label*="Close" i] {
+  background: var(--neo-yellow) !important;
+  color: var(--neo-ink) !important;
+  border: 2px solid var(--neo-ink) !important;
+  border-radius: 9999px !important;
+}
+
+/* Inputs / textareas inside any chat overlay */
+[role="dialog"] input:not([type="checkbox"]):not([type="radio"]),
+[role="dialog"] textarea,
+[data-vaul-drawer] input:not([type="checkbox"]):not([type="radio"]),
+[data-vaul-drawer] textarea {
+  background: var(--neo-surface-2) !important;
+  color: var(--neo-text) !important;
+  border: 2px solid var(--neo-border) !important;
+  border-radius: 14px !important;
+}
+[role="dialog"] input:focus-visible,
+[role="dialog"] textarea:focus-visible,
+[data-vaul-drawer] input:focus-visible,
+[data-vaul-drawer] textarea:focus-visible {
+  border-color: var(--neo-ink) !important;
+  box-shadow: 2px 2px 0 var(--neo-yellow) !important;
+  outline: none !important;
+}
+
+/* Switches — flipped to yellow when on */
+[role="switch"][data-state="checked"] {
+  background-color: var(--neo-yellow) !important;
+  border: 2px solid var(--neo-ink) !important;
+}
+[role="switch"][data-state="unchecked"] {
+  background-color: var(--neo-surface-2) !important;
+  border: 2px solid var(--neo-border) !important;
+}
+[role="switch"] > span { background-color: var(--neo-ink) !important; }
+
+/* Sliders */
+[role="slider"] {
+  background: var(--neo-yellow) !important;
+  border: 2px solid var(--neo-ink) !important;
+  box-shadow: 2px 2px 0 var(--neo-ink) !important;
+}
+[data-orientation="horizontal"] [data-radix-slider-track] {
+  background: var(--neo-surface-2) !important;
+  border: 2px solid var(--neo-border) !important;
+  border-radius: 9999px !important;
+  height: 8px !important;
+}
+[data-radix-slider-range] {
+  background: var(--neo-yellow) !important;
+}
+
+/* Tabs */
+[role="tablist"] {
+  background: var(--neo-surface-2) !important;
+  border: 2px solid var(--neo-border) !important;
+  border-radius: 14px !important;
+  padding: 3px !important;
+}
+[role="tab"][data-state="active"] {
+  background: var(--neo-yellow) !important;
+  color: var(--neo-ink) !important;
+  border: 2px solid var(--neo-ink) !important;
+  border-radius: 10px !important;
+  font-weight: 900 !important;
+  box-shadow: 2px 2px 0 var(--neo-ink) !important;
+}
+[role="tab"][data-state="inactive"] {
+  color: var(--neo-text) !important;
+  font-weight: 800 !important;
+}
+
+/* Badges generic */
+[role="dialog"] .badge,
+[data-vaul-drawer] .badge,
+[role="dialog"] [class*="Badge"],
+[data-vaul-drawer] [class*="Badge"] {
+  border: 2px solid var(--neo-ink) !important;
+  border-radius: 9999px !important;
+  font-weight: 900 !important;
+}
+
+/* Chat sidebar / left rail — match the sticker dark surface */
+[data-sidebar="sidebar"],
+aside[data-sidebar],
+nav[data-sidebar] {
+  background: var(--neo-surface) !important;
+  color: var(--neo-text) !important;
+  border-right: 2.5px solid var(--neo-ink) !important;
+}
+[data-sidebar="sidebar"] [data-active="true"],
+[data-sidebar-menu-button][data-active="true"] {
+  background: var(--neo-yellow) !important;
+  color: var(--neo-ink) !important;
+  border: 2px solid var(--neo-ink) !important;
+  border-radius: 12px !important;
+  font-weight: 900 !important;
+  box-shadow: 2px 2px 0 var(--neo-ink) !important;
+}
+[data-sidebar-menu-button]:not([data-active="true"]):hover {
+  background: var(--neo-surface-2) !important;
+  border-radius: 12px !important;
+}
+[data-sidebar="sidebar"] hr,
+[data-sidebar="sidebar"] [role="separator"] {
+  background: var(--neo-border) !important;
+  border-color: var(--neo-border) !important;
+}
+
+/* Sidebar trigger / chat header buttons */
+[data-sidebar="trigger"],
+button[data-sidebar-trigger] {
+  background: var(--neo-surface-2) !important;
+  color: var(--neo-text) !important;
+  border: 2px solid var(--neo-border) !important;
+  border-radius: 12px !important;
+}
+
+/* Tooltips — sticker */
+[role="tooltip"], [data-radix-tooltip-content] {
+  background: var(--neo-ink) !important;
+  color: var(--neo-yellow) !important;
+  border: 2px solid var(--neo-ink) !important;
+  border-radius: 10px !important;
+  font-weight: 800 !important;
+  box-shadow: 2px 2px 0 rgba(59,130,246,0.4) !important;
+}
+
+/* Scrollbars inside chat overlays */
+[role="dialog"] *::-webkit-scrollbar,
+[data-vaul-drawer] *::-webkit-scrollbar,
+[data-radix-popper-content-wrapper] *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+[role="dialog"] *::-webkit-scrollbar-thumb,
+[data-vaul-drawer] *::-webkit-scrollbar-thumb,
+[data-radix-popper-content-wrapper] *::-webkit-scrollbar-thumb {
+  background: var(--neo-border);
+  border-radius: 9999px;
+}
+[role="dialog"] *::-webkit-scrollbar-thumb:hover,
+[data-vaul-drawer] *::-webkit-scrollbar-thumb:hover,
+[data-radix-popper-content-wrapper] *::-webkit-scrollbar-thumb:hover {
+  background: var(--neo-yellow);
+}
+
+/* Generic outline / ghost buttons inside chat overlays default to sticker */
+[role="dialog"] button:not([data-no-neo]):not([aria-label*="Close" i]):not([class*="bg-["]):not([class*="bg-primary"]):not([class*="bg-yellow"]):not([class*="bg-[#3B82F6"]),
+[data-vaul-drawer] button:not([data-no-neo]):not([aria-label*="Close" i]):not([class*="bg-["]):not([class*="bg-primary"]):not([class*="bg-yellow"]) {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+[role="dialog"] button:not([data-no-neo]):active,
+[data-vaul-drawer] button:not([data-no-neo]):active {
+  transform: translate(1px, 1px);
+}
+
+/* Separators */
+[role="dialog"] [data-orientation="horizontal"][role="separator"],
+[data-vaul-drawer] [data-orientation="horizontal"][role="separator"] {
+  background: var(--neo-border) !important;
+  height: 2px !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Claude-style desktop reskin (md+ only).
+   Warm ivory canvas, soft sidebar, hairline borders, coral accent.
+   Mobile is intentionally untouched.
+   ───────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  :root {
+    --claude-canvas: #faf9f5;
+    --claude-surface: #f0eee6;
+    --claude-border: rgba(60, 50, 40, 0.10);
+    --claude-ink: #1f1e1c;
+    --claude-muted: #6b6862;
+    --claude-coral: #d97757;
+  }
+
+  /* Desktop chat canvas: warm ivory. Override ambient bg + body. */
+  html[data-section="chat"] body {
+    background-color: var(--claude-canvas) !important;
+    color: var(--claude-ink);
+  }
+  html[data-section="chat"] .ambient-bg {
+    background: var(--claude-canvas) !important;
+  }
+  html[data-section="chat"] .ambient-bg__blob {
+    display: none !important;
+  }
+
+  /* Persistent desktop sidebar — soft cream surface */
+  html[data-section="chat"] aside.bg-sidebar {
+    background: var(--claude-surface) !important;
+    border-right: 1px solid var(--claude-border) !important;
+    color: var(--claude-ink);
+  }
+
+  html[data-section="chat"] aside.bg-sidebar :where(hr, [role="separator"]) {
+    background-color: var(--claude-border) !important;
+    border-color: var(--claude-border) !important;
+  }
+
+  html[data-section="chat"] aside.bg-sidebar :where(button, a) {
+    color: var(--claude-ink);
+  }
+
+  html[data-section="chat"] aside.bg-sidebar button:hover,
+  html[data-section="chat"] aside.bg-sidebar a:hover {
+    background-color: rgba(60, 50, 40, 0.05) !important;
+  }
+
+  html[data-section="chat"] aside.bg-sidebar [aria-current="page"],
+  html[data-section="chat"] aside.bg-sidebar [data-active="true"] {
+    background-color: rgba(60, 50, 40, 0.07) !important;
+  }
+
+  /* Force chat foreground/text to ink */
+  html[data-section="chat"] body .text-foreground {
+    color: var(--claude-ink);
+  }
+}
+
+/* ============================================================
+   iOS Safari speed: off-screen sections skip layout/paint until
+   they scroll into view. Massive first-paint win on long pages.
+   Apply via className="cv-auto" on big sections that aren't LCP.
+   ============================================================ */
+@layer utilities {
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 800px;
+  }
+  .cv-auto-sm {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 400px;
+  }
+  /* Keep iOS iframe/PWA page scrolling native. Do not set overscroll-behavior
+     on html/body here; WebKit can freeze touch scroll inside embedded previews. */
+}
+
+
+
+/* Composer dock positioning: sit flush left on mobile, and clear the sidebar
+   on desktop via the --sb-left offset the dock sets inline. (The Tailwind
+   arbitrary class `md:start-[var(--sb-left)]` does not compile, so this rule
+   is the source of truth.) */
+.chat-composer-dock {
+  inset-inline-start: 0;
+}
+@media (min-width: 768px) {
+  .chat-composer-dock {
+    inset-inline-start: var(--sb-left, 0px);
+  }
+}
+
+/* When a fullscreen preview viewer is open (slides, docs, image deck),
+   hide the chat composer dock and the mobile chat header so the preview
+   is unobstructed on mobile. */
+body.app-fullscreen-active [data-tour="composer"],
+body.app-fullscreen-active .chat-composer-dock,
+body.app-fullscreen-active .mobile-chat-header,
+body.app-fullscreen-active .mobile-sidebar-trigger {
+  display: none !important;
+}
+
+.settings-desktop-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.28) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.22) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+
+/* Gemini iOS-style liquid glass plus sheet — distorts what's behind it. */
+.gemini-mobile-plus-sheet.glass-sheet-content,
+[data-vaul-drawer].gemini-mobile-plus-sheet,
+[role="dialog"].gemini-mobile-plus-sheet {
+  position: fixed !important;
+  background: hsl(var(--foreground) / 0.07) !important;
+  color: hsl(var(--foreground)) !important;
+  border-top: 1px solid hsl(var(--foreground) / 0.15) !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow:
+    inset 1px 1px 1px 0 hsl(var(--foreground) / 0.3),
+    inset -1px -1px 1px 0 hsl(var(--foreground) / 0.12),
+    0 -18px 48px hsl(0 0% 0% / 0.34) !important;
+  backdrop-filter: blur(40px) saturate(220%) brightness(1.1) contrast(1.1) url(#megsy-glass-warp) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(220%) brightness(1.1) contrast(1.1) !important;
+  overflow: hidden;
+}
+
+.gemini-mobile-plus-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.02' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+  opacity: 0.85;
+}
+
+.gemini-mobile-plus-sheet > div:first-child {
+  width: 50px !important;
+  height: 5px !important;
+  margin-top: 9px !important;
+  margin-bottom: 14px !important;
+  border-radius: 9999px !important;
+  background: hsl(var(--foreground) / 0.27) !important;
+  position: relative;
+  z-index: 1;
+}
+
+.gemini-mobile-plus-sheet [data-plus-menu] {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif !important;
+  max-height: calc(92dvh - 40px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  position: relative;
+  z-index: 1;
+}
+
+.gemini-mobile-plus-sheet [data-plus-menu]::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile composer + menu — anchored liquid glass from the supplied prompt.
+   Kept intentionally lightweight (blur 4px, no draggable sheet/no noise) to
+   remove the mobile lag while still matching the liquid-glass chrome. */
+.mobile-plus-glass-menu {
+  background: var(--chat-claude-composer, #101312) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 0 !important;
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  box-shadow: none !important;
+  color: var(--chat-claude-fg, #f5f5f7) !important;
+  isolation: isolate;
+  scrollbar-width: none;
+}
+
+.mobile-plus-glass-menu::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-plus-glass-menu::before,
+.mobile-plus-glass-menu .gemini-glass-tile::before {
+  content: none !important;
+}
+
+.mobile-plus-glass-menu > * {
+  position: relative;
+  z-index: 2;
+}
+
+.mobile-plus-glass-menu,
+.mobile-plus-glass-menu * {
+  color: var(--chat-claude-fg, #f5f5f7) !important;
+}
+
+.mobile-plus-glass-menu .gemini-glass-tile {
+  background: var(--chat-claude-control, var(--sf-3)) !important;
+  background-blend-mode: normal;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  min-height: 56px;
+  border-radius: 16px !important;
+  overflow: hidden;
+  position: relative;
+}
+
+.mobile-plus-glass-menu .gemini-glass-tile::after {
+  content: none !important;
+}
+
+.mobile-plus-glass-menu .gemini-glass-tile:active {
+  background: hsl(var(--background)) !important;
+}
+
+.mobile-plus-glass-menu .gemini-service-row {
+  min-height: 56px;
+  padding-block: 6px;
+}
+
+
+.gemini-plus-menu,
+.gemini-plus-menu * {
+  letter-spacing: 0 !important;
+}
+
+.gemini-glass-pill {
+  border-radius: 9999px !important;
+  background:
+    linear-gradient(180deg, hsl(var(--foreground) / 0.105), hsl(var(--foreground) / 0.058)) !important;
+  box-shadow:
+    inset 0 1px 0 hsl(var(--foreground) / 0.14),
+    inset 0 -1px 0 hsl(0 0% 0% / 0.12),
+    0 1px 8px hsl(0 0% 0% / 0.08) !important;
+  backdrop-filter: blur(22px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(170%) !important;
+}
+
+.gemini-glass-tile {
+  position: relative;
+  min-height: 100px;
+  border-radius: 28px !important;
+  background:
+    linear-gradient(180deg, hsl(var(--foreground) / 0.08), hsl(var(--foreground) / 0.035)) !important;
+  box-shadow:
+    inset 0 1px 0 hsl(var(--foreground) / 0.18),
+    inset 0 -1px 0 hsl(0 0% 0% / 0.22),
+    inset 0 0 0 1px hsl(var(--foreground) / 0.04),
+    0 12px 30px hsl(0 0% 0% / 0.24) !important;
+  backdrop-filter: blur(48px) saturate(220%) brightness(1.12) contrast(1.12) url(#megsy-glass-warp) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(220%) brightness(1.12) contrast(1.12) !important;
+  overflow: hidden;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.gemini-glass-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.018 0.028' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.28 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+    radial-gradient(120% 80% at 20% 0%, hsl(var(--foreground) / 0.12), transparent 60%);
+  mix-blend-mode: overlay;
+  opacity: 0.95;
+}
+
+.gemini-glass-tile > * {
+  position: relative;
+  z-index: 1;
+}
+
+.gemini-glass-tile:active {
+  background:
+    linear-gradient(180deg, hsl(var(--foreground) / 0.14), hsl(var(--foreground) / 0.075)) !important;
+}
+
+.gemini-service-row {
+  min-height: 72px;
+  padding: 8px 3px 8px 1px;
+  border-radius: 0 !important;
+}
+
+.gemini-service-row:active {
+  background: transparent !important;
+  opacity: 0.72;
+}
+
+
+.gemini-glass-pill:active,
+.gemini-list-row:active {
+  background-color: hsl(var(--foreground) / 0.075) !important;
+}
+
+.gemini-list-panel {
+  border-radius: 24px;
+  background: linear-gradient(180deg, hsl(var(--foreground) / 0.045), hsl(var(--foreground) / 0.026));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--foreground) / 0.075),
+    inset 0 0 0 1px hsl(var(--foreground) / 0.035);
+}
+
+.gemini-list-row {
+  border-radius: 18px !important;
+  min-height: 65px;
+}
+
+.gemini-row-icon {
+  background: hsl(var(--foreground) / 0.055);
+  box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.08);
+}
+
+.gemini-row-divider {
+  position: absolute;
+  left: 58px;
+  right: 12px;
+  bottom: 0;
+  height: 1px;
+  background: hsl(var(--foreground) / 0.055);
+}
+
+.gemini-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: hsl(var(--brand-mint));
+  box-shadow: 0 0 12px hsl(var(--brand-mint) / 0.5);
+  flex: 0 0 auto;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .gemini-mobile-plus-sheet {
+    transform: translateZ(0);
+  }
+}
+
+/* ============================================================
+   Chat Aurora — reactive multi-color background for /chat
+   Lightweight: 5 blurred radial gradients, GPU-only transforms,
+   pure CSS keyframes, reacts to typing/sending/thinking/generating
+   and tints itself per active chat mode via [data-chat-mode].
+   ============================================================ */
+.chat-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+  /* Mode-tunable accent — overridden by body[data-chat-mode="…"] below. */
+  --aurora-accent-1: #3b82f6;
+  --aurora-accent-2: #ec4899;
+  --aurora-accent-3: #ef4444;
+  --aurora-accent-4: #60a5fa;
+  --aurora-accent-5: #f472b6;
+  --aurora-speed: 32s;
+  --aurora-base-opacity: 0.22;
+  transition: filter 600ms ease;
+}
+.chat-aurora__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+.chat-aurora__blob--cyan {
+  top: -14%;
+  left: -10%;
+  width: 70vw;
+  height: 70vw;
+  background: radial-gradient(circle at 50% 50%, var(--aurora-accent-1) 0%, transparent 65%);
+  animation: aurora-drift-1 var(--aurora-speed) ease-in-out infinite;
+}
+.chat-aurora__blob--magenta {
+  bottom: -18%;
+  right: -12%;
+  width: 72vw;
+  height: 72vw;
+  background: radial-gradient(circle at 50% 50%, var(--aurora-accent-2) 0%, transparent 65%);
+  animation: aurora-drift-2 var(--aurora-speed) ease-in-out infinite;
+  animation-delay: -6s;
+}
+.chat-aurora__blob--amber {
+  top: 30%;
+  left: 28%;
+  width: 55vw;
+  height: 55vw;
+  background: radial-gradient(circle at 50% 50%, var(--aurora-accent-3) 0%, transparent 65%);
+  animation: aurora-drift-3 var(--aurora-speed) ease-in-out infinite;
+  animation-delay: -12s;
+}
+.chat-aurora__blob--violet {
+  top: -8%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle at 50% 50%, var(--aurora-accent-4) 0%, transparent 65%);
+  animation: aurora-drift-4 var(--aurora-speed) ease-in-out infinite;
+  animation-delay: -18s;
+}
+.chat-aurora__blob--emerald {
+  bottom: -10%;
+  left: -8%;
+  width: 58vw;
+  height: 58vw;
+  background: radial-gradient(circle at 50% 50%, var(--aurora-accent-5) 0%, transparent 65%);
+  animation: aurora-drift-5 var(--aurora-speed) ease-in-out infinite;
+  animation-delay: -22s;
+}
+
+html:not(.dark) .chat-aurora__blob {
+  mix-blend-mode: multiply;
+  filter: blur(110px);
+}
+html:not(.dark) .chat-aurora { --aurora-base-opacity: 0.22; }
+
+@keyframes aurora-drift-1 {
+  0%, 100% { opacity: var(--aurora-base-opacity); transform: translate3d(0, 0, 0) scale(1); }
+  50%      { opacity: calc(var(--aurora-base-opacity) + 0.15); transform: translate3d(6vw, 4vh, 0) scale(1.12); }
+}
+@keyframes aurora-drift-2 {
+  0%, 100% { opacity: var(--aurora-base-opacity); transform: translate3d(0, 0, 0) scale(1); }
+  50%      { opacity: calc(var(--aurora-base-opacity) + 0.15); transform: translate3d(-5vw, -3vh, 0) scale(1.14); }
+}
+@keyframes aurora-drift-3 {
+  0%, 100% { opacity: calc(var(--aurora-base-opacity) - 0.08); transform: translate3d(0, 0, 0) scale(1); }
+  50%      { opacity: var(--aurora-base-opacity); transform: translate3d(4vw, -5vh, 0) scale(1.1); }
+}
+@keyframes aurora-drift-4 {
+  0%, 100% { opacity: calc(var(--aurora-base-opacity) - 0.05); transform: translate3d(0, 0, 0) scale(1); }
+  50%      { opacity: var(--aurora-base-opacity); transform: translate3d(-6vw, 5vh, 0) scale(1.12); }
+}
+@keyframes aurora-drift-5 {
+  0%, 100% { opacity: calc(var(--aurora-base-opacity) - 0.05); transform: translate3d(0, 0, 0) scale(1); }
+  50%      { opacity: var(--aurora-base-opacity); transform: translate3d(5vw, -4vh, 0) scale(1.1); }
+}
+
+/* ─── Reactive states — speed up + boost the tone matching the activity ─── */
+body[data-chat-state="typing"]     .chat-aurora { --aurora-speed: 16s; --aurora-base-opacity: 0.38; }
+body[data-chat-state="sending"]    .chat-aurora { --aurora-speed: 9s;  --aurora-base-opacity: 0.62; filter: saturate(1.2); }
+body[data-chat-state="thinking"]   .chat-aurora { --aurora-speed: 7s;  --aurora-base-opacity: 0.68; filter: saturate(1.25); }
+body[data-chat-state="generating"] .chat-aurora { --aurora-speed: 5s;  --aurora-base-opacity: 0.78; filter: saturate(1.35); }
+
+/* ─── Per-mode hue palette — creative touch per service ─── */
+body[data-chat-mode="normal"]        .chat-aurora { --aurora-accent-1:#3b82f6; --aurora-accent-2:#ec4899; --aurora-accent-3:#ef4444; --aurora-accent-4:#60a5fa; --aurora-accent-5:#f472b6; }
+body[data-chat-mode="images"]        .chat-aurora { --aurora-accent-1:#ff6b9d; --aurora-accent-2:#feca57; --aurora-accent-3:#ff9f43; --aurora-accent-4:#ee5a6f; --aurora-accent-5:#c44569; }
+body[data-chat-mode="video"]         .chat-aurora { --aurora-accent-1:#a78bfa; --aurora-accent-2:#f472b6; --aurora-accent-3:#60a5fa; --aurora-accent-4:#c084fc; --aurora-accent-5:#818cf8; }
+body[data-chat-mode="slides"]        .chat-aurora,
+body[data-chat-mode="slides-images"] .chat-aurora { --aurora-accent-1:#fbbf24; --aurora-accent-2:#fb923c; --aurora-accent-3:#f472b6; --aurora-accent-4:#facc15; --aurora-accent-5:#fde047; }
+body[data-chat-mode="deep-research"] .chat-aurora { --aurora-accent-1:#60a5fa; --aurora-accent-2:#22d3ee; --aurora-accent-3:#34d399; --aurora-accent-4:#3b82f6; --aurora-accent-5:#06b6d4; }
+body[data-chat-mode="learning"]      .chat-aurora { --aurora-accent-1:#34d399; --aurora-accent-2:#fbbf24; --aurora-accent-3:#22d3ee; --aurora-accent-4:#10b981; --aurora-accent-5:#84cc16; }
+body[data-chat-mode="shopping"]      .chat-aurora { --aurora-accent-1:#f43f5e; --aurora-accent-2:#fb7185; --aurora-accent-3:#fbbf24; --aurora-accent-4:#ec4899; --aurora-accent-5:#f97316; }
+body[data-chat-mode="operator"]      .chat-aurora { --aurora-accent-1:#94a3b8; --aurora-accent-2:#a78bfa; --aurora-accent-3:#22d3ee; --aurora-accent-4:#64748b; --aurora-accent-5:#0ea5e9; }
+body[data-chat-mode="code"]          .chat-aurora { --aurora-accent-1:#22d3ee; --aurora-accent-2:#10b981; --aurora-accent-3:#3b82f6; --aurora-accent-4:#06b6d4; --aurora-accent-5:#0ea5e9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-aurora__blob { animation: none !important; opacity: 0.22 !important; }
+  .chat-aurora { transition: none !important; }
+}
+
+/* Desktop chat background stays black: keep the aurora motion but drain its color/brightness. */
+@media (min-width: 768px) {
+  .chat-aurora {
+    filter: grayscale(100%) brightness(0.28);
+    --aurora-base-opacity: 0.10;
+  }
+  body[data-chat-state="typing"]     .chat-aurora { --aurora-base-opacity: 0.16; }
+  body[data-chat-state="sending"]    .chat-aurora { --aurora-base-opacity: 0.22; }
+  body[data-chat-state="thinking"]   .chat-aurora { --aurora-base-opacity: 0.26; }
+  body[data-chat-state="generating"] .chat-aurora { --aurora-base-opacity: 0.30; }
+}
+
+
+
+/* ============================================================
+   Cinematic Settings (Space-Travel) — scoped utilities
+   ============================================================ */
+/* Font import moved to top of file */
+
+.font-cine-heading { font-family: 'Instrument Serif', serif; }
+.font-cine-body { font-family: 'Barlow', sans-serif; }
+
+.liquid-glass-strong {
+  background: rgba(255,255,255,0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  border: none;
+  box-shadow: 4px 4px 4px rgba(0,0,0,0.05), inset 0 1px 1px var(--overlay-white-15);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass-strong::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.5) 0%,
+    var(--overlay-white-20) 20%,
+    rgba(255,255,255,0) 40%,
+    rgba(255,255,255,0) 60%,
+    var(--overlay-white-20) 80%,
+    rgba(255,255,255,0.5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Slow drift for cinematic ambient backdrop */
+@keyframes cine-drift {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); opacity: 0.55; }
+  50% { transform: translate3d(2%, -3%, 0) scale(1.08); opacity: 0.75; }
+}
+.cine-orb { animation: cine-drift 18s ease-in-out infinite; }
+
+/* ============================================================
+   Lumina liquid-glass footer (site-wide)
+   ============================================================ */
+@font-face {
+  font-family: "Helvetica Regular";
+  src: url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.eot");
+  src: url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.eot?#iefix") format("embedded-opentype"),
+       url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.woff2") format("woff2"),
+       url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.woff") format("woff"),
+       url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.ttf") format("truetype"),
+       url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.svg#Helvetica Regular") format("svg");
+  font-display: swap;
+}
+
+.lumina-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px var(--overlay-white-10);
+  position: relative;
+  overflow: hidden;
+}
+.lumina-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.45) 0%, var(--overlay-white-15) 20%,
+    rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+    var(--overlay-white-15) 80%, rgba(255,255,255,0.45) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ============================================================
+   Readability floor — raise very-low opacity text so it stays
+   legible on OLED-black backgrounds. Non-destructive: only
+   affects opacity variants ≤ 60% which typically fail WCAG AA.
+   ============================================================ */
+@layer utilities {
+  .text-white\/40 { color: var(--ink-2) !important; }
+  .text-white\/45 { color: var(--ink-2) !important; }
+  .text-white\/50 { color: var(--ink-2) !important; }
+  .text-white\/55 { color: var(--ink-2) !important; }
+  .text-white\/60 { color: var(--ink-2) !important; }
+  .text-white\/65 { color: var(--ink-2) !important; }
+  .text-white\/70 { color: var(--ink-2) !important; }
+  .text-muted-foreground\/40 { color: hsl(var(--muted-foreground) / 0.72) !important; }
+  .text-muted-foreground\/50 { color: hsl(var(--muted-foreground) / 0.78) !important; }
+  .text-muted-foreground\/60 { color: hsl(var(--muted-foreground) / 0.82) !important; }
+  .text-muted-foreground\/70 { color: hsl(var(--muted-foreground) / 0.88) !important; }
+  .text-muted-foreground\/80 { color: hsl(var(--muted-foreground) / 0.92) !important; }
+}
+
+/* Boost dim grays used on dark surfaces so they clear WCAG AA. */
+@layer utilities {
+  .text-gray-400, .text-zinc-400, .text-slate-400,
+  .text-gray-500, .text-zinc-500, .text-slate-500 {
+    color: rgb(200 205 214) !important;
+  }
+  .text-gray-300, .text-zinc-300, .text-slate-300 {
+    color: rgb(220 224 232) !important;
+  }
+}
+
+/* ============ Promo Unlock page — scoped helpers ============ */
+@keyframes promo-marquee-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes promo-marquee-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.animate-promo-marquee-left { animation: promo-marquee-left 22s linear infinite; }
+.animate-promo-marquee-right { animation: promo-marquee-right 26s linear infinite; }
+
+.promo-noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+}
+
+/* -----------------------------------------------------------------------
+   Perf utilities (added by performance pass)
+   -----------------------------------------------------------------------
+   `.cv-auto`  — content-visibility: auto skips paint/layout for off-screen
+                 sections. Big win on long landing/marketing pages. The
+                 contain-intrinsic-size reserves height so scrollbar/anchor
+                 positions stay stable while the browser skips work.
+   `.press`    — micro-interaction: scale down slightly on active press so
+                 taps feel tactile without shipping Framer Motion for it.
+                 Respects prefers-reduced-motion.
+------------------------------------------------------------------------ */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
+}
+.press {
+  transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.press:active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+  .press { transition: none; }
+  .press:active { transform: none; }
+}
+
+/* System status — Uiverse-inspired pipes */
+.status-pipe {
+  position: relative;
+  height: 14px;
+  width: 100%;
+  border-radius: 9999px;
+  background: var(--overlay-white-04);
+  border: 1px solid var(--overlay-white-06);
+  overflow: hidden;
+}
+.status-pipe-fill {
+  position: relative;
+  height: 100%;
+  border-radius: 9999px;
+  overflow: hidden;
+  transition: width 0.6s ease;
+}
+.status-pipe-highlight {
+  position: absolute;
+  inset: 1px;
+  border-radius: 9999px;
+  background: linear-gradient(177.95deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+.status-points {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+.status-point {
+  position: absolute;
+  bottom: -6px;
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  border-radius: 9999px;
+  animation: status-floating-points infinite ease-in-out;
+}
+.status-point:nth-child(1)  { left: 10%; opacity: 1;   animation-duration: 2.35s; animation-delay: 0.2s; }
+.status-point:nth-child(2)  { left: 30%; opacity: 0.7; animation-duration: 2.5s;  animation-delay: 0.5s; }
+.status-point:nth-child(3)  { left: 25%; opacity: 0.8; animation-duration: 2.2s;  animation-delay: 0.1s; }
+.status-point:nth-child(4)  { left: 44%; opacity: 0.6; animation-duration: 2.05s; }
+.status-point:nth-child(5)  { left: 50%; opacity: 1;   animation-duration: 1.9s; }
+.status-point:nth-child(6)  { left: 75%; opacity: 0.5; animation-duration: 1.5s;  animation-delay: 1.5s; }
+.status-point:nth-child(7)  { left: 88%; opacity: 0.9; animation-duration: 2.2s;  animation-delay: 0.2s; }
+.status-point:nth-child(8)  { left: 58%; opacity: 0.8; animation-duration: 2.25s; animation-delay: 0.2s; }
+.status-point:nth-child(9)  { left: 98%; opacity: 0.6; animation-duration: 2.6s;  animation-delay: 0.1s; }
+.status-point:nth-child(10) { left: 65%; opacity: 1;   animation-duration: 2.5s;  animation-delay: 0.2s; }
+@keyframes status-floating-points {
+  0%   { transform: translateY(0); }
+  85%  { opacity: 0; }
+  100% { transform: translateY(-30px); opacity: 0; }
+}
+
+/* Status hero — animated check badge */
+.status-check-badge {
+  animation: status-badge-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.status-check-svg path {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: status-check-draw 0.55s ease-out 0.25s forwards;
+}
+@keyframes status-badge-pop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes status-check-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+
+/* Landing marquee animations */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   Global RTL overrides — flip common Tailwind LTR-only utilities
+   when the document is in RTL mode. Applies to Arabic, Hebrew,
+   Persian, etc. Uses logical properties where possible.
+   ───────────────────────────────────────────────────────────── */
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Reverse text alignment for common Tailwind utilities */
+html[dir="rtl"] .text-left { text-align: right !important; }
+html[dir="rtl"] .text-right { text-align: left !important; }
+
+/* Swap horizontal margins */
+html[dir="rtl"] .ml-1 { margin-left: 0 !important; margin-right: 0.25rem !important; }
+html[dir="rtl"] .ml-2 { margin-left: 0 !important; margin-right: 0.5rem !important; }
+html[dir="rtl"] .ml-3 { margin-left: 0 !important; margin-right: 0.75rem !important; }
+html[dir="rtl"] .ml-4 { margin-left: 0 !important; margin-right: 1rem !important; }
+html[dir="rtl"] .ml-auto { margin-left: 0 !important; margin-right: auto !important; }
+html[dir="rtl"] .mr-1 { margin-right: 0 !important; margin-left: 0.25rem !important; }
+html[dir="rtl"] .mr-2 { margin-right: 0 !important; margin-left: 0.5rem !important; }
+html[dir="rtl"] .mr-3 { margin-right: 0 !important; margin-left: 0.75rem !important; }
+html[dir="rtl"] .mr-4 { margin-right: 0 !important; margin-left: 1rem !important; }
+html[dir="rtl"] .mr-auto { margin-right: 0 !important; margin-left: auto !important; }
+
+/* Swap horizontal padding */
+html[dir="rtl"] .pl-1 { padding-left: 0 !important; padding-right: 0.25rem !important; }
+html[dir="rtl"] .pl-2 { padding-left: 0 !important; padding-right: 0.5rem !important; }
+html[dir="rtl"] .pl-3 { padding-left: 0 !important; padding-right: 0.75rem !important; }
+html[dir="rtl"] .pl-4 { padding-left: 0 !important; padding-right: 1rem !important; }
+html[dir="rtl"] .pl-6 { padding-left: 0 !important; padding-right: 1.5rem !important; }
+html[dir="rtl"] .pl-8 { padding-left: 0 !important; padding-right: 2rem !important; }
+html[dir="rtl"] .pr-1 { padding-right: 0 !important; padding-left: 0.25rem !important; }
+html[dir="rtl"] .pr-2 { padding-right: 0 !important; padding-left: 0.5rem !important; }
+html[dir="rtl"] .pr-3 { padding-right: 0 !important; padding-left: 0.75rem !important; }
+html[dir="rtl"] .pr-4 { padding-right: 0 !important; padding-left: 1rem !important; }
+html[dir="rtl"] .pr-6 { padding-right: 0 !important; padding-left: 1.5rem !important; }
+html[dir="rtl"] .pr-8 { padding-right: 0 !important; padding-left: 2rem !important; }
+
+/* Flip absolute positioning offsets */
+html[dir="rtl"] .left-0 { left: auto !important; right: 0 !important; }
+html[dir="rtl"] .left-1 { left: auto !important; right: 0.25rem !important; }
+html[dir="rtl"] .left-2 { left: auto !important; right: 0.5rem !important; }
+html[dir="rtl"] .left-3 { left: auto !important; right: 0.75rem !important; }
+html[dir="rtl"] .left-4 { left: auto !important; right: 1rem !important; }
+html[dir="rtl"] .left-6 { left: auto !important; right: 1.5rem !important; }
+html[dir="rtl"] .left-8 { left: auto !important; right: 2rem !important; }
+html[dir="rtl"] .right-0 { right: auto !important; left: 0 !important; }
+html[dir="rtl"] .right-1 { right: auto !important; left: 0.25rem !important; }
+html[dir="rtl"] .right-2 { right: auto !important; left: 0.5rem !important; }
+html[dir="rtl"] .right-3 { right: auto !important; left: 0.75rem !important; }
+html[dir="rtl"] .right-4 { right: auto !important; left: 1rem !important; }
+html[dir="rtl"] .right-6 { right: auto !important; left: 1.5rem !important; }
+html[dir="rtl"] .right-8 { right: auto !important; left: 2rem !important; }
+
+/* Elements anchored on BOTH sides must keep both anchors in RTL —
+   the blanket flips above would otherwise drop one side and shrink them. */
+html[dir="rtl"] .left-0.right-0 { left: 0 !important; right: 0 !important; }
+html[dir="rtl"] .left-1.right-1 { left: 0.25rem !important; right: 0.25rem !important; }
+html[dir="rtl"] .left-2.right-2 { left: 0.5rem !important; right: 0.5rem !important; }
+html[dir="rtl"] .left-3.right-3 { left: 0.75rem !important; right: 0.75rem !important; }
+html[dir="rtl"] .left-4.right-4 { left: 1rem !important; right: 1rem !important; }
+html[dir="rtl"] .inset-x-0 { left: 0 !important; right: 0 !important; }
+
+/* Border-radius: swap left/right corners */
+html[dir="rtl"] .rounded-l { border-radius: 0 0.25rem 0.25rem 0 !important; }
+html[dir="rtl"] .rounded-l-md { border-radius: 0 0.375rem 0.375rem 0 !important; }
+html[dir="rtl"] .rounded-l-lg { border-radius: 0 0.5rem 0.5rem 0 !important; }
+html[dir="rtl"] .rounded-l-xl { border-radius: 0 0.75rem 0.75rem 0 !important; }
+html[dir="rtl"] .rounded-l-full { border-radius: 0 9999px 9999px 0 !important; }
+html[dir="rtl"] .rounded-r { border-radius: 0.25rem 0 0 0.25rem !important; }
+html[dir="rtl"] .rounded-r-md { border-radius: 0.375rem 0 0 0.375rem !important; }
+html[dir="rtl"] .rounded-r-lg { border-radius: 0.5rem 0 0 0.5rem !important; }
+html[dir="rtl"] .rounded-r-xl { border-radius: 0.75rem 0 0 0.75rem !important; }
+html[dir="rtl"] .rounded-r-full { border-radius: 9999px 0 0 9999px !important; }
+
+/* Border: swap left/right sides */
+html[dir="rtl"] .border-l { border-left: 0 !important; border-right-width: 1px !important; }
+html[dir="rtl"] .border-r { border-right: 0 !important; border-left-width: 1px !important; }
+
+/* Flex reversal is opt-in only. Reversing every `.flex-row` globally breaks
+   toolbars, chat controls, and nested component layouts in RTL. */
+html[dir="rtl"] [data-rtl-reverse="true"].flex-row,
+html[dir="rtl"] .rtl-flex-row { flex-direction: row-reverse !important; }
+html[dir="rtl"] [data-rtl-reverse="true"].flex-row-reverse,
+html[dir="rtl"] .rtl-flex-row-reverse { flex-direction: row !important; }
+
+/* Directional icons (chevrons, arrows) should mirror */
+html[dir="rtl"] svg.lucide-chevron-right,
+html[dir="rtl"] svg.lucide-chevron-left,
+html[dir="rtl"] svg.lucide-arrow-right,
+html[dir="rtl"] svg.lucide-arrow-left,
+html[dir="rtl"] svg.lucide-arrow-up-right,
+html[dir="rtl"] svg.lucide-arrow-down-right {
+  transform: scaleX(-1);
+}
+
+/* Preserve LTR for numeric/latin content that must not flip */
+html[dir="rtl"] [dir="ltr"],
+html[dir="rtl"] .keep-ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Clean desktop landing: hide only the ambient video. The chat header stays
+   visible so model picker, credits and sign-in are always reachable. */
+@media (min-width: 768px) {
+  [data-shell="megsy"][data-chat-empty="true"] > video[aria-hidden] {
+    display: none !important;
+  }
+  [data-shell="megsy"][data-chat-empty="true"] {
+    background: hsl(var(--background)) !important;
+  }
+}
+
+/* Solid, edge-less menu surfaces — no glass, no visible borders. */
+[data-plus-menu],
+[data-tier-menu],
+[data-media-settings-menu],
+[data-radix-popper-content-wrapper] [data-tier-menu],
+[data-radix-popper-content-wrapper] [data-media-settings-menu],
+[data-radix-popper-content-wrapper] .unified-menu-surface,
+.unified-menu-surface {
+  border: 0 !important;
+  border-top: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-left: 0 !important;
+  border-radius: 1rem !important;
+  background: hsl(var(--popover)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  color: #ECECEC !important;
+  padding: 0.5rem !important;
+}
+.unified-menu-surface [data-radix-menu-content-inner],
+.unified-menu-surface > * {
+  color: inherit;
+}
+
+/* Integrations uses the plus-sheet physics, but owns a flat, edge-to-edge
+   surface. These selectors intentionally beat the legacy generic menu rules. */
+[data-plus-menu][data-integrations-sheet="true"] {
+  padding: 0 !important;
+  background: var(--chat-claude-composer, var(--sf-2)) !important;
+  background-color: var(--chat-claude-composer, var(--sf-2)) !important;
+  border: 0 !important;
+  border-radius: 28px 28px 0 0 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+[data-plus-menu][data-integrations-sheet="true"] [data-connectors-search] {
+  background: var(--chat-claude-composer, var(--sf-2)) !important;
+  border: 0 !important;
+  box-shadow: inset 0 0 0 1px hsl(var(--foreground) / 0.08) !important;
+}
+[data-plus-menu][data-integrations-sheet="true"] [data-connectors-search] input {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+[data-plus-menu][data-integrations-sheet="true"] [data-integration-row] {
+  background: var(--chat-claude-composer, var(--sf-2)) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+[data-plus-menu]::before,
+[data-tier-menu]::before,
+[data-media-settings-menu]::before,
+.unified-menu-surface::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Auth inputs: keep typed and autofilled text white on every auth layout. */
+.auth-input-white,
+.auth-desktop-split input,
+.auth-desktop-split textarea,
+.auth-desktop-split [contenteditable="true"] {
+  color: var(--ink-1) !important;
+  -webkit-text-fill-color: var(--ink-1) !important;
+  caret-color: var(--ink-1) !important;
+}
+
+.auth-input-white::placeholder,
+.auth-desktop-split input::placeholder,
+.auth-desktop-split textarea::placeholder {
+  color: var(--ink-2) !important;
+  -webkit-text-fill-color: var(--ink-2) !important;
+}
+
+.auth-desktop-split input:-webkit-autofill,
+.auth-desktop-split input:-webkit-autofill:hover,
+.auth-desktop-split input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink-1) !important;
+  caret-color: var(--ink-1) !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Mobile sidebar footer: force the account/signup controls to stay crisp and high-contrast. */
+[data-mobile-sidebar-footer="true"] {
+  background: #fff !important;
+  border-color: var(--ink-1) !important;
+  box-shadow:
+    0 18px 42px -14px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-mobile-sidebar-footer="true"] button[data-mobile-sidebar-footer-action="primary"] {
+  background: #fff !important;
+  color: var(--sf-1) !important;
+  -webkit-text-fill-color: var(--sf-1) !important;
+  border: 1px solid rgba(0, 0, 0, 0.22) !important;
+  box-shadow: none !important;
+}
+
+[data-mobile-sidebar-footer="true"] button[data-mobile-sidebar-footer-action="primary"] * {
+  color: var(--sf-1) !important;
+  -webkit-text-fill-color: var(--sf-1) !important;
+}
+
+[data-mobile-sidebar-footer="true"] button[data-mobile-sidebar-footer-action="new"] {
+  background: hsl(var(--background)) !important;
+  color: var(--ink-1) !important;
+  -webkit-text-fill-color: var(--ink-1) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: none !important;
+}
+
+[data-mobile-sidebar-footer="true"] button[data-mobile-sidebar-footer-action="new"] * {
+  color: var(--ink-1) !important;
+  -webkit-text-fill-color: var(--ink-1) !important;
+  stroke: currentColor !important;
+}
+
+/* ── Accessibility: minimum touch targets on coarse pointers ──────────────
+   Small icon buttons (h-8/h-9/size-8/size-9) get an invisible expanded hit
+   area via a pseudo-element, so tap targets reach ~44px without changing
+   any visual layout. */
+@media (pointer: coarse) {
+  :is(button, [role="button"]):is(
+      [class*="h-8"],
+      [class*="h-9"],
+      [class*="size-8"],
+      [class*="size-9"]
+    ) {
+    position: relative;
+  }
+  :is(button, [role="button"]):is(
+      [class*="h-8"],
+      [class*="h-9"],
+      [class*="size-8"],
+      [class*="size-9"]
+    )::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
+  }
+}
+
+/* Megsy brand logo — invert to black in light theme */
+html[data-theme="light"] .megsy-brand-logo {
+  filter: brightness(0) saturate(100%);
+}
+
+/* ===== Light theme — force main app pages onto light backgrounds ===== */
+html[data-theme="light"] body,
+html[data-theme="light"] #root {
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground));
+}
+/* Neutralize hardcoded dark backgrounds on settings/help/profile/skills/library */
+html[data-theme="light"] main .bg-black,
+html[data-theme="light"] main [class*="bg-black"],
+html[data-theme="light"] main [style*="background-color: var(--sf-1)"],
+html[data-theme="light"] main [style*="background: var(--sf-1)"],
+html[data-theme="light"] main [style*="background:var(--sf-1)"] {
+  background-color: hsl(var(--background)) !important;
+  background-image: none !important;
+}
+html[data-theme="light"] main .text-white,
+html[data-theme="light"] main [class*="text-white/"] {
+  color: hsl(var(--foreground)) !important;
+}
+/* Kill dark decorative background images/videos on non-chat routes */
+html[data-theme="light"] main video[class*="bg"],
+html[data-theme="light"] main .absolute.inset-0 > img[src*="bg"],
+html[data-theme="light"] main [class*="grid-bg"],
+html[data-theme="light"] main [class*="starfield"],
+html[data-theme="light"] main [class*="vignette"] {
+  display: none !important;
+}
+/* Cards on light routes */
+html[data-theme="light"] main .liquid-glass,
+html[data-theme="light"] main [class*="glass-card"] {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}

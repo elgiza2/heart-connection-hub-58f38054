@@ -1,0 +1,74 @@
+/* ============================================================
+   CHAT LEGIBILITY — loaded LAST so it wins the cascade.
+
+   Fixes the two readability bugs reported in chat:
+   1. The user bubble was painted with `--primary` (near-white in the dark
+      theme) while every inline child (<p>, <span>, <strong>) kept the global
+      foreground colour — also near-white — so user messages rendered as an
+      empty white pill.
+   2. Assistant text and tool cards were too low-contrast / too small.
+   ============================================================ */
+
+:root {
+  --chat-user-bubble-bg: hsl(0 0% 16%);
+  --chat-user-bubble-fg: hsl(0 0% 98%);
+}
+
+/* ── User bubble ─────────────────────────────────────────── */
+.user-bubble,
+.chat-bubble-user,
+[data-role="user"] .message-bubble,
+[data-message-role="user"] .message-bubble,
+[data-shell="megsy"] .user-bubble {
+  background: var(--chat-user-bubble-bg) !important;
+  color: var(--chat-user-bubble-fg) !important;
+  border: 1px solid
+    color-mix(in srgb, var(--chat-user-bubble-fg) 12%, transparent) !important;
+  box-shadow: 0 6px 18px -12px rgb(0 0 0 / 0.55) !important;
+  font-weight: 450;
+}
+
+/* Every inline child must inherit the bubble colour — this is the actual
+   invisible-text fix. */
+.user-bubble *,
+.chat-bubble-user *,
+[data-role="user"] .message-bubble *,
+[data-message-role="user"] .message-bubble * {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.user-bubble code,
+.user-bubble pre {
+  background: color-mix(in srgb, var(--chat-user-bubble-fg) 12%, transparent) !important;
+}
+
+.user-bubble a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Assistant text ──────────────────────────────────────── */
+.prose-chat {
+  color: hsl(var(--foreground)) !important;
+  font-size: 1rem;
+  line-height: 1.85;
+}
+
+.prose-chat strong {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 700;
+}
+
+.prose-chat p,
+.prose-chat li {
+  color: hsl(var(--foreground) / 0.94);
+}
+
+.prose-chat h1,
+.prose-chat h2,
+.prose-chat h3 {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}

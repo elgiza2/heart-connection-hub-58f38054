@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Megsy ai</string>
+    <string name="offline_title">لا يوجد اتصال بالإنترنت</string>
+    <string name="offline_body">تحقق من الاتصال وحاول مرة أخرى.</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="press_back_again">اضغط رجوع مرة أخرى للخروج</string>
+</resources>

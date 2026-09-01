@@ -1,0 +1,1 @@
+ALTER TABLE public.long_runs ADD COLUMN IF NOT EXISTS decide_failures integer NOT NULL DEFAULT 0;

@@ -1,0 +1,30 @@
+/* Manus-style settings design tokens.
+   Dark is the default (matches the chat surface); light mirrors the
+   manus reference screenshots exactly (#f1f1f1 page, pure white cards). */
+:root {
+  --mn-bg: hsl(var(--background));
+  --mn-card: hsl(var(--card));
+  --mn-card-2: hsl(var(--secondary));
+  --mn-fg: hsl(var(--foreground));
+  --mn-fg-strong: hsl(var(--foreground));
+  --mn-muted: hsl(var(--muted-foreground));
+  --mn-faint: hsl(var(--muted-foreground) / 0.72);
+  --mn-sep: hsl(var(--border) / 0.6);
+  --mn-cta-bg: hsl(var(--primary));
+  --mn-cta-fg: hsl(var(--primary-foreground));
+  --mn-seg: hsl(var(--muted));
+  --mn-seg-active: hsl(var(--secondary));
+  --mn-seg-active-fg: hsl(var(--foreground));
+  --mn-sheet: hsl(var(--popover));
+  --mn-input: hsl(var(--input));
+  --mn-avatar: #7c5cd6;
+  --mn-danger: hsl(var(--destructive));
+  --mn-accent: hsl(var(--ring));
+  --mn-press: hsl(var(--foreground) / 0.05);
+}
+
+html[data-theme="light"] {
+  --mn-sep: hsl(var(--border));
+  --mn-press: hsl(var(--foreground) / 0.05);
+  --mn-avatar: #8b5cf6;
+}

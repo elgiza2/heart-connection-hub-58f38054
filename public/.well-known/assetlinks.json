@@ -1,0 +1,17 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.megsy.ai",
+      "sha256_cert_fingerprints": [
+        "CC:97:EF:BB:11:E2:FA:07:2A:FF:1C:FB:A3:92:DA:56:55:0B:09:2E:2B:14:79:F2:56:93:CE:A5:3C:49:45:CC",
+        "65:62:D6:FC:FE:50:B1:C6:24:08:81:A0:9E:76:B5:31:55:A8:C9:BB:05:7A:DE:03:33:0F:72:D7:8B:EA:65:D0",
+        "B6:24:F3:99:B0:04:C5:05:75:CA:E2:17:86:97:9F:C8:B8:70:81:AC:A3:D4:DF:21:31:CD:38:25:D4:36:51:4D",
+        "08:58:65:68:B4:8D:C9:15:4C:1F:C4:51:CA:4E:6B:1E:70:5F:47:84:02:5D:51:A5:26:E1:0F:F5:50:DC:3A:A2"
+      ]
+    }
+  }
+]

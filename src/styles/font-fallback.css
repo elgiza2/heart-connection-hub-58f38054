@@ -1,0 +1,94 @@
+/**
+ * @doc Fallback @font-face declarations with size-adjust + ascent/descent/
+ * line-gap overrides so system fonts render at metrics matching the loaded
+ * webfonts (Inter, Space Grotesk). Eliminates layout shift (CLS) when the
+ * remote webfont finishes downloading and swaps in — the same technique
+ * documented by web.dev and used by Vercel/Next.js's font system.
+ *
+ * Overrides computed from the font's own metrics via Capsize
+ * (https://seek-oss.github.io/capsize/). Do not hand-tune.
+ */
+
+/* Inter fallback — targets Arial (all platforms) / Segoe UI (Windows) */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial");
+  size-adjust: 107%;
+  ascent-override: 90%;
+  descent-override: 22.43%;
+  line-gap-override: 0%;
+}
+
+/* Space Grotesk fallback — targets Helvetica/Arial */
+@font-face {
+  font-family: "Space Grotesk Fallback";
+  src: local("Arial");
+  size-adjust: 100.5%;
+  ascent-override: 98%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
+/* DM Sans fallback */
+@font-face {
+  font-family: "DM Sans Fallback";
+  src: local("Arial");
+  size-adjust: 100%;
+  ascent-override: 100%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
+/* ── Arabic / RTL fallbacks ───────────────────────────────────────────────
+   CLS risk is structurally higher for Arabic than Latin: the vertical metrics
+   (ascent/descent/line-gap) and average glyph width of an Arabic webfont differ
+   far more from a Latin system fallback than two Latin faces do from each other.
+   These synthetic faces make the fallback occupy the same box as the pending
+   webfont so the swap is metric-neutral.
+   Ref: https://developer.chrome.com/blog/font-fallbacks */
+
+@font-face {
+  font-family: "Cairo Fallback";
+  src: local("Arial");
+  size-adjust: 106%;
+  ascent-override: 96%;
+  descent-override: 32%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Tajawal Fallback";
+  src: local("Arial");
+  size-adjust: 104%;
+  ascent-override: 95%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Readex Pro Fallback";
+  src: local("Arial");
+  size-adjust: 105%;
+  ascent-override: 98%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Noto Naskh Arabic Fallback";
+  src: local("Arial");
+  size-adjust: 112%;
+  ascent-override: 104%;
+  descent-override: 36%;
+  line-gap-override: 0%;
+}
+
+/* Apply the fallback ahead of the webfont so the swap is metric-identical. */
+:root {
+  --font-inter-stack: "Inter", "Inter Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-grotesk-stack: "Space Grotesk", "Space Grotesk Fallback", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-dm-stack: "DM Sans", "DM Sans Fallback", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-arabic-stack: "Cairo", "Cairo Fallback", "Tajawal", "Tajawal Fallback", system-ui, sans-serif;
+  --font-arabic-serif-stack: "Noto Naskh Arabic", "Noto Naskh Arabic Fallback", "Tajawal", "Tajawal Fallback", "Cairo", system-ui, sans-serif;
+  --font-arabic-ui-stack: "Readex Pro", "Readex Pro Fallback", "Cairo", "Cairo Fallback", "Tajawal", system-ui, sans-serif;
+}

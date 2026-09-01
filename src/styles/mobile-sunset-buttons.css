@@ -1,0 +1,116 @@
+/* Mobile skin for PRIMARY call-to-action buttons only
+   (sign in / continue / subscribe / submit).
+   Icon buttons, ghost/outline/secondary buttons keep their normal look. */
+@media (max-width: 767px) {
+  button.btn-sunset,
+  a.btn-sunset,
+  [data-sunset],
+  button.bg-primary,
+  a.bg-primary,
+  label.bg-primary,
+  [role="button"].bg-primary,
+  form button[type="submit"]:not(.bg-transparent):not([data-plain]) {
+    background-color: hsl(var(--sunset-orange) / 0.16) !important;
+    background-image: var(--gradient-sunset-liquid) !important;
+    background-repeat: no-repeat !important;
+    background-size: 180% 180%, 170% 170%, 175% 175%, 180% 180%, 200% 100% !important;
+    animation: sunset-liquid-drift 14s ease-in-out infinite !important;
+    -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+    backdrop-filter: blur(14px) saturate(150%) !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    color: hsl(var(--sunset-foreground)) !important;
+    -webkit-text-fill-color: hsl(var(--sunset-foreground)) !important;
+    font-weight: 600 !important;
+    line-height: 1.15 !important;
+    box-shadow: none !important;
+  }
+
+  button.btn-sunset :where(svg, span),
+  [data-sunset] :where(svg, span),
+  button.bg-primary :where(svg, span),
+  a.bg-primary :where(svg, span),
+  form button[type="submit"]:not(.bg-transparent):not([data-plain]) :where(svg, span) {
+    color: inherit !important;
+    -webkit-text-fill-color: inherit !important;
+  }
+
+  button.btn-sunset:not(:disabled):active,
+  [data-sunset]:not(:disabled):active,
+  button.bg-primary:not(:disabled):active,
+  form button[type="submit"]:not(:disabled):active {
+    filter: brightness(0.96) saturate(1.06);
+    transform: translateY(1px);
+  }
+
+  button.btn-sunset:disabled,
+  [data-sunset]:disabled,
+  button.bg-primary:disabled,
+  form button[type="submit"]:disabled {
+    filter: saturate(0.55);
+    opacity: 0.5;
+  }
+}
+
+/* Override the mobile sidebar footer's primary action when it is the Sign-in CTA. */
+[data-mobile-sidebar-footer="true"] button[data-mobile-sidebar-footer-action="primary"][data-sunset] {
+  background-color: hsl(var(--sunset-orange) / 0.16) !important;
+  background-image: var(--gradient-sunset-liquid) !important;
+  background-repeat: no-repeat !important;
+  background-size: 180% 180%, 170% 170%, 175% 175%, 180% 180%, 200% 100% !important;
+  animation: sunset-liquid-drift 14s ease-in-out infinite !important;
+  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+  backdrop-filter: blur(14px) saturate(150%) !important;
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.35),
+    inset 0 0 0 1px hsl(0 0% 100% / 0.16) !important;
+  border: 0 !important;
+  color: hsl(var(--sunset-foreground)) !important;
+  -webkit-text-fill-color: hsl(var(--sunset-foreground)) !important;
+  border-radius: 16px !important;
+  margin-bottom: 8px !important;
+}
+
+[data-mobile-sidebar-footer="true"] button[data-mobile-sidebar-footer-action="primary"][data-sunset] * {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+[data-mobile-sidebar-footer="true"] button[data-mobile-sidebar-footer-action="primary"][data-sunset] {
+  box-shadow: none !important;
+}
+
+/* Remove the white pill wrapper border/shadow around primary CTA buttons. */
+.mobile-sidebar-footer-pill:has(.btn-sunset),
+.mobile-sidebar-footer-pill:has([data-sunset="true"]) {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Mobile pricing canvas keeps the plain app background. */
+@media (max-width: 767px) {
+  .pricing-sunset-bg {
+    background-color: hsl(var(--background)) !important;
+    background-image: none !important;
+  }
+}
+
+/* Weak devices: the liquid layer stops drifting but keeps its colours. */
+html[data-perf="low"] .btn-sunset::before,
+html[data-perf="low"] [data-sunset] {
+  animation: none !important;
+}
+
+/* `.btn-sunset` already paints the liquid in its ::before layer — keep the
+   element itself as pure glass on mobile so the colours don't double up. */
+@media (max-width: 767px) {
+  button.btn-sunset,
+  a.btn-sunset {
+    background-image: none !important;
+    animation: none !important;
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.35),
+      inset 0 0 0 1px hsl(0 0% 100% / 0.16),
+      0 10px 28px -16px hsl(var(--sunset-coral) / 0.7) !important;
+  }
+}

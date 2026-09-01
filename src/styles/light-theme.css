@@ -1,0 +1,271 @@
+/* ─────────────────────────────────────────────────────────────
+   Light theme (white + healthy pink).
+   Loaded last so it wins over the legacy dark-first page styles.
+   Everything here is scoped to html.light, so the auth screens
+   (which keep the dark theme) are untouched.
+   ───────────────────────────────────────────────────────────── */
+
+html.light,
+html.light body,
+html.light #root {
+  background-color: #f3f3f5 !important;
+  color: var(--ink-1);
+  color-scheme: light;
+}
+
+/* Dark utility surfaces used by legacy pages → light surfaces */
+html.light .bg-neutral-900:not(.theme-fixed),
+html.light .bg-neutral-950:not(.theme-fixed),
+html.light .bg-zinc-900:not(.theme-fixed),
+html.light .bg-zinc-950:not(.theme-fixed),
+html.light .bg-gray-900:not(.theme-fixed),
+html.light .bg-gray-950:not(.theme-fixed),
+html.light .bg-slate-900:not(.theme-fixed),
+html.light .bg-slate-950:not(.theme-fixed),
+html.light .bg-\[\#121212\]:not(.theme-fixed),
+html.light .bg-\[\#1c1c1c\]:not(.theme-fixed),
+html.light .bg-\[\#131313\]:not(.theme-fixed),
+html.light .bg-\[\#0a0a0b\]:not(.theme-fixed),
+html.light .bg-\[\#0b0d10\]:not(.theme-fixed),
+html.light .bg-\[\#02040c\]:not(.theme-fixed) {
+  background-color: var(--sf-1) !important;
+}
+html.light .bg-neutral-800:not(.theme-fixed),
+html.light .bg-zinc-800:not(.theme-fixed),
+html.light .bg-gray-800:not(.theme-fixed),
+html.light .bg-slate-800:not(.theme-fixed),
+html.light .bg-\[\#232323\]:not(.theme-fixed),
+html.light .bg-\[\#3A3A3A\]:not(.theme-fixed) {
+  background-color: var(--sf-2) !important;
+}
+
+/* Dark text utilities → readable ink */
+html.light .text-neutral-100:not(.theme-fixed),
+html.light .text-neutral-200:not(.theme-fixed),
+html.light .text-zinc-100:not(.theme-fixed),
+html.light .text-zinc-200:not(.theme-fixed),
+html.light .text-gray-100:not(.theme-fixed),
+html.light .text-gray-200:not(.theme-fixed),
+html.light .text-slate-100:not(.theme-fixed),
+html.light .text-slate-200:not(.theme-fixed) {
+  color: var(--ink-1) !important;
+}
+html.light .text-neutral-300:not(.theme-fixed),
+html.light .text-neutral-400:not(.theme-fixed),
+html.light .text-zinc-300:not(.theme-fixed),
+html.light .text-zinc-400:not(.theme-fixed),
+html.light .text-gray-300:not(.theme-fixed),
+html.light .text-gray-400:not(.theme-fixed),
+html.light .text-slate-300:not(.theme-fixed),
+html.light .text-slate-400:not(.theme-fixed),
+html.light .text-white\/70:not(.theme-fixed),
+html.light .text-white\/60:not(.theme-fixed),
+html.light .text-white\/50:not(.theme-fixed) {
+  color: var(--ink-2) !important;
+}
+
+/* Dark borders → hairline */
+html.light .border-neutral-800:not(.theme-fixed),
+html.light .border-neutral-700:not(.theme-fixed),
+html.light .border-zinc-800:not(.theme-fixed),
+html.light .border-zinc-700:not(.theme-fixed),
+html.light .border-gray-800:not(.theme-fixed),
+html.light .border-gray-700:not(.theme-fixed),
+html.light [class*="border-white/"]:not(.theme-fixed) {
+  border-color: var(--hairline) !important;
+}
+
+/* Chat surface: assistant text plain on white, user bubble pink */
+html.light .prose,
+html.light .prose :where(p, li, td, th, h1, h2, h3, h4, h5, h6, strong, blockquote) {
+  color: var(--ink-1);
+}
+html.light .prose :where(a) {
+  color: hsl(var(--primary));
+}
+
+/* Ambient background blobs — soft pink instead of dark glow */
+html.light .ambient-bg__blob {
+  opacity: 0.12;
+}
+
+/* Scrollbars */
+html.light ::-webkit-scrollbar-thumb {
+  background-color: rgba(23, 23, 26, 0.18);
+}
+html.light ::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Placeholders stay legible */
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: var(--ink-3) !important;
+}
+
+/* Primary actions use the pink accent with white text */
+html.light .bg-primary {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+html.light .bg-primary * {
+  color: inherit;
+}
+
+/* Selection */
+html.light ::selection {
+  background: hsl(var(--primary) / 0.18);
+  color: var(--ink-1);
+}
+
+/* ── Legacy brand tokens remapped for the light canvas ───────── */
+html.light {
+  --brand-parchment: 240 10% 12%;  /* was cream text on dark → ink on white */
+  --brand-ink: 0 0% 100%;
+  --brand-muted: 240 4% 45%;
+  --brand-charcoal: 0 0% 100%;
+  --brand-smoke: 240 5% 96%;
+  --page-bg: #ffffff;
+
+  --surface-1: 0 0% 100%;
+  --surface-2: 340 30% 98%;
+  --surface-3: 340 25% 96%;
+  --surface-4: 340 20% 93%;
+
+  --overlay-white-03: rgba(23, 23, 26, 0.03);
+  --overlay-white-04: rgba(23, 23, 26, 0.04);
+  --overlay-white-05: rgba(23, 23, 26, 0.05);
+  --overlay-white-06: rgba(23, 23, 26, 0.05);
+  --overlay-white-08: rgba(23, 23, 26, 0.06);
+  --overlay-white-10: rgba(23, 23, 26, 0.07);
+  --overlay-white-12: rgba(23, 23, 26, 0.08);
+  --overlay-white-14: rgba(23, 23, 26, 0.09);
+  --overlay-white-16: rgba(23, 23, 26, 0.10);
+  --overlay-white-22: rgba(23, 23, 26, 0.12);
+  --overlay-white-45: rgba(23, 23, 26, 0.35);
+  --overlay-white-60: rgba(23, 23, 26, 0.55);
+  --overlay-white-62: rgba(23, 23, 26, 0.60);
+  --overlay-white-70: rgba(23, 23, 26, 0.68);
+  --overlay-white-92: rgba(23, 23, 26, 0.88);
+  --overlay-white-95: rgba(23, 23, 26, 0.92);
+  --overlay-white-100: #17171a;
+  --overlay-black-22: rgba(23, 23, 26, 0.06);
+  --overlay-black-35: rgba(23, 23, 26, 0.08);
+  --overlay-black-50: rgba(23, 23, 26, 0.10);
+  --overlay-black-55: rgba(23, 23, 26, 0.12);
+}
+
+/* ── Cards & surfaces: crisp rounded borders like the reference ── */
+html.light .rounded-2xl,
+html.light .rounded-3xl,
+html.light .rounded-\[20px\],
+html.light .rounded-\[24px\],
+html.light .rounded-\[28px\] {
+  border: 1px solid var(--hairline);
+}
+
+/* White cards on the grey canvas, with a clearly visible edge */
+html.light .bg-card:not(.theme-fixed),
+html.light .bg-background:not(.theme-fixed),
+html.light .bg-white:not(.theme-fixed),
+html.light [data-card],
+html.light .settings-card,
+html.light .card {
+  background-color: #ffffff !important;
+  border-color: var(--hairline) !important;
+}
+
+/* Composer card — white surface with a clear hairline edge on every breakpoint
+   so the input box is visible against the white page. */
+html.light .composer-card,
+html.light .chat-composer-frame,
+html.light [data-chat-composer],
+html.light .animated-input-shell {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(23, 23, 26, 0.22) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 8px 28px -14px rgba(23, 23, 26, 0.22) !important;
+}
+
+/* Higher-specificity guard: the chat skin sets `border: 0 !important` on the
+   composer, which would otherwise erase the light-theme edge. */
+html.light .chat-composer-frame.composer-card,
+html.light .chat-composer-frame.chat-composer-liquid,
+html.light body .chat-composer-frame {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: rgba(23, 23, 26, 0.22) !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 8px 28px -14px rgba(23, 23, 26, 0.22) !important;
+}
+
+
+html.light .composer-card textarea,
+html.light .chat-composer-frame textarea {
+  color: var(--ink-1) !important;
+  caret-color: hsl(var(--primary));
+}
+html.light aside.bg-sidebar,
+html.light [data-sidebar] {
+  background-color: #fbf8fa !important;
+  border-right-color: var(--hairline) !important;
+}
+
+/* Brand wordmark: the silver→white shimmer is dark-mode only. In light mode
+   render solid ink so "Megsy" is legible in the sidebar / headers. */
+html.light .brand-word {
+  background: none !important;
+  -webkit-text-fill-color: var(--ink-1) !important;
+  color: var(--ink-1) !important;
+  animation: none !important;
+}
+
+/* Brand icon: dark mode brightens the mark toward white, which makes it
+   invisible on the light canvas. Render it as dark ink instead and drop the
+   shimmer overlay entirely. */
+html.light .brand-logo-img {
+  filter: grayscale(100%) brightness(0.35) contrast(1.15) !important;
+  animation: none !important;
+}
+html.light .brand-logo-shine {
+  display: none !important;
+}
+
+
+
+/* Settings canvas: soft grey page in light mode so the white cards read as
+   separate surfaces (dark mode keeps the standard background). */
+.settings-canvas-bg { background-color: hsl(var(--background)); }
+html.light .settings-canvas-bg { background-color: #f3f3f5; }
+
+/* ── Chat transcript legibility in light mode ────────────────
+   Two legacy dark-only rules paint assistant prose white
+   (`.chat-surface-dark .prose-chat` and the Claude skin). Scope
+   them back to ink so the answer is readable on the white canvas. */
+html.light .chat-surface-dark .prose-chat,
+html.light .chat-surface-dark .prose-chat p,
+html.light .chat-surface-dark .prose-chat li,
+html.light .chat-surface-dark .prose-chat strong,
+html.light .chat-surface-dark .prose-chat em,
+html.light .chat-surface-dark .prose-chat blockquote,
+html.light .chat-surface-dark .prose-chat th,
+html.light .chat-surface-dark .prose-chat td,
+html.light [data-skin="claude"] .prose-chat,
+html.light [data-skin="claude"] .prose-chat p,
+html.light [data-skin="claude"] .prose-chat li,
+html.light .prose-chat,
+html.light .prose-chat p,
+html.light .prose-chat li {
+  color: var(--ink-1) !important;
+  -webkit-text-fill-color: var(--ink-1) !important;
+}
+html.light .prose-chat a,
+html.light [data-skin="claude"] .prose-chat a {
+  color: hsl(var(--primary)) !important;
+  -webkit-text-fill-color: hsl(var(--primary)) !important;
+}
+html.light .prose-chat code,
+html.light .prose-chat pre,
+html.light .prose-chat pre * {
+  -webkit-text-fill-color: currentColor !important;
+}

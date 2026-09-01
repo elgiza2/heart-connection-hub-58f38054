@@ -1,0 +1,30 @@
+/* Landing / marketing typography scope.
+   Applied only when <html data-typography="landing"> is set by AppLayout on
+   marketing routes. Color tokens remain global and charcoal everywhere. */
+
+html[data-typography="landing"] body {
+  font-family: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+html[data-typography="landing"][dir="rtl"] body {
+  font-family: "Cairo", "Tajawal", "Readex Pro", "Manrope", system-ui, sans-serif;
+}
+
+html[data-typography="landing"],
+html[data-typography="landing"] body,
+html[data-typography="landing"] #root {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground));
+  color-scheme: dark;
+}
+
+/* Safety net: explicit light-paper backgrounds inside marketing pages. */
+html[data-typography="landing"] .bg-paper,
+html[data-typography="landing"] .bg-paper-2,
+html[data-typography="landing"] .bg-white {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground));
+}
+html[data-typography="landing"] .text-ink,
+html[data-typography="landing"] .text-black {
+  color: hsl(var(--foreground)) !important;
+}

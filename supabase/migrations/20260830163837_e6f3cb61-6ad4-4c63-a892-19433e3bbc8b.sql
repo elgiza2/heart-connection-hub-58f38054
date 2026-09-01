@@ -1,0 +1,1 @@
+ALTER TABLE public.dev_projects ADD COLUMN IF NOT EXISTS preview_url text;

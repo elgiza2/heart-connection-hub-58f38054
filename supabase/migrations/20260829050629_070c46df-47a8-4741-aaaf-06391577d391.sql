@@ -1,0 +1,3 @@
+CREATE POLICY "email assets readable by authenticated" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'email-assets');
+CREATE POLICY "email assets writable by authenticated" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'email-assets');
+CREATE POLICY "email assets updatable by authenticated" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'email-assets') WITH CHECK (bucket_id = 'email-assets');

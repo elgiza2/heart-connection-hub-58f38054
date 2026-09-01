@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Claude-style splash: clean centered logo + subtle breathing pulse.
+         Paints before React or the main JS loads. Auto-disappears the moment
+         #root receives its first child (React's first commit). Byte-small. -->
+    <style>
+      :root { color-scheme: dark; }
+      html, body { background-color: #0a0a0a; margin: 0; }
+      #root { min-height: 100dvh; background-color: #0a0a0a; }
+      @keyframes megsy-splash-pulse {
+        0%, 100% { opacity: .55; transform: scale(1); }
+        50%      { opacity: 1;   transform: scale(1.06); }
+      }
+      @keyframes megsy-splash-fadein {
+        from { opacity: 0; } to { opacity: 1; }
+      }
+      #root:empty::before {
+        content: "";
+        position: fixed; inset: 0;
+        background:
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ffffff' stop-opacity='.98'/><stop offset='1' stop-color='%23ffffff' stop-opacity='.6'/></linearGradient></defs><path fill='url(%23g)' d='M36 6c2.4 8.6 7.4 14 16.5 16.5C43.4 25 38 30.4 36 39c-2-8.6-7.4-14-16.5-16.5C28.6 20 34 14.6 36 6Zm22 30c1.4 5.2 4.4 8.4 9.5 9.9-5.1 1.5-8.1 4.7-9.5 9.9-1.4-5.2-4.4-8.4-9.5-9.9 5.1-1.5 8.1-4.7 9.5-9.9ZM18 46c1.4 5.2 4.4 8.4 9.5 9.9-5.1 1.5-8.1 4.7-9.5 9.9-1.4-5.2-4.4-8.4-9.5-9.9C13.6 54.4 16.6 51.2 18 46Z'/></svg>")
+            no-repeat center center / 72px 72px,
+          radial-gradient(1200px 800px at 50% 40%, rgba(255,255,255,.04), transparent 60%),
+          #0a0a0a;
+        animation: megsy-splash-fadein .25s ease-out both, megsy-splash-pulse 1.6s ease-in-out .25s infinite;
+        z-index: 0;
+      }
+    </style>
+    <meta name="google" content="notranslate" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Megsy" />
+    <meta name="application-name" content="Megsy AI" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <!-- iOS PWA startup image (static splash before JS loads — matches the animated PwaSplash component) -->
+    <link rel="apple-touch-startup-image" href="/splash-megsy.png" />
+
+    <!-- canonical is set per-route via SEOHead/Helmet to avoid every page pointing to homepage -->
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>Megsy AI — All-in-One AI Platform for Chat, Images &amp; Video</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://ltgampdtawuefwwayncx.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://ltgampdtawuefwwayncx.supabase.co" />
+    <!-- LCP hint: preconnect + prefetch the hero video CDN so the landing hero paints faster. -->
+    <link rel="preconnect" href="https://d8j0ntlcm91z4.cloudfront.net" crossorigin />
+    <link rel="dns-prefetch" href="https://d8j0ntlcm91z4.cloudfront.net" />
+    <!-- Telegram Mini App SDK — required for initData when opened inside Telegram. -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- LCP-critical fonts only (Space Grotesk + Inter). Trimmed weights + display=swap for instant first paint with system-font fallback. -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" />
+    <!-- Non-blocking secondary families (loaded after first paint via the print→all onload trick). -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@700&family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&family=Noto+Serif+Arabic:wght@400;600;700&family=Almarai:wght@300;400;700;800&display=swap" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Tajawal:wght@400;500;700&family=Readex+Pro:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap" media="print" onload="this.media='all'" />
+    <!-- SEO landings (SynapseX-style): Space Mono, Anton SC, Bootstrap Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Anton+SC&display=swap" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" media="print" onload="this.media='all'" />
+
+    <!-- ITC Garamond Std Narrow (mobile showcase screens) -->
+    <style>
+      @font-face { font-family: "ITC Garamond Std Narrow"; font-weight: 300; font-style: normal; font-display: swap;
+        src: url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-LtNarrow_i2zcip.woff2") format("woff2"),
+             url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-LtNarrow_soc5vc.woff") format("woff"); }
+      @font-face { font-family: "ITC Garamond Std Narrow"; font-weight: 400; font-style: normal; font-display: swap;
+        src: url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrow_xjfoc0.woff2") format("woff2"),
+             url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrow_wfoxm1.woff") format("woff"); }
+      @font-face { font-family: "ITC Garamond Std Narrow"; font-weight: 400; font-style: italic; font-display: swap;
+        src: url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrowIta_hiy9ld.woff2") format("woff2"),
+             url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrowIta_rlarxo.woff") format("woff"); }
+      @font-face { font-family: "ITC Garamond Std Narrow"; font-weight: 500; font-style: normal; font-display: swap;
+        src: url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrow_xjfoc0.woff2") format("woff2"),
+             url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrow_wfoxm1.woff") format("woff"); }
+    </style>
+    <link href="https://db.onlinewebfonts.com/c/e66905e07608167a84e6ad52f638c3c6?family=Helvetica+Now+Var" rel="stylesheet" media="print" onload="this.media='all'" />
+    
+  
+  <meta name="description" content="Chat, generate images, create videos, build slides, docs and full apps — one AI platform with every top model. Free to start.">
+  
+  
+  <meta property="og:image" content="https://megsyai.com/og-megsy.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Megsy AI — All-in-One AI Platform">
+  <meta name="twitter:image" content="https://megsyai.com/og-megsy.jpg">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://megsyai.com/">
+  <meta property="og:site_name" content="Megsy AI">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ar_EG">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"Megsy AI","url":"https://megsyai.com/","logo":"https://megsyai.com/apple-touch-icon.png","sameAs":["https://x.com/megsyai","https://www.instagram.com/megsyai"],"description":"All-in-one AI platform for chat, images, video, slides, docs and apps."}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebSite","name":"Megsy AI","url":"https://megsyai.com/","potentialAction":{"@type":"SearchAction","target":"https://megsyai.com/search?q={search_term_string}","query-input":"required name=search_term_string"}}
+  </script>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Megsy AI — All-in-One AI Platform for Chat, Images &amp; Video">
+  <meta name="twitter:title" content="Megsy AI — All-in-One AI Platform for Chat, Images &amp; Video">
+  <meta property="og:description" content="Chat, generate images, create videos, build slides, docs and full apps — one AI platform with every top model. Free to start.">
+  <meta name="twitter:description" content="Chat, generate images, create videos, build slides, docs and full apps — one AI platform with every top model. Free to start.">
+  <script type="module" crossorigin src="/assets/index-CF29SWBl.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-ChBuwvmN.css">
+</head>
+
+  <body>
+    <!-- Global SVG filter used by liquid-glass surfaces (.gemini-glass-tile, plus sheet). -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <filter id="megsy-glass-warp" x="-10%" y="-10%" width="120%" height="120%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="2" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="28" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+    <div id="root"></div>
+    <!-- Speculation Rules API (Chromium 111+): prerender same-origin links on
+         moderate hover intent. Falls back silently on Safari/Firefox. -->
+    <script type="speculationrules">
+      {
+        "prerender": [
+          { "source": "document", "where": { "and": [ { "href_matches": "/*" }, { "not": { "href_matches": "/api/*" } }, { "not": { "href_matches": "/auth/*" } } ] }, "eagerness": "moderate" }
+        ],
+        "prefetch": [
+          { "source": "document", "where": { "href_matches": "/*" }, "eagerness": "conservative" }
+        ]
+      }
+    </script>
+
+
+  </body>
+</html>

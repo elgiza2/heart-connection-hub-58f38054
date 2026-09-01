@@ -1,0 +1,187 @@
+/** @doc Fluid typography, spacing, touch and standalone-mode helpers for PWA sizing. */
+
+/* ============================================================
+   Fluid Type & Spacing Scale (Utopia-inspired)
+   Uses clamp() so text/spacing grow smoothly between phones and desktop
+   without breakpoint jumps. Consume via var(--step-*) / var(--space-*).
+   ============================================================ */
+:root {
+  --step--2: clamp(0.72rem, 0.68rem + 0.28vw, 0.82rem);
+  --step--1: clamp(0.86rem, 0.81rem + 0.35vw, 0.98rem);
+  --step-0:  clamp(1.02rem, 0.95rem + 0.5vw,  1.19rem);
+  --step-1:  clamp(1.22rem, 1.13rem + 0.6vw,  1.5rem);
+  --step-2:  clamp(1.48rem, 1.35rem + 0.85vw, 1.9rem);
+  --step-3:  clamp(1.78rem, 1.6rem + 1.1vw,   2.4rem);
+  --step-4:  clamp(2.14rem, 1.88rem + 1.6vw,  3rem);
+  --step-5:  clamp(2.55rem, 2.2rem + 2.3vw,   3.8rem);
+
+  --space-3xs: clamp(0.28rem, 0.24rem + 0.18vw, 0.4rem);
+  --space-2xs: clamp(0.55rem, 0.48rem + 0.3vw,  0.75rem);
+  --space-xs:  clamp(0.8rem,  0.72rem + 0.4vw,  1.1rem);
+  --space-s:   clamp(1.08rem, 0.95rem + 0.6vw,  1.5rem);
+  --space-m:   clamp(1.6rem,  1.42rem + 0.85vw, 2.15rem);
+  --space-l:   clamp(2.1rem,  1.88rem + 1.15vw, 2.85rem);
+  --space-xl:  clamp(3.1rem,  2.78rem + 1.65vw, 4.2rem);
+  --space-2xl: clamp(4.1rem,  3.7rem + 2.15vw,  5.6rem);
+}
+
+/* ============================================================
+   Larger phones (Pro Max / Ultra / big Androids) — bump the root
+   font size so fluid clamp() steps and rem-based spacing scale up
+   proportionally instead of feeling cramped on big screens.
+   ============================================================ */
+@media (min-width: 400px) {
+  html { font-size: 16.5px; }
+}
+@media (min-width: 430px) {
+  html { font-size: 17px; }
+}
+@media (min-width: 480px) {
+  html { font-size: 17.5px; }
+}
+
+/* ============================================================
+   Content container — fluid width, safe gutters, always centered.
+   Use: <div class="container-fluid">
+   ============================================================ */
+.container-fluid {
+  width: min(100% - 2rem, 1200px);
+  margin-inline: auto;
+}
+
+/* ============================================================
+   RAM grid — responsive without media queries.
+   Use: <div class="auto-grid">
+   ============================================================ */
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: var(--space-s);
+}
+
+/* ============================================================
+   Container-query surfaces. Wrap a component in .cq to let it react
+   to its parent's width rather than the whole viewport.
+   ============================================================ */
+.cq { container-type: inline-size; }
+
+/* ============================================================
+   Touch target minimums — WCAG 2.2 + Apple HIG.
+   Applied only on coarse pointers so mouse users keep tight UI.
+   ============================================================ */
+@media (pointer: coarse) {
+  /* Only enforce the 44px touch target on buttons/links that DON'T declare an
+     explicit Tailwind size (h-*, w-*, size-*). Otherwise small icon buttons
+     like the composer's "Clear mode" X (h-5 w-5) and tightly-sized pill chips
+     get inflated to a 44×44 circle, which looks broken. Opt-in via
+     `.touch-target` still works. */
+  button:not([class*="h-"]):not([class*="w-"]):not([class*="size-"]):not([data-no-min-target]),
+  [role="button"]:not([class*="h-"]):not([class*="w-"]):not([class*="size-"]):not([data-no-min-target]),
+  a.btn,
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Only run hover styles when the device really supports hover.
+   Consumers can opt in with .hover-safe:hover { ... }. */
+@media (hover: none) {
+  .hover-only { display: none !important; }
+}
+
+/* ============================================================
+   Reduced motion — respect OS preference globally.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   iOS tap-highlight + text auto-resize cleanup.
+   ============================================================ */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent flex/grid children from overflowing long strings. */
+.min-w-0 { min-width: 0; }
+
+/* Aspect helpers for media */
+.aspect-video  { aspect-ratio: 16 / 9; }
+.aspect-square { aspect-ratio: 1 / 1; }
+.aspect-photo  { aspect-ratio: 4 / 3; }
+.media-cover   { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ============================================================
+   Dynamic viewport helpers (safe on iOS Safari + Android Chrome).
+   Prefer `dvh` (dynamic) so URL-bar collapse doesn't jump layout;
+   fall back to `vh` on older browsers.
+   ============================================================ */
+.h-svh  { height: 100svh; }
+.h-lvh  { height: 100lvh; }
+.min-h-svh { min-height: 100svh; }
+.min-h-lvh { min-height: 100lvh; }
+
+/* Keyboard-aware bottom padding — pair with useVisualViewport().
+   Falls back to the safe-area inset when the keyboard is closed. */
+.pb-keyboard {
+  padding-bottom: calc(var(--keyboard-inset, 0px) + var(--safe-bottom));
+}
+.mb-keyboard {
+  margin-bottom: calc(var(--keyboard-inset, 0px) + var(--safe-bottom));
+}
+/* Hide when the on-screen keyboard is open (e.g. bottom tab bars). */
+html[data-keyboard="open"] .hide-when-keyboard { display: none !important; }
+
+/* ============================================================
+   Foldables & dual-screen (Surface Duo, Galaxy Fold).
+   Uses the CSS Viewport Segments spec: split layout across the hinge
+   when the device reports two horizontal segments.
+   ============================================================ */
+@media (horizontal-viewport-segments: 2) {
+  .fold-split {
+    display: grid;
+    grid-template-columns:
+      env(viewport-segment-width 0 0)
+      env(viewport-segment-left 1 0)
+      1fr;
+  }
+  .fold-split > :nth-child(2) { display: none; } /* hinge gutter */
+}
+@media (vertical-viewport-segments: 2) {
+  .fold-split-v {
+    display: grid;
+    grid-template-rows:
+      env(viewport-segment-height 0 0)
+      env(viewport-segment-top 0 1)
+      1fr;
+  }
+}
+
+/* ============================================================
+   Standalone (installed PWA) — kill bounce & pull-to-refresh
+   but keep inner scroll containers bouncy for good UX.
+   ============================================================ */
+@media all and (display-mode: standalone),
+       all and (display-mode: fullscreen) {
+  html {
+    overscroll-behavior: none;
+  }
+  body {
+    overscroll-behavior-y: contain;
+  }
+  .scroll-area {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}

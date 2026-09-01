@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="dark" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- No loader / no splash. Page paints instantly on a plain background. -->
+    <style>
+      :root { color-scheme: dark; }
+      html, body { background-color: #1c1c1c; margin: 0; }
+      #root { min-height: 100dvh; background-color: #1c1c1c; }
+      #root[data-snapshot-preview="true"] { pointer-events: none; user-select: none; contain: paint; }
+    </style>
+    <meta name="google" content="notranslate" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/app-icon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/app-icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/app-icon-512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/app-icon-180.png" />
+    <meta name="apple-mobile-web-app-title" content="Megsy" />
+    <meta name="application-name" content="Megsy AI" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- canonical is set per-route via SEOHead/Helmet to avoid every page pointing to homepage -->
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="megsy-build" content="%VITE_BUILD_ID%" />
+    <title>Megsy AI — All-in-One AI Platform for Chat, Images &amp; Video</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://ltgampdtawuefwwayncx.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://ltgampdtawuefwwayncx.supabase.co" />
+    <!-- LCP hint: preconnect + prefetch the hero video CDN so the landing hero paints faster. -->
+    <link rel="preconnect" href="https://d8j0ntlcm91z4.cloudfront.net" crossorigin />
+    <link rel="dns-prefetch" href="https://d8j0ntlcm91z4.cloudfront.net" />
+    <!-- Telegram Mini App SDK — only needed when the app is actually opened
+         inside Telegram. Loading it unconditionally cost every web visitor an
+         extra cross-origin request on the critical path. -->
+    <script>
+      (function () {
+        try {
+          var inTelegram =
+            /[?#&]tgWebApp/.test(location.href) ||
+            "TelegramWebviewProxy" in window ||
+            /Telegram/i.test(navigator.userAgent);
+          if (!inTelegram) return;
+          // document.write keeps the SDK parser-blocking *inside Telegram only*,
+          // so window.Telegram.WebApp is guaranteed to exist before main.tsx
+          // reads initData. Web visitors never pay for this request.
+          document.write(
+            '<script src="https://telegram.org/js/telegram-web-app.js"><\/script>'
+          );
+
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- LCP-critical fonts only (Space Grotesk + Inter). Trimmed weights + display=swap for instant first paint with system-font fallback. -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" /></noscript>
+    <!-- Every secondary family in ONE request, injected only AFTER `load` +
+         idle. These families are used by inner surfaces (showcase, Arabic UI,
+         marketing), never by the first painted frame, so requesting them
+         during startup only stole bandwidth from the entry bundle. Skipped
+         entirely on Data Saver / 2G connections. -->
+    <script>
+      (function () {
+        var HREF =
+          "https://fonts.googleapis.com/css2?family=Inter:wght@700&family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&family=DM+Sans:wght@400;500;600;700&family=Noto+Serif+Arabic:wght@400;600;700&family=Almarai:wght@300;400;700;800&family=Cairo:wght@400;500;600;700&family=Tajawal:wght@400;500;700&family=Readex+Pro:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Sora:wght@400;500;600;700;800&family=Archivo+Black&family=Manrope:wght@400;500;600;700&display=swap";
+        var EXTRA = "https://db.onlinewebfonts.com/c/e66905e07608167a84e6ad52f638c3c6?family=Helvetica+Now+Var";
+        function add(href) {
+          var l = document.createElement("link");
+          l.rel = "stylesheet";
+          l.href = href;
+          document.head.appendChild(l);
+        }
+        function go() {
+          try {
+            var c = navigator.connection || {};
+            if (c.saveData) return;
+            if (/2g/.test(c.effectiveType || "")) return;
+          } catch (e) {}
+          var run = function () { add(HREF); add(EXTRA); };
+          if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 3000 });
+          else setTimeout(run, 800);
+        }
+        if (document.readyState === "complete") go();
+        else window.addEventListener("load", go, { once: true });
+      })();
+    </script>
+
+
+    <!-- ITC Garamond Std Narrow (mobile showcase screens) -->
+    <style>
+      @font-face { font-family: "ITC Garamond Std Narrow"; font-weight: 300; font-style: normal; font-display: swap;
+        src: url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-LtNarrow_i2zcip.woff2") format("woff2"),
+             url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-LtNarrow_soc5vc.woff") format("woff"); }
+      @font-face { font-family: "ITC Garamond Std Narrow"; font-weight: 400; font-style: normal; font-display: swap;
+        src: url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrow_xjfoc0.woff2") format("woff2"),
+             url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrow_wfoxm1.woff") format("woff"); }
+      @font-face { font-family: "ITC Garamond Std Narrow"; font-weight: 400; font-style: italic; font-display: swap;
+        src: url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrowIta_hiy9ld.woff2") format("woff2"),
+             url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrowIta_rlarxo.woff") format("woff"); }
+      @font-face { font-family: "ITC Garamond Std Narrow"; font-weight: 500; font-style: normal; font-display: swap;
+        src: url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrow_xjfoc0.woff2") format("woff2"),
+             url("https://res.cloudinary.com/dgupuutfn/raw/upload/v1783596334/ITCGaramondStd-BkNarrow_wfoxm1.woff") format("woff"); }
+    </style>
+    
+    
+  
+  <meta name="description" content="Chat, generate images, create videos, build slides, docs and full apps — one AI platform with every top model. Free to start.">
+  
+  
+  <meta property="og:image" content="https://megsyai.com/og-megsy.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Megsy AI — All-in-One AI Platform">
+  <meta name="twitter:image" content="https://megsyai.com/og-megsy.jpg">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://megsyai.com/">
+  <meta property="og:site_name" content="Megsy AI">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ar_EG">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"Megsy AI","url":"https://megsyai.com/","logo":"https://megsyai.com/__l5e/assets-v1/d75995aa-ee53-4948-b9de-0a0f157cc2f1/apple-touch-icon.png","sameAs":["https://x.com/megsyai","https://www.instagram.com/megsyai"],"description":"All-in-one AI platform for chat, images, video, slides, docs and apps."}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebSite","name":"Megsy AI","url":"https://megsyai.com/","potentialAction":{"@type":"SearchAction","target":"https://megsyai.com/search?q={search_term_string}","query-input":"required name=search_term_string"}}
+  </script>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Megsy AI — All-in-One AI Platform for Chat, Images &amp; Video">
+  <meta name="twitter:title" content="Megsy AI — All-in-One AI Platform for Chat, Images &amp; Video">
+  <meta property="og:description" content="Chat, generate images, create videos, build slides, docs and full apps — one AI platform with every top model. Free to start.">
+  <meta name="twitter:description" content="Chat, generate images, create videos, build slides, docs and full apps — one AI platform with every top model. Free to start.">
+  <script>
+    /* Pre-paint theme so there is no flash. Auth screens are always dark. */
+    (function () {
+      try {
+        var p = location.pathname;
+        var auth = /^\/(auth|login|signin|sign-in|signup|sign-up|register|reset-password)(\/|$)/.test(p);
+        var m = localStorage.getItem('megsy_theme') || 'light';
+        var dark = auth || m === 'dark' || (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        var h = document.documentElement;
+        h.classList.add(dark ? 'dark' : 'light');
+        h.setAttribute('data-theme', dark ? 'dark' : 'light');
+        h.style.colorScheme = dark ? 'dark' : 'light';
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y9pn08bl46");
+  </script>
+</head>
+
+  <body>
+    <!-- Global SVG filter used by liquid-glass surfaces (.gemini-glass-tile, plus sheet). -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <filter id="megsy-glass-warp" x="-10%" y="-10%" width="120%" height="120%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="2" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="28" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+    <div id="root"></div>
+
+    <!-- Speculation Rules API (Chromium 111+): registered from JS so weak
+         devices, Data Saver and slow networks are skipped entirely — a full
+         prerender is a second page render and it used to run on every hover,
+         which slowed the *current* page down on low-end hardware. Injected
+         after load so it never competes with the first paint. -->
+    <script>
+      (function () {
+        try {
+          if (!HTMLScriptElement.supports?.("speculationrules")) return;
+          var nav = navigator;
+          var c = nav.connection || {};
+          var slow = c.saveData === true || /(^|-)(2g|slow-2g)$/.test(c.effectiveType || "");
+          var weak = (nav.hardwareConcurrency || 8) <= 4 || (nav.deviceMemory || 8) <= 4;
+          if (slow || weak) return;
+          var add = function () {
+            var s = document.createElement("script");
+            s.type = "speculationrules";
+            s.textContent = JSON.stringify({
+              prerender: [
+                {
+                  source: "document",
+                  where: {
+                    and: [
+                      { href_matches: "/*" },
+                      { not: { href_matches: "/api/*" } },
+                      { not: { href_matches: "/auth/*" } },
+                    ],
+                  },
+                  eagerness: "moderate",
+                },
+              ],
+              prefetch: [
+                { source: "document", where: { href_matches: "/*" }, eagerness: "conservative" },
+              ],
+            });
+            document.body.appendChild(s);
+          };
+          if (document.readyState === "complete") setTimeout(add, 1200);
+          else addEventListener("load", function () { setTimeout(add, 1200); });
+        } catch (e) {}
+      })();
+    </script>
+
+    <script type="module" src="/src/main.tsx"></script>
+
+
+  </body>
+</html>
