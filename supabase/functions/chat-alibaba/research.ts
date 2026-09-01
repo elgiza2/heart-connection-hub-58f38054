@@ -84,29 +84,24 @@ needed=true when the answer depends on current events, prices, releases, people,
 needed=false for chit-chat, math, translation, coding help, opinion or rewriting.
 Give 1-3 short high-signal queries in the language most likely to hold the sources.`;
 
-async function planQueries(question: string, force = false): Promise<string[]> {
-  const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
-  if (!key) return force ? [question.slice(0, 200)] : heuristicQueries(question);
+/** Query planner. Runs on the project's own Alibaba key, never on a gateway. */
+async function planQueries(
+  call: PlannerCall | undefined,
+  question: string,
+  force = false,
+): Promise<string[]> {
+  if (!call) return force ? [question.slice(0, 200)] : heuristicQueries(question);
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": key,
-        "X-Lovable-AIG-SDK": "fetch",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3.1-flash-lite",
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: PLANNER },
-          { role: "user", content: question.slice(0, 4_000) },
-        ],
-      }),
+    const raw = await call(["qwen3.8-flash", "qwen-flash", "qwen-plus"], {
+      temperature: 0.1,
+      max_tokens: 300,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: PLANNER },
+        { role: "user", content: question.slice(0, 4_000) },
+      ],
     });
-    if (!res.ok) return force ? [question.slice(0, 200)] : heuristicQueries(question);
-    const data = await res.json() as { choices?: { message?: { content?: string } }[] };
-    const raw = data.choices?.[0]?.message?.content ?? "";
+    if (!raw) return force ? [question.slice(0, 200)] : heuristicQueries(question);
     const parsed = JSON.parse(raw.replace(/^```json\s*|\s*```$/g, "")) as {
       needed?: boolean;
       queries?: unknown;
@@ -131,90 +126,56 @@ function heuristicQueries(question: string): string[] {
 }
 
 /**
- * Gateway-hosted web search, used when no Brave key is configured.
- *
- * Runs the queries through the Lovable AI Gateway's native web-search tool and
- * harvests the URL citations the model actually used, so the chat answer still
- * gets fresh, attributable facts.
+ * Keyless web search, used when no Brave key is configured. Scrapes the DuckDuckGo
+ * HTML endpoint so live research keeps working on the project's own infrastructure
+ * without any third-party AI gateway.
  */
-async function gatewaySearch(
-  queries: string[],
-): Promise<{ digest: string; sources: { title: string; url: string }[] }> {
-  const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
-  if (!key) return { digest: "", sources: [] };
+async function freeSearch(query: string, count = 10): Promise<Finding[]> {
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+    const res = await fetch("https://html.duckduckgo.com/html/", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": key,
-        "X-Lovable-AIG-SDK": "fetch",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0 (compatible; MegsyAgent/2026)",
       },
-      body: JSON.stringify({
-        model: "openai/gpt-5.6-luna",
-        stream: true,
-        store: false,
-        tools: [{ type: "web_search_preview" }],
-        instructions:
-          "Search the web now. Return dated, specific facts as short bullets with the exact source URL after each bullet. Today is " +
-          new Date().toISOString().slice(0, 10) +
-          ". Never answer from memory alone; if a fact is unverified, omit it.",
-        input: queries.join("\n"),
-      }),
+      body: new URLSearchParams({ q: query }).toString(),
     });
-    if (!res.ok || !res.body) return { digest: "", sources: [] };
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let digest = "";
-    const sources = new Map<string, string>();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-      for (const line of lines) {
-        if (!line.startsWith("data:")) continue;
-        const raw = line.slice(5).trim();
-        if (!raw || raw === "[DONE]") continue;
-        let event: Record<string, any>;
-        try {
-          event = JSON.parse(raw);
-        } catch {
-          continue;
-        }
-        if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
-          digest += event.delta;
-        }
-        if (event.type === "response.output_text.annotation.added") {
-          const annotation = event.annotation ?? {};
-          if (annotation.url) sources.set(String(annotation.url), String(annotation.title ?? annotation.url));
-        }
-      }
+    if (!res.ok) return [];
+    const html = await res.text();
+    const out: Finding[] = [];
+    const pattern =
+      /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+    for (const match of html.matchAll(pattern)) {
+      const strip = (value: string) =>
+        value.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'")
+          .replace(/&quot;/g, '"').replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+      let url = match[1];
+      const redirect = url.match(/[?&]uddg=([^&]+)/);
+      if (redirect) url = decodeURIComponent(redirect[1]);
+      if (!/^https?:\/\//.test(url)) continue;
+      out.push({ title: strip(match[2]) || url, url, snippet: strip(match[3]), excerpt: "" });
+      if (out.length >= count) break;
     }
-    for (const match of digest.matchAll(/https?:\/\/[^\s)\]]+/g)) {
-      if (!sources.has(match[0])) sources.set(match[0], match[0]);
-    }
-    return {
-      digest: digest.slice(0, 12_000),
-      sources: [...sources.entries()].slice(0, 15).map(([url, title]) => ({ title, url })),
-    };
-  } catch (error) {
-    console.error("gateway web search failed", error);
-    return { digest: "", sources: [] };
+    return out;
+  } catch {
+    return [];
   }
 }
 
 /** Runs the planned searches, de-duplicates by URL and reads the top pages. */
+export type PlannerCall = (
+  models: string[],
+  payload: Record<string, unknown>,
+) => Promise<string>;
+
 export async function research(
   admin: SupabaseClient,
   question: string,
   onEvent: (frame: Record<string, unknown>) => void,
   force = false,
+  call?: PlannerCall,
 ): Promise<{ findings: Finding[]; queries: string[]; digest: string }> {
-  const queries = await planQueries(question, force);
+  const queries = await planQueries(call, question, force);
   if (!queries.length) return { findings: [], queries: [], digest: "" };
 
   const callId = `web_search-${Date.now()}`;
@@ -223,13 +184,12 @@ export async function research(
   });
 
   const key = await braveKey(admin);
-  let top: Finding[] = [];
-  let digest = "";
+  const digest = "";
+  const seen = new Set<string>();
+  const results: Finding[] = [];
 
   if (key) {
     const batches = await Promise.all(queries.map((query) => braveSearch(key, query)));
-    const seen = new Set<string>();
-    const results: Finding[] = [];
     for (const batch of batches) {
       for (const item of batch) {
         const url = (item.url ?? "").trim();
@@ -238,18 +198,25 @@ export async function research(
         results.push({ title: item.title ?? url, url, snippet: item.description ?? "", excerpt: "" });
       }
     }
-    top = results.slice(0, 12);
-    const pages = await Promise.all(top.slice(0, 6).map((item) => readPage(item.url)));
-    pages.forEach((text, index) => {
-      top[index].excerpt = text;
-    });
   }
 
-  if (!top.length) {
-    const gateway = await gatewaySearch(queries);
-    digest = gateway.digest;
-    top = gateway.sources.map((item) => ({ ...item, snippet: "", excerpt: "" }));
+  if (!results.length) {
+    const batches = await Promise.all(queries.map((query) => freeSearch(query)));
+    for (const batch of batches) {
+      for (const item of batch) {
+        if (seen.has(item.url)) continue;
+        seen.add(item.url);
+        results.push(item);
+      }
+    }
   }
+
+  const top = results.slice(0, 12);
+  const pages = await Promise.all(top.slice(0, 6).map((item) => readPage(item.url)));
+  pages.forEach((text, index) => {
+    if (text) top[index].excerpt = text;
+  });
+
 
   onEvent({
     tool_event: {

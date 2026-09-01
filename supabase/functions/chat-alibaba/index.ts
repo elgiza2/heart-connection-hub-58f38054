@@ -17,9 +17,11 @@ const headers = {
     "authorization, x-client-info, apikey, content-type, x-anon-fingerprint",
 };
 
+// Only the international Model Studio endpoint accepts the workspace key stored
+// in Supabase (`alibaba_keys`). The Beijing endpoint rejects it with 401, so it
+// is intentionally not tried. No other AI provider is used by this function.
 const ENDPOINTS = [
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
-  "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
 ];
 
 const SYSTEM = `You are MEGSY, an autonomous general-purpose AI agent.
@@ -43,7 +45,6 @@ type RequestBody = {
 type ChatUpstream = {
   response: Response;
   keyId?: string;
-  format: "chat" | "responses";
 };
 
 function json(value: unknown, status = 200) {
@@ -123,13 +124,9 @@ async function callAlibaba(
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
             body: JSON.stringify({ ...payload, model }),
           });
-          if (response.ok) return { response, keyId: entry.id, format: "chat", model };
+          if (response.ok) return { response, keyId: entry.id, model };
           const detail = (await response.text().catch(() => "")).slice(0, 500);
           console.error(`chat-alibaba upstream ${model} [${response.status}]: ${detail}`);
-          // Retire a rejected key so later turns stop paying its latency.
-          if (response.status === 401 && entry.id && /invalid_api_key|Incorrect API key/i.test(detail)) {
-            void admin.from("alibaba_keys").update({ status: "invalid" }).eq("id", entry.id);
-          }
           if (isModelError(response.status, detail)) continue models;
           if (![401, 403, 429].includes(response.status) && response.status < 500) return null;
         } catch (error) {
@@ -141,130 +138,15 @@ async function callAlibaba(
   return null;
 }
 
-/**
- * Streams a Responses-API call and returns only its final text. Used by the
- * manager/worker calls when no Alibaba key can serve the request.
- */
-async function gatewayText(messages: Message[], maxTokens = 1400): Promise<string> {
-  const upstream = await callGateway(messages, "openai/gpt-5.6-luna");
-  if (!upstream?.response.ok || !upstream.response.body) return "";
-  const reader = upstream.response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let text = "";
-  while (text.length < maxTokens * 8) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (!line.startsWith("data:")) continue;
-      const raw = line.slice(5).trim();
-      if (!raw || raw === "[DONE]") continue;
-      try {
-        const event = JSON.parse(raw) as any;
-        if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
-          text += event.delta;
-        }
-      } catch { /* ignore partial frames */ }
-    }
-  }
-  await reader.cancel().catch(() => {});
-  return text.trim();
-}
-
-/** Non-streaming text helper: Alibaba first, Lovable AI Gateway as the fallback. */
+/** Non-streaming text helper for the manager and the parallel workers. */
 function makeTextCall(admin: any): CallFn {
   return async (models, payload) => {
     const result = await callAlibaba(admin, models, { ...payload, stream: false });
-    if (result) {
-      const data = await result.response.json().catch(() => null) as any;
-      const content = data?.choices?.[0]?.message?.content;
-      if (typeof content === "string" && content.trim()) return content.trim();
-    }
-    const messages = Array.isArray((payload as any).messages) ? (payload as any).messages as Message[] : [];
-    if (!messages.length) return "";
-    return gatewayText(messages, Number((payload as any).max_tokens) || 1400);
+    if (!result) return "";
+    const data = await result.response.json().catch(() => null) as any;
+    const content = data?.choices?.[0]?.message?.content;
+    return typeof content === "string" ? content.trim() : "";
   };
-}
-
-
-async function callGateway(messages: Message[], model = "openai/gpt-5.6-sol"): Promise<ChatUpstream | null> {
-  const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
-  if (!key) return null;
-  try {
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": key,
-        "X-Lovable-AIG-SDK": "fetch",
-      },
-      body: JSON.stringify({
-        model,
-        input: messages,
-        stream: true,
-        store: false,
-        reasoning: { effort: "medium", summary: "auto" },
-        include: ["reasoning.encrypted_content"],
-      }),
-    });
-    return { response, format: "responses" };
-  } catch (error) {
-    console.error("chat-alibaba gateway request failed", error);
-    return null;
-  }
-}
-
-function gatewayAsChatStream(body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> {
-  const reader = body.getReader();
-  const decoder = new TextDecoder();
-  const encoder = new TextEncoder();
-  let buffer = "";
-  return new ReadableStream({
-    async pull(controller) {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          if (buffer.trim()) emitGatewayLine(buffer, controller, encoder);
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-          return;
-        }
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        let emitted = false;
-        for (const line of lines) emitted = emitGatewayLine(line, controller, encoder) || emitted;
-        if (emitted) return;
-      }
-    },
-    cancel() {
-      return reader.cancel();
-    },
-  });
-}
-
-function emitGatewayLine(
-  line: string,
-  controller: ReadableStreamDefaultController<Uint8Array>,
-  encoder: TextEncoder,
-): boolean {
-  if (!line.startsWith("data:")) return false;
-  const raw = line.slice(5).trim();
-  if (!raw || raw === "[DONE]") return false;
-  try {
-    const event = JSON.parse(raw) as Record<string, any>;
-    const text = event.type === "response.output_text.delta" ? event.delta : null;
-    const reasoning = event.type === "response.reasoning_summary_text.delta" ? event.delta : null;
-    if (!text && !reasoning) return false;
-    const delta = text ? { content: text } : { reasoning_content: reasoning };
-    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta }] })}\n\n`));
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 async function personalization(admin: any, userId: string) {
@@ -361,6 +243,7 @@ Deno.serve(async (req) => {
         question,
         (frame) => preFrames.push(frame),
         profile.research === "always",
+        call,
       );
       liveContext = researchContext(findings, queries, digest);
     } catch (error) {
@@ -389,7 +272,7 @@ Deno.serve(async (req) => {
     .filter(Boolean)
     .join("\n\n");
 
-  let result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
+  const result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
     stream: true,
     stream_options: { include_usage: true },
     enable_search: body.searchEnabled === true && !liveContext,
@@ -398,10 +281,6 @@ Deno.serve(async (req) => {
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
     messages: [{ role: "system", content: system }, ...messages],
   });
-  if (!result) {
-    result = await callGateway([{ role: "system", content: system }, ...messages]);
-  }
-
   if (!result) return json({ error: "Chat service temporarily unavailable" }, 503);
   if (!result.response.ok) {
     const detail = await result.response.text().catch(() => "");
@@ -414,15 +293,12 @@ Deno.serve(async (req) => {
   }
   if (!result.response.body) return json({ error: "Chat service temporarily unavailable" }, 503);
 
-  const usedModel = result.model ?? (result.format === "responses" ? "openai/gpt-5.6-sol" : models[0]);
+  const usedModel = result.model ?? models[0];
   if (result.keyId) {
     void admin.from("alibaba_keys").update({ last_used_at: new Date().toISOString() }).eq("id", result.keyId);
   }
 
-  const source = result.format === "responses"
-    ? gatewayAsChatStream(result.response.body)
-    : result.response.body;
-  const upstreamReader = source.getReader();
+  const upstreamReader = result.response.body.getReader();
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
