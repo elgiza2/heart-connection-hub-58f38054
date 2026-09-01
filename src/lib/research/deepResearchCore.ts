@@ -23,12 +23,13 @@ function researchInstructions(query: string, depth: string): string {
   const Arabic = /[\u0600-\u06FF]/.test(query);
   const scale =
     depth === "pro"
-      ? { searches: "at least 5", words: "at least 1,500 words", sections: "4-6" }
+      ? { searches: "at least 8", words: "at least 1,800 words", sections: "5-7" }
       : depth === "ultra8x" || depth === "ultra4x"
-        ? { searches: "at least 12", words: "at least 4,000 words", sections: "8-12" }
+        ? { searches: "at least 20", words: "at least 4,500 words", sections: "8-12" }
         : depth === "ultra2x"
-          ? { searches: "at least 8", words: "at least 2,800 words", sections: "6-9" }
-          : { searches: "at least 6", words: "at least 2,200 words", sections: "5-8" };
+          ? { searches: "at least 14", words: "at least 3,000 words", sections: "6-9" }
+          : { searches: "at least 10", words: "at least 2,400 words", sections: "5-8" };
+
   const depthGuide =
     depth === "ultra8x" || depth === "ultra4x"
       ? "Search exhaustively from many independent angles and prioritize primary sources."
