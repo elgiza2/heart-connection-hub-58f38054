@@ -128,7 +128,7 @@ async function dataCall(
     await supabase.from("agent_memory").insert({
       user_id: opts.userId,
       kind: "user_fact",
-      key: String(args.key ?? content.slice(0, 60) || "fact"),
+      key: String(args.key ?? (content.slice(0, 60) || "fact")),
       value: content,
       source_run_id: opts.runId ?? null,
     } as never);
