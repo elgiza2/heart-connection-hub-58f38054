@@ -65,7 +65,7 @@ function envKey(): string | null {
   return null;
 }
 
-async function modelKeys(admin: ReturnType<typeof createClient>) {
+async function modelKeys(admin: any) {
   const result: Array<{ id?: string; key: string }> = [];
   const { data } = await admin
     .from("alibaba_keys")
@@ -74,7 +74,7 @@ async function modelKeys(admin: ReturnType<typeof createClient>) {
     .in("category", ["qwen", "memory", "text"])
     .order("last_used_at", { ascending: true, nullsFirst: true })
     .limit(6);
-  for (const row of data ?? []) {
+  for (const row of (data ?? []) as any[]) {
     const key = typeof row.api_key === "string" ? row.api_key.trim() : "";
     if (key) result.push({ id: row.id, key });
   }
@@ -107,7 +107,7 @@ function isModelError(status: number, detail: string): boolean {
  * third-party models Alibaba hosts) and each active key, across both regions.
  */
 async function callAlibaba(
-  admin: ReturnType<typeof createClient>,
+  admin: any,
   models: string[],
   payload: Record<string, unknown>,
 ): Promise<(ChatUpstream & { model: string }) | null> {
@@ -213,7 +213,7 @@ function emitGatewayLine(
   }
 }
 
-async function personalization(admin: ReturnType<typeof createClient>, userId: string) {
+async function personalization(admin: any, userId: string) {
   const { data: memories } = await admin
     .from("agent_memory")
     .select("key,value")
@@ -223,8 +223,7 @@ async function personalization(admin: ReturnType<typeof createClient>, userId: s
   const prompt = `Infer a conservative personalization profile from these memories. Do not invent facts.
 Return JSON only with keys call_name, profession, about, interests (array), ai_traits, custom_instructions.
 Memories: ${JSON.stringify(memories ?? []).slice(0, 10000)}`;
-  const result = await callAlibaba(admin, {
-    model: "qwen-plus",
+  const result = await callAlibaba(admin, ["qwen-plus", "qwen-max"], {
     stream: false,
     temperature: 0.2,
     response_format: { type: "json_object" },
