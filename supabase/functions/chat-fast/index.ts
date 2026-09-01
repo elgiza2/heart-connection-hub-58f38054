@@ -236,6 +236,7 @@ Deno.serve(async (req) => {
     model?: string;
     force?: boolean;
     maxTokens?: number;
+    thinking?: boolean;
   };
   try {
     body = await req.json();
