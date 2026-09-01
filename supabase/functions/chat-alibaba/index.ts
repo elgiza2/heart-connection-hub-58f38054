@@ -7,6 +7,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { lastUserText, research, researchContext } from "./research.ts";
+import type { PlannerCall, RawCall } from "./research.ts";
 import { profileModels, profileSystem, routeProfile } from "./router.ts";
 import { type CallFn, deliveryContract, plan, runTeam } from "./orchestrator.ts";
 
@@ -138,10 +139,19 @@ async function callAlibaba(
     for (const entry of keys) {
       for (const endpoint of ENDPOINTS) {
         try {
+          const requestPayload = model.startsWith("qwen")
+            ? payload
+            : Object.fromEntries(
+              Object.entries(payload).filter(([name]) => name !== "enable_search" && name !== "search_options"),
+            );
           const response = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
-            body: JSON.stringify({ ...payload, model }),
+            body: JSON.stringify({
+              ...requestPayload,
+              ...(model.startsWith("kimi-") ? { temperature: undefined } : {}),
+              model,
+            }),
           });
           if (response.ok) return { response, keyId: entry.id, model };
           const detail = (await response.text().catch(() => "")).slice(0, 500);
@@ -158,13 +168,21 @@ async function callAlibaba(
 }
 
 /** Non-streaming text helper for the manager and the parallel workers. */
-function makeTextCall(admin: any): CallFn {
+function makeTextCall(admin: any): PlannerCall {
   return async (models, payload) => {
     const result = await callAlibaba(admin, models, { ...payload, stream: false });
     if (!result) return "";
     const data = await result.response.json().catch(() => null) as any;
     const content = data?.choices?.[0]?.message?.content;
     return typeof content === "string" ? content.trim() : "";
+  };
+}
+
+function makeRawCall(admin: any): RawCall {
+  return async (models: string[], payload: Record<string, unknown>) => {
+    const result = await callAlibaba(admin, models, { ...payload, stream: false });
+    if (!result) return null;
+    return await result.response.json().catch(() => null);
   };
 }
 
@@ -263,6 +281,7 @@ Deno.serve(async (req) => {
         (frame) => preFrames.push(frame),
         profile.research === "always",
         call,
+        makeRawCall(admin),
       );
       liveContext = researchContext(findings, queries, digest);
     } catch (error) {
@@ -294,7 +313,15 @@ Deno.serve(async (req) => {
   const result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
     stream: true,
     stream_options: { include_usage: true },
-    enable_search: body.searchEnabled === true && !liveContext,
+    // Alibaba's built-in search stays on for the streamed answer too; when the
+    // pre-pass already gathered sources it is a supplement, not the only engine.
+    enable_search: body.searchEnabled === true,
+    search_options: body.searchEnabled === true
+      ? {
+        search_strategy: "agent",
+        enable_source: true,
+      }
+      : undefined,
     enable_thinking: false,
     temperature: profile.temperature,
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),

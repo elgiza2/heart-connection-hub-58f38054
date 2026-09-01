@@ -93,7 +93,6 @@ async function planQueries(
   if (!call) return force ? [question.slice(0, 200)] : heuristicQueries(question);
   try {
     const raw = await call(["qwen3.8-flash", "qwen-flash", "qwen-plus"], {
-      temperature: 0.1,
       max_tokens: 300,
       response_format: { type: "json_object" },
       messages: [
@@ -205,12 +204,70 @@ export type PlannerCall = (
   payload: Record<string, unknown>,
 ) => Promise<string>;
 
+/** Raw (non-stream) Model Studio call that returns the whole response JSON. */
+export type RawCall = (
+  models: string[],
+  payload: Record<string, unknown>,
+) => Promise<any>;
+
+/**
+ * Model Studio's own built-in web search (`enable_search`). Alibaba runs the
+ * search on its side and returns the sources in `search_info`, so this is the
+ * highest-quality engine available on the project's own key — no third-party
+ * search key needed. `forced_search` guarantees a search happens on the turn.
+ */
+async function nativeSearch(
+  raw: RawCall | undefined,
+  queries: string[],
+): Promise<{ findings: Finding[]; digest: string }> {
+  if (!raw) return { findings: [], digest: "" };
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const data = await raw(["qwen-plus", "qwen-flash", "qwen-max"], {
+      enable_search: true,
+      search_options: {
+        // Chat Completions currently supports the agent strategy and sources.
+        search_strategy: "agent",
+        enable_source: true,
+      },
+      messages: [
+        {
+          role: "system",
+          content:
+            `Today is ${today}. Research the request with live web search and answer with dense, dated facts only. ` +
+            `Cite every fact as [n]. No preamble, no advice, no mention of tools.`,
+        },
+        { role: "user", content: queries.join("\n") },
+      ],
+    });
+    const message = data?.choices?.[0]?.message ?? {};
+    const info = data?.search_info ?? message?.search_info ?? data?.output?.search_info ?? {};
+    const rows: any[] = info?.search_results ?? [];
+    const findings: Finding[] = [];
+    for (const row of rows) {
+      const url = String(row?.url ?? row?.link ?? "").trim();
+      if (!/^https?:\/\//.test(url)) continue;
+      findings.push({
+        title: String(row?.title ?? url),
+        url,
+        snippet: String(row?.snippet ?? row?.description ?? "").slice(0, 400),
+        excerpt: "",
+      });
+    }
+    const digest = typeof message?.content === "string" ? message.content.trim().slice(0, 6_000) : "";
+    return { findings, digest };
+  } catch {
+    return { findings: [], digest: "" };
+  }
+}
+
 export async function research(
   admin: SupabaseClient,
   question: string,
   onEvent: (frame: Record<string, unknown>) => void,
   force = false,
   call?: PlannerCall,
+  raw?: RawCall,
 ): Promise<{ findings: Finding[]; queries: string[]; digest: string }> {
   const queries = await planQueries(call, question, force);
   if (!queries.length) return { findings: [], queries: [], digest: "" };
@@ -221,9 +278,18 @@ export async function research(
   });
 
   const key = await braveKey(admin);
-  const digest = "";
   const seen = new Set<string>();
   const results: Finding[] = [];
+
+  // Alibaba's built-in search first: it is on the same key as the models and
+  // returns both sources and a verified digest in one call.
+  const native = await nativeSearch(raw, queries);
+  let digest = native.digest;
+  for (const item of native.findings) {
+    if (seen.has(item.url)) continue;
+    seen.add(item.url);
+    results.push(item);
+  }
 
   if (key) {
     const batches = await Promise.all(queries.map((query) => braveSearch(key, query)));
@@ -237,7 +303,7 @@ export async function research(
     }
   }
 
-  if (!results.length) {
+  if (results.length < 4) {
     const batches = await Promise.all(queries.map((query) => freeSearch(query)));
     for (const batch of batches) {
       for (const item of batch) {
