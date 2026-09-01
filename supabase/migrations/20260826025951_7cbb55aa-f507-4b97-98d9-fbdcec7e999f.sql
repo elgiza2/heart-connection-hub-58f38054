@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.watchdog_resume_research();

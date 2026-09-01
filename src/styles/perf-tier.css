@@ -1,0 +1,76 @@
+/**
+ * Device-tier performance layer.
+ *
+ * `src/lib/deviceCapability.ts` sets `<html data-perf="low|mid|high">` before
+ * the first paint. Everything below applies ONLY to the `low` tier: weak CPUs,
+ * <=4 GB RAM, 2G / data-saver connections, or an explicit reduced-motion
+ * preference.
+ *
+ * Rules for anything added here:
+ *  - never change layout, spacing, colour tokens or content
+ *  - only remove cost: blur, infinite animations, large glows, filters
+ *  - keep focus states, borders and contrast intact (WCAG)
+ */
+
+/* Backdrop blur is the single most expensive effect in this UI: every glass
+   surface forces the compositor to re-sample the layer beneath it. Replace it
+   with the flat surface colour the glass already sits on. */
+html[data-perf="low"] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Decorative SVG displacement / blur filters on glass + "liquid" surfaces. */
+html[data-perf="low"] .composer-liquid-glass,
+html[data-perf="low"] .gemini-glass-tile,
+html[data-perf="low"] .mobile-plus-glass-menu,
+html[data-perf="low"] .unified-menu-surface,
+html[data-perf="low"] .ios26-glass-chip,
+html[data-perf="low"] .liquid-glass,
+html[data-perf="low"] .liquid-glass-pro {
+  filter: none !important;
+}
+
+/* Infinite decorative animations keep the main thread and GPU awake for the
+   whole session. One-shot transitions (open/close, hover) are untouched so the
+   interface still feels responsive rather than frozen. */
+html[data-perf="low"] .auth-bg,
+html[data-perf="low"] .auth-stars,
+html[data-perf="low"] .ambient-bg,
+html[data-perf="low"] .dark-veil-css,
+html[data-perf="low"] .chat-mobile-blue-bg,
+html[data-perf="low"] .chat-mobile-blue-bg::before,
+html[data-perf="low"] .chat-mobile-blue-bg::after,
+html[data-perf="low"] .glow-btn::before,
+html[data-perf="low"] .glow-btn::after,
+html[data-perf="low"] .oil-bg,
+html[data-perf="low"] .oil-bg::before,
+html[data-perf="low"] .oil-bg::after {
+  animation: none !important;
+}
+
+/* Purely decorative overlays: starfields, glow blobs and blurred halos carry
+   no information, so hiding them costs nothing visually meaningful. */
+html[data-perf="low"] .auth-stars,
+html[data-perf="low"] .glow-blob,
+html[data-perf="low"] .decorative-glow {
+  display: none !important;
+}
+
+/* Autoplaying background video on a weak device competes with the UI thread
+   for decode budget. The poster image stays visible underneath. */
+html[data-perf="low"] video[data-decorative="true"] {
+  display: none !important;
+}
+
+/* Users who asked for less motion get it regardless of hardware tier. */
+@media (prefers-reduced-motion: reduce) {
+  html *,
+  html *::before,
+  html *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

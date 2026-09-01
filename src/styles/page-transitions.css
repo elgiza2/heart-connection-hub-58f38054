@@ -1,0 +1,317 @@
+
+/* Settings sub-page enter animation (used by SubShell on desktop). */
+.settings-page-enter {
+  animation: settings-enter 220ms cubic-bezier(0.22, 0.9, 0.3, 1) both;
+}
+@keyframes settings-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-page-enter { animation: none; }
+}
+/* ─── Global page + element animation polish ─────────────────────────
+   Adds a soft cross-fade + tiny lift for route changes, a press-feedback
+   on buttons/links/cards, and a fluid focus ring. All rules respect
+   prefers-reduced-motion. Scoped narrowly so we don't fight existing
+   surface-specific animations (chat, showcase videos, etc.). */
+
+/* Route transition — driven by <PageTransition/> wrapper */
+.ng-page-enter {
+  animation: ng-page-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.ng-page-enter--chat {
+  animation-name: ng-page-in-chat;
+  animation-duration: 120ms;
+}
+
+@keyframes ng-page-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(0.997);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes ng-page-in-chat {
+  0% { opacity: 0.92; }
+  100% { opacity: 1; }
+}
+
+.chat-message-enter {
+  animation: chat-message-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
+}
+
+@keyframes chat-message-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Staggered fade-up for direct children of a page container. Opt-in via
+   `data-stagger` on the parent element so long lists don't get animated
+   involuntarily. */
+[data-stagger] > * {
+  animation: ng-stagger-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  opacity: 0;
+}
+[data-stagger] > *:nth-child(1)  { animation-delay:  10ms; }
+[data-stagger] > *:nth-child(2)  { animation-delay:  55ms; }
+[data-stagger] > *:nth-child(3)  { animation-delay: 100ms; }
+[data-stagger] > *:nth-child(4)  { animation-delay: 140ms; }
+[data-stagger] > *:nth-child(5)  { animation-delay: 180ms; }
+[data-stagger] > *:nth-child(6)  { animation-delay: 215ms; }
+[data-stagger] > *:nth-child(7)  { animation-delay: 245ms; }
+[data-stagger] > *:nth-child(8)  { animation-delay: 275ms; }
+[data-stagger] > *:nth-child(n+9){ animation-delay: 300ms; }
+
+@keyframes ng-stagger-in {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Press feedback — buttons, links, and interactive cards.
+   Uses transform+opacity only (compositor-friendly). Scoped to
+   `:where` so specificity stays at 0 and never overrides component
+   styles. */
+:where(button, [role="button"], a, .ng-pressable) {
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease-out;
+}
+
+html[data-section="chat"] :where(button, [role="button"], a, .ng-pressable) {
+  transition-duration: 120ms;
+}
+
+:where(button, [role="button"], a, .ng-pressable):active:not(:disabled) {
+  transform: scale(0.96);
+  opacity: 0.9;
+  transition-duration: 80ms;
+}
+
+/* Radix / shadcn overlay + content animation polish.
+   Applied via data-state attributes so it works across Dialog, Sheet,
+   Popover, DropdownMenu, ContextMenu, HoverCard, Tooltip. */
+:where([data-radix-popper-content-wrapper] > *,
+       [data-state][role="dialog"],
+       [data-state][role="menu"],
+       [data-state][role="listbox"]) {
+  will-change: transform, opacity;
+}
+
+@keyframes ng-overlay-in  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes ng-overlay-out { from { opacity: 1 } to { opacity: 0 } }
+@keyframes ng-content-in {
+  from { opacity: 0; transform: translate3d(0, 6px, 0) scale(0.98); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes ng-content-out {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to   { opacity: 0; transform: translate3d(0, 4px, 0) scale(0.985); }
+}
+
+/* Smooth image + skeleton reveal — avoids jarring pop-in */
+img:not([data-no-fade]) {
+  animation: ng-img-in 260ms ease-out both;
+}
+@keyframes ng-img-in { from { opacity: 0 } to { opacity: 1 } }
+
+/* Global input responsiveness — remove 300ms tap delay & tap flash,
+   smoother scrolling, and crisp SVG icon transitions. */
+html {
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+:where(button, [role="button"], a, summary, label, input, select, textarea) {
+  touch-action: manipulation;
+}
+@media (hover: hover) {
+  :where(a, button, [role="button"]):hover svg {
+    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  :where(a, button, [role="button"]):hover:not(:disabled) svg[data-hover-lift="true"] {
+    transform: translateY(-1px);
+  }
+}
+
+/* Smooth scroll for anchor jumps, but never fight programmatic scroll. */
+@media (prefers-reduced-motion: no-preference) {
+  html:focus-within { scroll-behavior: smooth; }
+}
+
+/* Reduce-motion: kill all custom keyframes and transforms. */
+@media (prefers-reduced-motion: reduce) {
+  .ng-page-enter,
+  .chat-message-enter,
+  [data-stagger] > *,
+  img:not([data-no-fade]) {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  :where(button, [role="button"], a, .ng-pressable) {
+    transition: none !important;
+  }
+  :where(button, [role="button"], a, .ng-pressable):active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ─── Navigation progress bar ────────────────────────────────────────
+   Shown while the next route's chunk is still loading. The previous page
+   stays painted underneath (App renders routes from a deferred location),
+   so navigation never flashes an empty/black frame. */
+html[data-nav-pending="true"]::after {
+  content: "";
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 2px;
+  z-index: 2147483000;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--section-accent, 252 92% 67%)),
+    transparent
+  );
+  animation: ng-nav-progress 900ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes ng-nav-progress {
+  0%   { transform: translate3d(-100%, 0, 0); }
+  100% { transform: translate3d(100%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-nav-pending="true"]::after { animation: none; opacity: 0.6; }
+}
+
+/* ─── Motion polish layer ────────────────────────────────────────────
+   Shared easing tokens + micro-interactions. Transform/opacity only so
+   everything stays on the compositor. All rules degrade under
+   prefers-reduced-motion (see the block at the end). */
+
+:root {
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 280ms;
+}
+
+/* Softer, springier press: scale down slightly less, bounce back out. */
+:where(button, [role="button"], a, .ng-pressable) {
+  transition:
+    transform var(--dur-base) var(--ease-spring),
+    opacity var(--dur-base) ease-out,
+    background-color var(--dur-base) ease-out,
+    border-color var(--dur-base) ease-out,
+    box-shadow var(--dur-base) ease-out;
+}
+:where(button, [role="button"], a, .ng-pressable):active:not(:disabled) {
+  transform: scale(0.97);
+  opacity: 0.92;
+  transition-duration: 70ms;
+}
+
+/* Card / tile hover lift (opt-in). */
+.ng-lift {
+  transition:
+    transform var(--dur-slow) var(--ease-out-quint),
+    box-shadow var(--dur-slow) var(--ease-out-quint);
+}
+@media (hover: hover) {
+  .ng-lift:hover { transform: translate3d(0, -2px, 0); }
+}
+.ng-lift:active { transform: translate3d(0, 0, 0) scale(0.985); }
+
+/* Chat messages: slightly longer, gentler settle. */
+.chat-message-enter {
+  animation: chat-message-in 240ms var(--ease-out-quint) both;
+}
+
+/* Streaming caret for assistant text while tokens arrive. */
+.ng-caret::after {
+  content: "";
+  display: inline-block;
+  width: 0.5ch;
+  height: 1em;
+  margin-inline-start: 2px;
+  vertical-align: -0.14em;
+  background: currentColor;
+  opacity: 0.7;
+  border-radius: 1px;
+  animation: ng-caret-blink 1s steps(2, start) infinite;
+}
+@keyframes ng-caret-blink { 50% { opacity: 0; } }
+
+/* Skeleton shimmer — replaces flat pulse for perceived speed. */
+.ng-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.ng-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--foreground) / 0.07),
+    transparent
+  );
+  animation: ng-shimmer-sweep 1.4s var(--ease-out-quint) infinite;
+}
+@keyframes ng-shimmer-sweep { to { transform: translateX(100%); } }
+
+/* Sidebar / list rows: smooth background + inward nudge on hover. */
+@media (hover: hover) {
+  :where([data-row], [role="listitem"], [data-sidebar="menu-button"]) {
+    transition:
+      background-color var(--dur-base) ease-out,
+      transform var(--dur-base) var(--ease-out-quint);
+  }
+  :where([data-row], [role="listitem"], [data-sidebar="menu-button"]):hover {
+    transform: translate3d(2px, 0, 0);
+  }
+  [dir="rtl"] :where([data-row], [role="listitem"], [data-sidebar="menu-button"]):hover {
+    transform: translate3d(-2px, 0, 0);
+  }
+}
+
+/* Focus ring animates in instead of snapping. */
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  animation: ng-focus-in 160ms var(--ease-out-quint) both;
+}
+@keyframes ng-focus-in {
+  from { outline-offset: 4px; }
+  to   { outline-offset: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ng-lift,
+  .ng-shimmer::after,
+  .ng-caret::after,
+  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  @media (hover: hover) {
+    :where([data-row], [role="listitem"], [data-sidebar="menu-button"]):hover {
+      transform: none;
+    }
+  }
+}

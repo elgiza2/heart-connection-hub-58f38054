@@ -1,0 +1,158 @@
+/* ─────────────────────────────────────────────────────────────
+   Manus Theme — desktop chat shell.
+   Scoped to [data-shell="megsy"]. Activates only at md+.
+
+   Direction: charcoal canvas + warm ink-light foreground, Instrument
+   Serif accent headings, hairline borders. Light/cream palette removed —
+   the app is dark-only, so this shell inherits the global dark tokens.
+   ───────────────────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  html.dark [data-shell="megsy"] {
+    /* Keep the subtree aligned with the global dark tokens so every
+       shadcn component (cards, buttons, popovers, inputs) matches. */
+    --background: 0 0% 11%;
+    --foreground: 40 15% 94%;
+    --card: 0 0% 15%;
+    --card-foreground: 40 15% 94%;
+    --popover: 0 0% 14%;
+    --popover-foreground: 40 15% 94%;
+    --primary: 40 15% 94%;
+    --primary-foreground: 0 0% 8%;
+    --secondary: 0 0% 17%;
+    --secondary-foreground: 40 15% 94%;
+    --muted: 0 0% 17%;
+    --muted-foreground: 40 6% 62%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 40 15% 94%;
+    --border: 0 0% 23%;
+    --input: 0 0% 20%;
+    --ring: 40 15% 94%;
+    --radius: 0.75rem;
+
+    background-color: hsl(var(--background));
+    color: hsl(40 15% 94%);
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Hide the mobile blue gradient on desktop when Megsy theme is active */
+  html.dark [data-shell="megsy"] .chat-mobile-blue-bg,
+  html.dark [data-shell="megsy"] .chat-ambient-glow {
+    display: none !important;
+  }
+
+  /* Sidebar — match the charcoal canvas */
+  html.dark [data-shell="megsy"] aside.bg-sidebar,
+  html.dark [data-shell="megsy"] [data-sidebar] {
+    background-color: hsl(var(--sidebar-background)) !important;
+    color: hsl(40 15% 94%) !important;
+    border-right-color: hsl(var(--sidebar-border)) !important;
+  }
+  html.dark [data-shell="megsy"] aside.bg-sidebar * {
+    border-color: hsl(var(--border));
+  }
+
+  /* Editorial serif treatment for greetings and large display text */
+  html.dark [data-shell="megsy"] h1,
+  html.dark [data-shell="megsy"] h2,
+  html.dark [data-shell="megsy"] .megsy-serif,
+  html.dark [data-shell="megsy"] [class*="text-3xl"],
+  html.dark [data-shell="megsy"] [class*="text-4xl"],
+  html.dark [data-shell="megsy"] [class*="text-5xl"] {
+    font-family: "Instrument Serif", ui-serif, Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  /* Mono caption helper */
+  html.dark [data-shell="megsy"] .megsy-mono,
+  html.dark [data-shell="megsy"] code,
+  html.dark [data-shell="megsy"] kbd {
+    font-family: ui-monospace, "JetBrains Mono", SFMono-Regular, Menlo,
+      Consolas, monospace;
+  }
+
+  /* Hairline borders globally inside the shell */
+  html.dark [data-shell="megsy"] .border,
+  html.dark [data-shell="megsy"] .border-t,
+  html.dark [data-shell="megsy"] .border-b,
+  html.dark [data-shell="megsy"] .border-l,
+  html.dark [data-shell="megsy"] .border-r,
+  html.dark [data-shell="megsy"] .border-border,
+  html.dark [data-shell="megsy"] .border-border\/70,
+  html.dark [data-shell="megsy"] .border-border\/50,
+  html.dark [data-shell="megsy"] .border-border\/40,
+  html.dark [data-shell="megsy"] .border-border\/30 {
+    border-color: hsl(var(--border));
+  }
+
+  /* Composer card — elevated dark surface on charcoal */
+  html.dark [data-shell="megsy"] .composer-card,
+  html.dark [data-shell="megsy"] .chat-composer-frame {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.6);
+  }
+  html.dark [data-shell="megsy"] .composer-card textarea,
+  html.dark [data-shell="megsy"] .chat-composer-frame textarea {
+    color: hsl(40 15% 94%) !important;
+    caret-color: hsl(40 15% 94%);
+  }
+  html.dark [data-shell="megsy"] .composer-card textarea::placeholder {
+    color: hsl(40 6% 55%) !important;
+  }
+
+  /* User message bubble — light ink on dark canvas (high contrast) */
+  html.dark [data-shell="megsy"] [data-role="user"],
+  html.dark [data-shell="megsy"] .user-bubble {
+    background: hsl(var(--secondary)) !important;
+    color: hsl(40 15% 94%) !important;
+  }
+
+  /* Soft scrollbars matching the dark palette */
+  html.dark [data-shell="megsy"] ::-webkit-scrollbar { width: 10px; height: 10px; }
+  html.dark [data-shell="megsy"] ::-webkit-scrollbar-thumb {
+    background: hsl(0 0% 22%);
+    border-radius: 999px;
+    border: 2px solid hsl(var(--background));
+  }
+  html.dark [data-shell="megsy"] ::-webkit-scrollbar-track { background: transparent; }
+
+  /* Floating Megsy "computer" canvas card — right side of the workspace */
+  html.dark [data-shell="megsy"] .manus-canvas {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 18px;
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Pill running indicator */
+  html.dark [data-shell="megsy"] .manus-running-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background: hsl(var(--secondary));
+    border: 1px solid hsl(var(--border));
+    border-radius: 999px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(40 6% 62%);
+  }
+  html.dark [data-shell="megsy"] .manus-running-pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #10b981;
+    animation: manus-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes manus-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
+}

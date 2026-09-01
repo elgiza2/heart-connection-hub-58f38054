@@ -1,0 +1,2 @@
+UPDATE public.image_models SET model_id_api = 'Flux1schnell' WHERE slug = 'deapi-flux-schnell';
+UPDATE public.image_models SET model_id_api = 'Flux_2_Klein_4B_BF16', supports_image_editing = true, max_input_images = 4 WHERE slug = 'deapi-flux-2-klein';

@@ -1,0 +1,33 @@
+# Megsy AI
+
+> Megsy is an Egyptian AI platform powered by Megay 3.9 — the first Arabic-native large language model built and trained in Egypt. Megsy offers chat, image generation, web search, code tools, document analysis, and slide/site generation, free on every plan.
+
+## Key facts
+
+- Product: Megsy AI (megsyai.com)
+- Default model: Megay 3.9 (in-house, Egyptian-built)
+- Languages: 100+, natively tuned for Arabic and Egyptian dialect
+- Capabilities: chat, web search, image generation, code, PDFs/documents, slides, published mini-sites
+- Free tier: unlimited Megay 3.9 chat
+- Support: Support@megsyai.com
+
+## Primary pages
+
+- [Home](https://megsyai.com/): product overview
+- [Megay 3.9 model page](https://megsyai.com/megay): the first Egyptian AI model — Arabic & English
+- [Megsy 3.9 model details](https://megsyai.com/megsy-model): technical model card
+- [Pricing](https://megsyai.com/pricing): plans and limits
+- [About](https://megsyai.com/about): company and mission
+- [Features guide](https://megsyai.com/features): capability walkthrough
+- [Contact](https://megsyai.com/contact): reach the team
+
+## Policies
+
+- [Terms](https://megsyai.com/terms)
+- [Privacy](https://megsyai.com/privacy)
+- [AI disclaimer](https://megsyai.com/ai-disclaimer)
+- [Content policy](https://megsyai.com/content-policy)
+
+## Full corpus
+
+- [llms-full.txt](https://megsyai.com/llms-full.txt): concatenated markdown of the public site for offline ingestion.

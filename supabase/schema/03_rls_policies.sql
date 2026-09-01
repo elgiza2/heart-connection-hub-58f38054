@@ -1,0 +1,1346 @@
+-- Snapshot of Supabase public schema (03_rls_policies.sql). Generated for auditability. Do not run directly.
+
+-- public.admin_error_log (Users insert own error log, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: ((user_id = auth.uid()) OR (user_id IS NULL))
+-- public.admin_notifications (admin read notif, cmd=SELECT, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: -
+-- public.admin_notifications (admin update notif, cmd=UPDATE, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.agent_evals (evals_own, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.agent_golden_dataset (golden_read_auth, cmd=SELECT, roles={authenticated})
+-- using: true
+-- with check: -
+-- public.agent_incidents (admins manage incidents, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.agent_memory_files (own agent memory delete, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.agent_memory_files (own agent memory read, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.agent_memory_files (own agent memory update, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.agent_memory_files (own agent memory write, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.agent_messages (agent_messages_owner_all, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.agent_observations (admins view obs, cmd=SELECT, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: -
+-- public.agent_proposals (admins manage proposals, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.agent_runs (admins view runs, cmd=SELECT, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: -
+-- public.agent_sessions (agent_sessions_owner_all, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.agent_tool_bindings (Users manage own bindings, cmd=ALL, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: (user_id = auth.uid())
+-- public.agent_tool_invocations (Users view own invocations, cmd=SELECT, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.agent_tools_registry (Anyone authenticated can read active tools, cmd=SELECT, roles={authenticated})
+-- using: (is_active = true)
+-- with check: -
+-- public.agent_traces (traces_own, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.ai_agents (admins manage agents, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.ai_agents (authenticated read agents, cmd=SELECT, roles={authenticated})
+-- using: true
+-- with check: -
+-- public.ai_personalization (Users can insert own personalization, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.ai_personalization (Users can update own personalization, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.ai_personalization (Users can view own personalization, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.ai_project_files (ai_project_files_own, cmd=ALL, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = ai_project_files.project_id) AND (p.user_id = auth.uid()))))
+-- with check: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = ai_project_files.project_id) AND (p.user_id = auth.uid()))))
+-- public.ai_project_messages (ai_project_messages_own, cmd=ALL, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = ai_project_messages.project_id) AND (p.user_id = auth.uid()))))
+-- with check: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = ai_project_messages.project_id) AND (p.user_id = auth.uid()))))
+-- public.ai_project_snapshots (ai_project_snapshots_own, cmd=ALL, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = ai_project_snapshots.project_id) AND (p.user_id = auth.uid()))))
+-- with check: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = ai_project_snapshots.project_id) AND (p.user_id = auth.uid()))))
+-- public.ai_project_usage (usage_insert_owner, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = ai_project_usage.project_id) AND (p.user_id = auth.uid()))))
+-- public.ai_project_usage (usage_select_owner, cmd=SELECT, roles={public})
+-- using: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = ai_project_usage.project_id) AND (p.user_id = auth.uid()))))
+-- with check: -
+-- public.alibaba_keys (Admins manage alibaba_keys, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.anonymous_chat_usage (Anyone can insert anonymous usage, cmd=INSERT, roles={anon,authenticated})
+-- using: -
+-- with check: (auth.role() = ANY (ARRAY['anon'::text, 'authenticated'::text]))
+-- public.apify_keys (Admins manage apify_keys, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.app_kv (app_kv_owner_delete, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.app_kv (app_kv_owner_insert, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.app_kv (app_kv_owner_select, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.app_kv (app_kv_owner_update, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.appsumo_licenses (Users read own licenses, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.attachment_chunks (users delete own chunks, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.attachment_chunks (users insert own chunks, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.attachment_chunks (users view own chunks, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.background_jobs (users delete own background jobs, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.background_jobs (users insert own background jobs, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.background_jobs (users read own background jobs, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.background_jobs (users update own background jobs, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.billing_audit_log (admins read audit log, cmd=SELECT, roles={public})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: -
+-- public.billing_skus (Anyone can read active skus, cmd=SELECT, roles={public})
+-- using: (active = true)
+-- with check: -
+-- public.blog_categories (admins manage cats, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.blog_categories (auth read cats, cmd=SELECT, roles={authenticated})
+-- using: true
+-- with check: -
+-- public.blog_categories (public read cats, cmd=SELECT, roles={anon})
+-- using: true
+-- with check: -
+-- public.blog_posts (admins manage posts, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.blog_posts (auth read published posts, cmd=SELECT, roles={authenticated})
+-- using: ((status = 'published'::text) OR has_role(auth.uid(), 'admin'::app_role))
+-- with check: -
+-- public.blog_posts (public read published posts, cmd=SELECT, roles={anon})
+-- using: (status = 'published'::text)
+-- with check: -
+-- public.blog_topic_queue (topic_queue_admin_read, cmd=SELECT, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: -
+-- public.blog_topic_queue (topic_queue_admin_write, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.books (Users can manage own books, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.bot_admins (Admins manage bot_admins, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.brave_keys (Admins manage brave_keys, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.calendar_connections (Users can manage own calendar connections, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.chat_citations (Users insert own citations, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.chat_citations (Users view own citations, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.chat_followups (Users insert own followups, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.chat_followups (Users view own followups, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.chat_interaction_events (users insert own interaction events, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.chat_interaction_events (users read own interaction events, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.chat_models (admins manage chat_models, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.chat_models (chat_models readable by all, cmd=SELECT, roles={public})
+-- using: true
+-- with check: -
+-- public.chat_router_logs (Users view own router logs, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.chat_stream_buffers (Users delete their own stream buffers, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.chat_stream_buffers (Users insert their own stream buffers, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.chat_stream_buffers (Users read their own stream buffers, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.chat_stream_buffers (Users update their own stream buffers, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.composio_auth_configs (service_role_only_select, cmd=SELECT, roles={service_role})
+-- using: true
+-- with check: -
+-- public.composio_connections (users_view_own_connections, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.contact_submissions (Anyone can submit contact form, cmd=INSERT, roles={anon,authenticated})
+-- using: -
+-- with check: (auth.role() = ANY (ARRAY['anon'::text, 'authenticated'::text]))
+-- public.conversation_invites (Invited user can view own invites, cmd=SELECT, roles={authenticated})
+-- using: is_invite_for_current_user(invite_email)
+-- with check: -
+-- public.conversation_invites (Owner can manage invites, cmd=ALL, roles={authenticated})
+-- using: owns_conversation(conversation_id)
+-- with check: owns_conversation(conversation_id)
+-- public.conversation_members (Members can view conversation members, cmd=SELECT, roles={authenticated})
+-- using: is_conversation_member(conversation_id, auth.uid())
+-- with check: -
+-- public.conversation_members (Owner can delete members, cmd=DELETE, roles={authenticated})
+-- using: owns_conversation(conversation_id)
+-- with check: -
+-- public.conversation_members (Owner can insert members, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: owns_conversation(conversation_id)
+-- public.conversation_summaries (Users can delete own conversation summaries, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.conversation_summaries (Users can insert own conversation summaries, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: ((auth.uid() = user_id) AND owns_conversation(conversation_id))
+-- public.conversation_summaries (Users can update own conversation summaries, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: ((auth.uid() = user_id) AND owns_conversation(conversation_id))
+-- public.conversation_summaries (Users can view own conversation summaries, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.conversations (Public can view shared conversations, cmd=SELECT, roles={anon,authenticated})
+-- using: ((is_shared = true) AND (share_id IS NOT NULL))
+-- with check: -
+-- public.conversations (Users can manage own conversations, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.conversations (Workspace members can update conversations, cmd=UPDATE, roles={public})
+-- using: ((workspace_id IS NOT NULL) AND is_workspace_member(workspace_id, auth.uid()))
+-- with check: -
+-- public.conversations (Workspace members can view conversations, cmd=SELECT, roles={public})
+-- using: ((workspace_id IS NOT NULL) AND is_workspace_member(workspace_id, auth.uid()))
+-- with check: -
+-- public.credit_transactions (Service role writes credit transactions, cmd=INSERT, roles={public})
+-- using: -
+-- with check: ((auth.jwt() ->> 'role'::text) = 'service_role'::text)
+-- public.credit_transactions (Users can view own transactions, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.credit_transactions (Users read own credit transactions, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.daily_free_usage (Users read own daily usage, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.daily_promo_slots (Anyone can read promo slots, cmd=SELECT, roles={public})
+-- using: true
+-- with check: -
+-- public.document_premium_usage (Users view their own document premium usage, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.document_template_images (Document template images are publicly readable, cmd=SELECT, roles={public})
+-- using: true
+-- with check: -
+-- public.document_templates (Document templates are publicly readable, cmd=SELECT, roles={public})
+-- using: true
+-- with check: -
+-- public.dodo_products (Anyone can read active dodo products, cmd=SELECT, roles={public})
+-- using: (active = true)
+-- with check: -
+-- public.e2b_executions (users_delete_own_executions, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.e2b_executions (users_insert_own_executions, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.e2b_executions (users_select_own_executions, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.e2b_executions (users_update_own_executions, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.e2b_keys (Admins manage e2b keys, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.edge_audit_log (edge_audit_log_own, cmd=SELECT, roles={authenticated})
+-- using: ((auth.uid() = user_id) OR has_role(auth.uid(), 'admin'::app_role))
+-- with check: -
+-- public.edge_rate_limits (edge_rate_limits_service_only_read, cmd=SELECT, roles={authenticated})
+-- using: false
+-- with check: -
+-- public.email_logs (Users can view own email logs, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.focus_sessions (Users manage own focus sessions, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.free_trial_usage (Users read their own free trial usage, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.generated_sites (Public can view shared sites, cmd=SELECT, roles={anon,authenticated})
+-- using: (is_public = true)
+-- with check: -
+-- public.generated_sites (Users manage own sites, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.generated_songs (Users can manage own songs, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.generation_jobs (Users can insert own jobs, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.generation_jobs (Users can view own jobs, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.headshot_templates (Anyone can view active headshot templates, cmd=SELECT, roles={anon,authenticated})
+-- using: (is_active = true)
+-- with check: -
+-- public.hitl_tool_approvals (Users manage their own HITL approvals, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.i18n_sync_runs (Authenticated read sync runs, cmd=SELECT, roles={authenticated})
+-- using: true
+-- with check: -
+-- public.i18n_translations (Public read translations, cmd=SELECT, roles={public})
+-- using: true
+-- with check: -
+-- public.image_models (fal_image_models_read_anon, cmd=SELECT, roles={anon})
+-- using: (is_active = true)
+-- with check: -
+-- public.image_models (fal_image_models_read_authenticated, cmd=SELECT, roles={authenticated})
+-- using: (is_active = true)
+-- with check: -
+-- public.image_templates (Anyone can view active templates, cmd=SELECT, roles={anon,authenticated})
+-- using: (is_active = true)
+-- with check: -
+-- public.kashier_orders (Users can create their own kashier orders, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.kashier_orders (Users can view their own kashier orders, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.key_usage_log (admin read usage, cmd=SELECT, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: -
+-- public.landing_page_prompts (Admins manage landing prompts, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.landing_page_prompts (Anyone can read published rows (non-prompt cols), cmd=SELECT, roles={anon,authenticated})
+-- using: (is_published = true)
+-- with check: -
+-- public.learn_profile (learn_profile insert own, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.learn_profile (learn_profile select own, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.learn_profile (learn_profile update own, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.learn_sessions (learn_sessions insert own, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.learn_sessions (learn_sessions select own, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.learn_sessions (learn_sessions update own, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.manus_keys (admin manage manus keys, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.marketing_accounts (own accounts, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.marketing_ads (ads_delete_own, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.marketing_ads (ads_insert_own, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.marketing_ads (ads_select_own, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.marketing_ads (ads_update_own, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.marketing_analytics (analytics owner reads, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.marketing_campaigns (campaigns_delete_own, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.marketing_campaigns (campaigns_insert_own, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.marketing_campaigns (campaigns_select_own, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.marketing_campaigns (campaigns_update_own, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.marketing_campaigns (own campaigns, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.marketing_platform_limits (limits owner manages, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.marketing_posts (own posts, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.marketing_publish_log (own publish log, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.marketing_publish_queue (queue owner manages, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.mcp_connections (Users manage their own mcp connections, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.media_assets (media_assets_delete_own, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.media_assets (media_assets_insert_own, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.media_assets (media_assets_select_own, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.media_assets (media_assets_update_own, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.media_generation_log (admins read logs, cmd=SELECT, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM bot_admins ba
+--   WHERE ((ba.telegram_chat_id)::text = (auth.jwt() ->> 'telegram_chat_id'::text))))
+-- with check: -
+-- public.media_key_limits (admins manage limits, cmd=ALL, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM bot_admins ba
+--   WHERE ((ba.telegram_chat_id)::text = (auth.jwt() ->> 'telegram_chat_id'::text))))
+-- with check: (EXISTS ( SELECT 1
+--    FROM bot_admins ba
+--   WHERE ((ba.telegram_chat_id)::text = (auth.jwt() ->> 'telegram_chat_id'::text))))
+-- public.media_key_usage (admins read usage, cmd=SELECT, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM bot_admins ba
+--   WHERE ((ba.telegram_chat_id)::text = (auth.jwt() ->> 'telegram_chat_id'::text))))
+-- with check: -
+-- public.media_page_prompts (admin manage prompts, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.media_page_prompts (public read prompts, cmd=SELECT, roles={anon,authenticated})
+-- using: true
+-- with check: -
+-- public.media_provider_keys (Admins manage media_provider_keys, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.meeting_recordings (Users can view own recordings, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.meetings (Users can manage own meetings, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.megsy_code_skills (own delete, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.megsy_code_skills (own insert, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.megsy_code_skills (own select, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.megsy_code_skills (own update, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.message_feedback (mf_own_delete, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.message_feedback (mf_own_insert, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.message_feedback (mf_own_select, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.message_feedback (mf_own_update, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.message_reactions (Members can view reactions in their conversations, cmd=SELECT, roles={public})
+-- using: is_conversation_member(conversation_id, auth.uid())
+-- with check: -
+-- public.message_reactions (Users can add their own reactions, cmd=INSERT, roles={public})
+-- using: -
+-- with check: ((auth.uid() = user_id) AND is_conversation_member(conversation_id, auth.uid()))
+-- public.message_reactions (Users can delete their own reactions, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.message_reads (Members can view reads in their conversations, cmd=SELECT, roles={public})
+-- using: is_conversation_member(conversation_id, auth.uid())
+-- with check: -
+-- public.message_reads (Users can delete their own read marks, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.message_reads (Users can mark messages as read for themselves, cmd=INSERT, roles={public})
+-- using: -
+-- with check: ((auth.uid() = user_id) AND is_conversation_member(conversation_id, auth.uid()))
+-- public.messages (Members can insert messages, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: is_conversation_member(conversation_id, auth.uid())
+-- public.messages (Members can view conversation messages, cmd=SELECT, roles={authenticated})
+-- using: is_conversation_member(conversation_id, auth.uid())
+-- with check: -
+-- public.messages (Public can view messages of shared conversations, cmd=SELECT, roles={anon,authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM conversations
+--   WHERE ((conversations.id = messages.conversation_id) AND (conversations.is_shared = true))))
+-- with check: -
+-- public.messages (Users can manage own messages, cmd=ALL, roles={authenticated})
+-- using: owns_conversation(conversation_id)
+-- with check: owns_conversation(conversation_id)
+-- public.model_media (Anyone can view model media, cmd=SELECT, roles={anon,authenticated})
+-- using: true
+-- with check: -
+-- public.model_pricing (model_pricing_read_all_authenticated, cmd=SELECT, roles={authenticated})
+-- using: true
+-- with check: -
+-- public.model_pricing (model_pricing_read_anon, cmd=SELECT, roles={anon})
+-- using: (enabled = true)
+-- with check: -
+-- public.notification_preferences (Users can insert own preferences, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.notification_preferences (Users can update own preferences, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.notification_preferences (Users can view own preferences, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.notifications (Users can update own notifications, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.notifications (Users can view own notifications, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_agent_messages (Users insert own agent msgs, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (EXISTS ( SELECT 1
+--    FROM operator_runs r
+--   WHERE ((r.id = operator_agent_messages.run_id) AND (r.user_id = auth.uid()))))
+-- public.operator_agent_messages (Users view own agent msgs, cmd=SELECT, roles={public})
+-- using: (EXISTS ( SELECT 1
+--    FROM operator_runs r
+--   WHERE ((r.id = operator_agent_messages.run_id) AND (r.user_id = auth.uid()))))
+-- with check: -
+-- public.operator_artifacts (Users insert own artifacts, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (EXISTS ( SELECT 1
+--    FROM operator_runs r
+--   WHERE ((r.id = operator_artifacts.run_id) AND (r.user_id = auth.uid()))))
+-- public.operator_artifacts (Users view own artifacts, cmd=SELECT, roles={public})
+-- using: (EXISTS ( SELECT 1
+--    FROM operator_runs r
+--   WHERE ((r.id = operator_artifacts.run_id) AND (r.user_id = auth.uid()))))
+-- with check: -
+-- public.operator_audit_log (Users view own audit log, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_dynamic_agents (Users delete own dynamic agents, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_dynamic_agents (Users insert own dynamic agents, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.operator_dynamic_agents (Users update own dynamic agents, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_dynamic_agents (Users view own dynamic agents, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_memory (Users delete own memory, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_memory (Users insert own memory, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.operator_memory (Users view own memory, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_runs (Users delete own runs, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_runs (Users insert own runs, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.operator_runs (Users update own runs, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_runs (Users view own runs, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_steps (Users insert own run steps, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (EXISTS ( SELECT 1
+--    FROM operator_runs r
+--   WHERE ((r.id = operator_steps.run_id) AND (r.user_id = auth.uid()))))
+-- public.operator_steps (Users update own run steps, cmd=UPDATE, roles={public})
+-- using: (EXISTS ( SELECT 1
+--    FROM operator_runs r
+--   WHERE ((r.id = operator_steps.run_id) AND (r.user_id = auth.uid()))))
+-- with check: -
+-- public.operator_steps (Users view own run steps, cmd=SELECT, roles={public})
+-- using: (EXISTS ( SELECT 1
+--    FROM operator_runs r
+--   WHERE ((r.id = operator_steps.run_id) AND (r.user_id = auth.uid()))))
+-- with check: -
+-- public.operator_user_settings (Users insert own operator settings, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.operator_user_settings (Users update own operator settings, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.operator_user_settings (Users view own operator settings, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.parallel_monitor_events (Users delete own monitor events, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.parallel_monitor_events (Users read own monitor events, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.parallel_monitor_events (Users update own monitor events, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.parallel_monitors (Users delete own monitors, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.parallel_monitors (Users insert own monitors, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.parallel_monitors (Users read own monitors, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.parallel_monitors (Users update own monitors, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.parallel_tasks (Users delete own parallel tasks, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.parallel_tasks (Users insert own parallel tasks, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.parallel_tasks (Users read own parallel tasks, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.parallel_tasks (Users update own parallel tasks, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.payment_events (Service role manages payment events, cmd=ALL, roles={public})
+-- using: ((auth.jwt() ->> 'role'::text) = 'service_role'::text)
+-- with check: ((auth.jwt() ->> 'role'::text) = 'service_role'::text)
+-- public.payment_events (Users view their own payment events, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.pending_video_jobs (users read own video jobs, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.pipedream_accounts (Users delete own pipedream accounts, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.pipedream_accounts (Users insert own pipedream accounts, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.pipedream_accounts (Users update own pipedream accounts, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.pipedream_accounts (Users view own pipedream accounts, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.pipedream_tool_settings (users_delete_own_tool_settings, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.pipedream_tool_settings (users_insert_own_tool_settings, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.pipedream_tool_settings (users_select_own_tool_settings, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.pipedream_tool_settings (users_update_own_tool_settings, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.pptx_jobs (Users can insert their own pptx jobs, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (user_id = auth.uid())
+-- public.pptx_jobs (pptx_jobs_select_own, cmd=SELECT, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.premium_usage (Users can view their own premium usage, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.processed_orders (Users can view their own processed orders, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.profiles (Users can read own profile, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = id)
+-- with check: -
+-- public.profiles (Users can update own profile, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = id)
+-- with check: (auth.uid() = id)
+-- public.project_custom_domains (domains_delete_own, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.project_custom_domains (domains_insert_own, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.project_custom_domains (domains_select_own, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.project_custom_domains (domains_update_own, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.project_drafts (drafts_delete_own, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.project_drafts (drafts_insert_own, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.project_drafts (drafts_select_own, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.project_drafts (drafts_update_own, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.project_versions (versions_insert_owner, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = project_versions.project_id) AND (p.user_id = auth.uid()))))
+-- public.project_versions (versions_select_owner, cmd=SELECT, roles={public})
+-- using: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = project_versions.project_id) AND (p.user_id = auth.uid()))))
+-- with check: -
+-- public.project_visits (visits_insert_any, cmd=INSERT, roles={anon,authenticated})
+-- using: -
+-- with check: (auth.role() = ANY (ARRAY['anon'::text, 'authenticated'::text]))
+-- public.project_visits (visits_select_owner, cmd=SELECT, roles={public})
+-- using: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = project_visits.project_id) AND (p.user_id = auth.uid()))))
+-- with check: -
+-- public.projects (projects_delete_own, cmd=DELETE, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.projects (projects_insert_own, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (user_id = auth.uid())
+-- public.projects (projects_select_own, cmd=SELECT, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.projects (projects_update_own, cmd=UPDATE, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: (user_id = auth.uid())
+-- public.promo_deadlines (Users can insert their own promo deadline, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.promo_deadlines (Users can update their own promo deadline, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.promo_deadlines (Users can view their own promo deadline, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.push_subscriptions (own push subs, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.referral_clicks (Anyone can record a click, cmd=INSERT, roles={anon,authenticated})
+-- using: -
+-- with check: (auth.role() = ANY (ARRAY['anon'::text, 'authenticated'::text]))
+-- public.referral_clicks (Referred user marks their conversion, cmd=UPDATE, roles={authenticated})
+-- using: ((converted_user_id IS NULL) AND (EXISTS ( SELECT 1
+--    FROM referrals r
+--   WHERE ((r.referred_id = auth.uid()) AND (r.referral_code = referral_clicks.code)))))
+-- with check: ((converted_user_id = auth.uid()) AND (EXISTS ( SELECT 1
+--    FROM referrals r
+--   WHERE ((r.referred_id = auth.uid()) AND (r.referral_code = referral_clicks.code)))))
+-- public.referral_clicks (Referrers view their clicks, cmd=SELECT, roles={authenticated})
+-- using: (referrer_user_id = auth.uid())
+-- with check: -
+-- public.referral_codes (Users can insert own referral codes, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.referral_codes (Users can view own referral codes, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.referral_codes (Users create their own referral code, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (user_id = auth.uid())
+-- public.referral_codes (Users view their own referral code, cmd=SELECT, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.referral_earnings (Users can view own earnings, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = referrer_id)
+-- with check: -
+-- public.referral_earnings (Users view their earnings, cmd=SELECT, roles={authenticated})
+-- using: (referrer_id = auth.uid())
+-- with check: -
+-- public.referral_tiers (Referral tiers are public, cmd=SELECT, roles={anon,authenticated})
+-- using: true
+-- with check: -
+-- public.referrals (Users can view own referrals, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = referrer_id)
+-- with check: -
+-- public.referrals (Users view their referrals, cmd=SELECT, roles={authenticated})
+-- using: ((referrer_id = auth.uid()) OR (referred_id = auth.uid()))
+-- with check: -
+-- public.research_jobs (Users delete own research jobs, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.research_jobs (Users insert own research jobs, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.research_jobs (Users update own research jobs, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.research_jobs (Users view own research jobs, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.research_messages (Users can manage own research messages, cmd=ALL, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM research_sessions
+--   WHERE ((research_sessions.id = research_messages.session_id) AND (research_sessions.user_id = auth.uid()))))
+-- with check: (EXISTS ( SELECT 1
+--    FROM research_sessions
+--   WHERE ((research_sessions.id = research_messages.session_id) AND (research_sessions.user_id = auth.uid()))))
+-- public.research_reports (Public can view shared research reports, cmd=SELECT, roles={anon,authenticated})
+-- using: (share_token IS NOT NULL)
+-- with check: -
+-- public.research_reports (Users delete own research reports, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.research_reports (Users insert own research reports, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.research_reports (Users update own research reports, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.research_reports (Users view own research reports, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.research_sessions (Users can manage own research sessions, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.research_sources (Users can view own research sources, cmd=SELECT, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM research_sessions
+--   WHERE ((research_sessions.id = research_sources.session_id) AND (research_sessions.user_id = auth.uid()))))
+-- with check: -
+-- public.revenue_ledger (admin read revenue, cmd=SELECT, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: -
+-- public.reward_tasks (Anyone can read active reward tasks, cmd=SELECT, roles={public})
+-- using: (active = true)
+-- with check: -
+-- public.reward_tasks (Service role manages reward tasks, cmd=ALL, roles={public})
+-- using: (auth.role() = 'service_role'::text)
+-- with check: (auth.role() = 'service_role'::text)
+-- public.rp_portal_settings (Users can insert own portal settings, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.rp_portal_settings (Users can update own portal settings, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.rp_portal_settings (Users can view own portal settings, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.scheduled_user_messages (own scheduled msgs, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.security_findings (findings_owner_all, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.security_memory (memory_owner_all, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.security_memory (security_memory_own, cmd=ALL, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = security_memory.project_id) AND (p.user_id = auth.uid()))))
+-- with check: (EXISTS ( SELECT 1
+--    FROM projects p
+--   WHERE ((p.id = security_memory.project_id) AND (p.user_id = auth.uid()))))
+-- public.security_scans (scans_owner_all, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.service_incidents (Public read access for service_incidents, cmd=SELECT, roles={public})
+-- using: true
+-- with check: -
+-- public.service_status (Service role read service_status, cmd=SELECT, roles={service_role})
+-- using: true
+-- with check: -
+-- public.shopping_product_reports (Users insert own product reports, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.shopping_product_reports (Users view own product reports, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.showcase_items (Anyone can view showcase items, cmd=SELECT, roles={public})
+-- using: true
+-- with check: -
+-- public.skill_files (Users manage own skill files, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.skills (Users manage own skills, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.slide_projects (Users can manage own slide projects, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.slide_templates (Anyone can view active slide templates, cmd=SELECT, roles={public})
+-- using: (is_active = true)
+-- with check: -
+-- public.spreadsheet_projects (Users can manage own spreadsheet projects, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.status_subscribers (Users can delete own, cmd=DELETE, roles={authenticated})
+-- using: (contact = (( SELECT users.email
+--    FROM auth.users
+--   WHERE (users.id = auth.uid())))::text)
+-- with check: -
+-- public.status_subscribers (status_subscribers_delete_own, cmd=DELETE, roles={authenticated})
+-- using: ((channel = 'email'::text) AND (lower(contact) = lower(COALESCE((auth.jwt() ->> 'email'::text), ''::text))))
+-- with check: -
+-- public.status_subscribers (status_subscribers_insert_own_email, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: ((channel = 'email'::text) AND (lower(contact) = lower(COALESCE((auth.jwt() ->> 'email'::text), ''::text))))
+-- public.status_subscribers (status_subscribers_select_own, cmd=SELECT, roles={authenticated})
+-- using: ((channel = 'email'::text) AND (lower(contact) = lower(COALESCE((auth.jwt() ->> 'email'::text), ''::text))))
+-- with check: -
+-- public.student_exams (Users manage own exams, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.student_mistakes (Users manage own mistakes, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.student_profiles (Users manage own student profile, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.student_topics (Users manage own topics, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.study_plans (Users manage own study plans, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.subscriptions (Service role manages subscriptions, cmd=ALL, roles={public})
+-- using: ((auth.jwt() ->> 'role'::text) = 'service_role'::text)
+-- with check: ((auth.jwt() ->> 'role'::text) = 'service_role'::text)
+-- public.subscriptions (Users can view their own subscriptions, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.supabase_oauth_states (users can view own oauth state, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.system_skills (Anyone can view active system skills, cmd=SELECT, roles={anon,authenticated})
+-- using: (is_active = true)
+-- with check: -
+-- public.telegram_media (Users can delete own media, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.telegram_media (Users can insert own media, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.telegram_media (Users can update own media, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.telegram_media (Users can view own media, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.telegram_referrals (Users can view referrals tied to their telegram profile, cmd=SELECT, roles={authenticated})
+-- using: ((referrer_telegram_id IN ( SELECT telegram_users.telegram_id
+--    FROM telegram_users
+--   WHERE (telegram_users.user_id = auth.uid()))) OR (referred_telegram_id IN ( SELECT telegram_users.telegram_id
+--    FROM telegram_users
+--   WHERE (telegram_users.user_id = auth.uid()))))
+-- with check: -
+-- public.telegram_task_completions (Users can view their telegram task completions, cmd=SELECT, roles={authenticated})
+-- using: (telegram_id IN ( SELECT telegram_users.telegram_id
+--    FROM telegram_users
+--   WHERE (telegram_users.user_id = auth.uid())))
+-- with check: -
+-- public.telegram_tasks (Anyone can view active telegram tasks, cmd=SELECT, roles={anon,authenticated})
+-- using: (is_active = true)
+-- with check: -
+-- public.telegram_users (Users can view their own telegram profile, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.template_images (Template images are publicly readable, cmd=SELECT, roles={public})
+-- using: true
+-- with check: -
+-- public.tool_landing_images (Anyone can view tool landing images, cmd=SELECT, roles={anon,authenticated})
+-- using: true
+-- with check: -
+-- public.tool_templates (Anyone can view active tool templates, cmd=SELECT, roles={anon,authenticated})
+-- using: (is_active = true)
+-- with check: -
+-- public.tts_voices (TTS voices readable by all authenticated, cmd=SELECT, roles={authenticated})
+-- using: true
+-- with check: -
+-- public.user_assets (Users delete own assets, cmd=DELETE, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.user_assets (Users view own assets, cmd=SELECT, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.user_chat_settings (Users manage own chat settings, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.user_connector_state (ucs_own_delete, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_connector_state (ucs_own_insert, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.user_connector_state (ucs_own_select, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_connector_state (ucs_own_update, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.user_drafts (user_drafts_all_own, cmd=ALL, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: (user_id = auth.uid())
+-- public.user_gallery (Users can manage own gallery, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.user_github_connections (own delete gh, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_github_connections (own select gh, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_integrations (users delete own integrations, cmd=DELETE, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.user_integrations (users insert own integrations, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (user_id = auth.uid())
+-- public.user_integrations (users read own integrations, cmd=SELECT, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.user_integrations (users update own integrations, cmd=UPDATE, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: (user_id = auth.uid())
+-- public.user_knowledge_graph (Service inserts KG, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.user_knowledge_graph (Users delete own KG, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_knowledge_graph (Users view own KG, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_memory_entries (memory_delete_own, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_memory_entries (memory_insert_own, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.user_memory_entries (memory_select_own, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_memory_entries (memory_update_own, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_memory_profiles (Users can insert own memory profile, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.user_memory_profiles (Users can update own memory profile, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.user_memory_profiles (Users can view own memory profile, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_music_tracks (Users delete their tracks, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_music_tracks (Users insert their tracks, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.user_music_tracks (Users view their tracks, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_payment_methods (Users delete own payment methods, cmd=DELETE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_payment_methods (Users insert own payment methods, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: ((auth.uid() = user_id) AND (status = 'pending'::text))
+-- public.user_payment_methods (Users view own payment methods, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_personas (Users manage own personas, cmd=ALL, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.user_preferences (user_prefs_insert_own, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (user_id = auth.uid())
+-- public.user_preferences (user_prefs_select_own, cmd=SELECT, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.user_preferences (user_prefs_update_own, cmd=UPDATE, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: (user_id = auth.uid())
+-- public.user_reward_tasks (Service role manages task progress, cmd=ALL, roles={public})
+-- using: (auth.role() = 'service_role'::text)
+-- with check: (auth.role() = 'service_role'::text)
+-- public.user_reward_tasks (Users insert own task progress, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.user_reward_tasks (Users read own task progress, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_reward_tasks (Users update own task progress, cmd=UPDATE, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.user_roles (admins manage roles, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.user_roles (users read own roles, cmd=SELECT, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.user_supabase_connections (users can delete own supabase connection, cmd=DELETE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_supabase_connections (users can insert own supabase connection, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = user_id)
+-- public.user_supabase_connections (users can update own supabase connection, cmd=UPDATE, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.user_supabase_connections (users can view own supabase connection, cmd=SELECT, roles={public})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.video_models (fal_video_models_read_anon, cmd=SELECT, roles={anon})
+-- using: (is_active = true)
+-- with check: -
+-- public.video_models (fal_video_models_read_authenticated, cmd=SELECT, roles={authenticated})
+-- using: (is_active = true)
+-- with check: -
+-- public.voice_templates (Voice templates readable by all authenticated, cmd=SELECT, roles={authenticated})
+-- using: true
+-- with check: -
+-- public.wavespeed_keys (admin manage ws keys, cmd=ALL, roles={authenticated})
+-- using: has_role(auth.uid(), 'admin'::app_role)
+-- with check: has_role(auth.uid(), 'admin'::app_role)
+-- public.withdrawal_requests (Users can insert own withdrawals, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: ((auth.uid() = user_id) AND (status = 'pending'::text))
+-- public.withdrawal_requests (Users can view own withdrawals, cmd=SELECT, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: -
+-- public.withdrawal_requests (Users request their own withdrawals, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: ((user_id = auth.uid()) AND (status = 'pending'::text))
+-- public.withdrawal_requests (Users view their withdrawals, cmd=SELECT, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: -
+-- public.workspace_audit_log (members read audit, cmd=SELECT, roles={public})
+-- using: is_workspace_member(workspace_id, auth.uid())
+-- with check: -
+-- public.workspace_brand_kit (admins write brand, cmd=ALL, roles={public})
+-- using: is_workspace_admin(workspace_id, auth.uid())
+-- with check: is_workspace_admin(workspace_id, auth.uid())
+-- public.workspace_brand_kit (members read brand, cmd=SELECT, roles={public})
+-- using: is_workspace_member(workspace_id, auth.uid())
+-- with check: -
+-- public.workspace_credit_topups (billing read topups, cmd=SELECT, roles={public})
+-- using: (is_workspace_admin(workspace_id, auth.uid()) OR (workspace_role_of(workspace_id, auth.uid()) = 'billing_manager'::workspace_role))
+-- with check: -
+-- public.workspace_invites (Invited recipient can view own invite, cmd=SELECT, roles={public})
+-- using: is_invite_for_current_user(invite_email)
+-- with check: -
+-- public.workspace_invites (Owner/admin can manage invites, cmd=ALL, roles={public})
+-- using: is_workspace_admin(workspace_id, auth.uid())
+-- with check: is_workspace_admin(workspace_id, auth.uid())
+-- public.workspace_join_requests (admins update requests, cmd=UPDATE, roles={public})
+-- using: is_workspace_admin(workspace_id, auth.uid())
+-- with check: -
+-- public.workspace_join_requests (users create own requests, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (user_id = auth.uid())
+-- public.workspace_join_requests (users see own requests, cmd=SELECT, roles={public})
+-- using: ((user_id = auth.uid()) OR is_workspace_admin(workspace_id, auth.uid()))
+-- with check: -
+-- public.workspace_member_status (admins write status, cmd=ALL, roles={public})
+-- using: is_workspace_admin(workspace_id, auth.uid())
+-- with check: is_workspace_admin(workspace_id, auth.uid())
+-- public.workspace_member_status (members read status, cmd=SELECT, roles={public})
+-- using: is_workspace_member(workspace_id, auth.uid())
+-- with check: -
+-- public.workspace_members (Members can view co-members, cmd=SELECT, roles={public})
+-- using: is_workspace_member(workspace_id, auth.uid())
+-- with check: -
+-- public.workspace_members (Owner/admin can add members, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (is_workspace_admin(workspace_id, auth.uid()) OR ((user_id = auth.uid()) AND (EXISTS ( SELECT 1
+--    FROM workspaces w
+--   WHERE ((w.id = workspace_members.workspace_id) AND (w.owner_id = auth.uid()))))))
+-- public.workspace_members (Owner/admin can remove members; member can leave, cmd=DELETE, roles={public})
+-- using: (is_workspace_admin(workspace_id, auth.uid()) OR (auth.uid() = user_id))
+-- with check: -
+-- public.workspace_members (Owner/admin can update members, cmd=UPDATE, roles={public})
+-- using: is_workspace_admin(workspace_id, auth.uid())
+-- with check: -
+-- public.workspace_notification_prefs (own notif prefs, cmd=ALL, roles={public})
+-- using: (user_id = auth.uid())
+-- with check: (user_id = auth.uid())
+-- public.workspace_settings (admins write settings, cmd=ALL, roles={public})
+-- using: is_workspace_admin(workspace_id, auth.uid())
+-- with check: is_workspace_admin(workspace_id, auth.uid())
+-- public.workspace_settings (members read settings, cmd=SELECT, roles={public})
+-- using: is_workspace_member(workspace_id, auth.uid())
+-- with check: -
+-- public.workspace_shared_resources (Members add shared resources, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (is_workspace_member(workspace_id, auth.uid()) AND (auth.uid() = shared_by))
+-- public.workspace_shared_resources (Members view shared resources, cmd=SELECT, roles={public})
+-- using: is_workspace_member(workspace_id, auth.uid())
+-- with check: -
+-- public.workspace_shared_resources (Sharer or admin removes shared resource, cmd=DELETE, roles={public})
+-- using: ((auth.uid() = shared_by) OR is_workspace_admin(workspace_id, auth.uid()))
+-- with check: -
+-- public.workspace_task_attachments (Members add task attachments, cmd=INSERT, roles={public})
+-- using: -
+-- with check: ((auth.uid() = uploaded_by) AND (EXISTS ( SELECT 1
+--    FROM workspace_tasks t
+--   WHERE ((t.id = workspace_task_attachments.task_id) AND is_workspace_member(t.workspace_id, auth.uid())))))
+-- public.workspace_task_attachments (Members view task attachments, cmd=SELECT, roles={public})
+-- using: (EXISTS ( SELECT 1
+--    FROM workspace_tasks t
+--   WHERE ((t.id = workspace_task_attachments.task_id) AND is_workspace_member(t.workspace_id, auth.uid()))))
+-- with check: -
+-- public.workspace_task_attachments (Uploader/admin delete attachments, cmd=DELETE, roles={public})
+-- using: ((auth.uid() = uploaded_by) OR (EXISTS ( SELECT 1
+--    FROM workspace_tasks t
+--   WHERE ((t.id = workspace_task_attachments.task_id) AND is_workspace_admin(t.workspace_id, auth.uid())))))
+-- with check: -
+-- public.workspace_task_comments (Author/admin delete comments, cmd=DELETE, roles={public})
+-- using: ((auth.uid() = user_id) OR (EXISTS ( SELECT 1
+--    FROM workspace_tasks t
+--   WHERE ((t.id = workspace_task_comments.task_id) AND is_workspace_admin(t.workspace_id, auth.uid())))))
+-- with check: -
+-- public.workspace_task_comments (Members view task comments, cmd=SELECT, roles={public})
+-- using: (EXISTS ( SELECT 1
+--    FROM workspace_tasks t
+--   WHERE ((t.id = workspace_task_comments.task_id) AND is_workspace_member(t.workspace_id, auth.uid()))))
+-- with check: -
+-- public.workspace_task_comments (Members write task comments, cmd=INSERT, roles={public})
+-- using: -
+-- with check: ((auth.uid() = user_id) AND (EXISTS ( SELECT 1
+--    FROM workspace_tasks t
+--   WHERE ((t.id = workspace_task_comments.task_id) AND is_workspace_member(t.workspace_id, auth.uid())))))
+-- public.workspace_tasks (Creator/admin delete tasks, cmd=DELETE, roles={public})
+-- using: (is_workspace_admin(workspace_id, auth.uid()) OR (auth.uid() = created_by))
+-- with check: -
+-- public.workspace_tasks (Creator/assignee/admin update tasks, cmd=UPDATE, roles={public})
+-- using: (is_workspace_admin(workspace_id, auth.uid()) OR (auth.uid() = created_by) OR (auth.uid() = assignee_id))
+-- with check: -
+-- public.workspace_tasks (Members create tasks, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (is_workspace_member(workspace_id, auth.uid()) AND (auth.uid() = created_by))
+-- public.workspace_tasks (Members view tasks, cmd=SELECT, roles={public})
+-- using: is_workspace_member(workspace_id, auth.uid())
+-- with check: -
+-- public.workspace_usage (Members insert own usage, cmd=INSERT, roles={authenticated})
+-- using: -
+-- with check: ((auth.uid() = user_id) AND is_workspace_member(workspace_id, auth.uid()))
+-- public.workspace_usage (Members view own usage, cmd=SELECT, roles={public})
+-- using: ((auth.uid() = user_id) OR is_workspace_admin(workspace_id, auth.uid()))
+-- with check: -
+-- public.workspaces (Anyone can create a workspace they own, cmd=INSERT, roles={public})
+-- using: -
+-- with check: (auth.uid() = owner_id)
+-- public.workspaces (Members can view their workspaces, cmd=SELECT, roles={public})
+-- using: is_workspace_member(id, auth.uid())
+-- with check: -
+-- public.workspaces (Owner can delete workspace, cmd=DELETE, roles={public})
+-- using: (auth.uid() = owner_id)
+-- with check: -
+-- public.workspaces (Owner/admin can update workspace, cmd=UPDATE, roles={public})
+-- using: is_workspace_admin(id, auth.uid())
+-- with check: -
+-- public.youtube_conversations (Users can manage own youtube conversations, cmd=ALL, roles={authenticated})
+-- using: (auth.uid() = user_id)
+-- with check: (auth.uid() = user_id)
+-- public.youtube_messages (Users can manage own youtube messages, cmd=ALL, roles={authenticated})
+-- using: (EXISTS ( SELECT 1
+--    FROM youtube_conversations
+--   WHERE ((youtube_conversations.id = youtube_messages.conversation_id) AND (youtube_conversations.user_id = auth.uid()))))
+-- with check: (EXISTS ( SELECT 1
+--    FROM youtube_conversations
+--   WHERE ((youtube_conversations.id = youtube_messages.conversation_id) AND (youtube_conversations.user_id = auth.uid()))))
+-- public.yt_video_chat_messages (Users manage own yt chat messages, cmd=ALL, roles={authenticated})
+-- using: (chat_id IN ( SELECT yt_video_chats.id
+--    FROM yt_video_chats
+--   WHERE (yt_video_chats.user_id = auth.uid())))
+-- with check: (chat_id IN ( SELECT yt_video_chats.id
+--    FROM yt_video_chats
+--   WHERE (yt_video_chats.user_id = auth.uid())))
+-- public.yt_video_chats (Users manage own yt chats, cmd=ALL, roles={authenticated})
+-- using: (user_id = auth.uid())
+-- with check: (user_id = auth.uid())

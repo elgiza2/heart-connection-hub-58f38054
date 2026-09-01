@@ -1,0 +1,51 @@
+/**
+ * View Transitions API — soft, native-feeling page transitions.
+ * Applies only on browsers that support ::view-transition-* pseudo-elements
+ * (Chrome 111+, Edge 111+, Safari 18+). Silently ignored elsewhere so no JS
+ * fallback is needed. Paired with useNavigateWithTransition().
+ *
+ * Easing: cubic-bezier(0.22, 1, 0.36, 1) — "easeOutQuint", the same curve
+ * Vercel/Linear/Framer use. Enter 180ms, exit 120ms — fast enough to feel
+ * instant, slow enough to avoid jank.
+ */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  animation-duration: 120ms;
+  animation-name: megsy-vt-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: megsy-vt-fade-in;
+}
+
+@keyframes megsy-vt-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes megsy-vt-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Reduce-motion users get an instant cross-fade without translate. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 1ms;
+    animation-name: none;
+  }
+}
+
+/* Never animate view transitions when the user is inside the chat surface —
+   chat has its own message animations and we don't want them to fight. */
+html[data-section="chat"] ::view-transition-old(root),
+html[data-section="chat"] ::view-transition-new(root) {
+  animation: none;
+}

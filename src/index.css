@@ -1,0 +1,3878 @@
+/* Google fonts are loaded asynchronously from index.html (non render-blocking).
+   Keeping an @import here would block first paint on every page.
+
+   Route-specific themes (ios-glass, ios-feel, megsy-workspace,
+   mobile-settings-theme, manus-theme, portfolio-referrals, about-hero) moved to
+   styles/deferred.css — they are fetched once after first paint and then served
+   from the service-worker cache, so they never block the first frame. */
+@import "./styles/page-transitions.css";
+@import "./styles/landing-typography.css";
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── RTL global safeguards ────────────────────────────────────────────
+   Fix broken RTL layouts where horizontal overflow pushes text off the
+   right edge (start-of-line in RTL), causing truncated words in Arabic /
+   Hebrew / Persian. These rules keep the viewport width honest and force
+   long words to wrap instead of overflow. */
+/* Text-only rules — apply to leaf text elements, never containers.
+   Container-level rules (min-width:0, overflow-x, max-width) break
+   flex/grid layouts, sidebars, and input sizing, so we keep RTL as a
+   pure text/direction concern. Tailwind's logical properties (ms-/me-,
+   ps-/pe-, start-/end-) handle spatial mirroring for the layout. */
+html[dir="rtl"] :where(p, h1, h2, h3, h4, h5, h6, li, blockquote) {
+  text-align: start;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+  /* `isolate` (not `plaintext`): plaintext re-orders a whole paragraph to LTR
+     whenever it happens to start with a Latin word / number / emoji, which is
+     the single biggest cause of "broken" Arabic UI text. */
+  unicode-bidi: isolate;
+}
+/* Keep code, numbers, and technical identifiers LTR inside RTL text. */
+html[dir="rtl"] :where(code, pre, kbd, samp, .font-mono, .keep-ltr, [data-ltr="true"]) {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+}
+html[dir="rtl"] :where(code, pre) {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+/* Inputs keep their own writing direction based on content, not RTL html. */
+html[dir="rtl"] :where(input, textarea, select) {
+  unicode-bidi: isolate;
+}
+/* Flip icon-only chevron/arrow buttons in RTL so "next/back" reads correctly. */
+html[dir="rtl"] [data-rtl-flip="true"],
+html[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+/* Opt-out: any subtree marked LTR keeps its original direction and never gets
+   mirrored by the compatibility rules below. */
+html[dir="rtl"] :where([dir="ltr"], .keep-ltr, [data-ltr="true"], .no-rtl-flip) {
+  direction: ltr;
+}
+
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: start;
+}
+
+/* ── Physical-utility compatibility layer ────────────────────────────
+   Most of the UI uses Tailwind logical utilities (ms-/me-/ps-/pe-/start-/end-)
+   which mirror automatically. These rules only patch the remaining *physical*
+   utilities, and every one of them is scoped with :not() so it never touches
+   an element inside an explicitly-LTR island (code blocks, editors, terminals,
+   embedded previews, latin-only widgets). */
+html[dir="rtl"] .text-left:not([dir="ltr"] *, .keep-ltr *, [data-ltr="true"] *, .no-rtl-flip *) {
+  text-align: right;
+}
+html[dir="rtl"] .text-right:not([dir="ltr"] *, .keep-ltr *, [data-ltr="true"] *, .no-rtl-flip *) {
+  text-align: left;
+}
+
+@media all {
+  html[dir="rtl"] .ml-0\.5:not(.keep-ltr *) { margin-left: 0; margin-right: 0.125rem; }
+  html[dir="rtl"] .ml-1:not(.keep-ltr *) { margin-left: 0; margin-right: 0.25rem; }
+  html[dir="rtl"] .ml-1\.5:not(.keep-ltr *) { margin-left: 0; margin-right: 0.375rem; }
+  html[dir="rtl"] .ml-2:not(.keep-ltr *) { margin-left: 0; margin-right: 0.5rem; }
+  html[dir="rtl"] .ml-3:not(.keep-ltr *) { margin-left: 0; margin-right: 0.75rem; }
+  html[dir="rtl"] .ml-4:not(.keep-ltr *) { margin-left: 0; margin-right: 1rem; }
+  html[dir="rtl"] .ml-6:not(.keep-ltr *) { margin-left: 0; margin-right: 1.5rem; }
+  html[dir="rtl"] .ml-8:not(.keep-ltr *) { margin-left: 0; margin-right: 2rem; }
+  html[dir="rtl"] .ml-auto:not(.keep-ltr *) { margin-left: 0; margin-right: auto; }
+  html[dir="rtl"] .mr-0\.5:not(.keep-ltr *) { margin-right: 0; margin-left: 0.125rem; }
+  html[dir="rtl"] .mr-1:not(.keep-ltr *) { margin-right: 0; margin-left: 0.25rem; }
+  html[dir="rtl"] .mr-1\.5:not(.keep-ltr *) { margin-right: 0; margin-left: 0.375rem; }
+  html[dir="rtl"] .mr-2:not(.keep-ltr *) { margin-right: 0; margin-left: 0.5rem; }
+  html[dir="rtl"] .mr-3:not(.keep-ltr *) { margin-right: 0; margin-left: 0.75rem; }
+  html[dir="rtl"] .mr-4:not(.keep-ltr *) { margin-right: 0; margin-left: 1rem; }
+  html[dir="rtl"] .mr-6:not(.keep-ltr *) { margin-right: 0; margin-left: 1.5rem; }
+  html[dir="rtl"] .mr-8:not(.keep-ltr *) { margin-right: 0; margin-left: 2rem; }
+  html[dir="rtl"] .mr-auto:not(.keep-ltr *) { margin-right: 0; margin-left: auto; }
+
+  html[dir="rtl"] .pl-1:not(.keep-ltr *) { padding-left: 0; padding-right: 0.25rem; }
+  html[dir="rtl"] .pl-2:not(.keep-ltr *) { padding-left: 0; padding-right: 0.5rem; }
+  html[dir="rtl"] .pl-3:not(.keep-ltr *) { padding-left: 0; padding-right: 0.75rem; }
+  html[dir="rtl"] .pl-4:not(.keep-ltr *) { padding-left: 0; padding-right: 1rem; }
+  html[dir="rtl"] .pl-6:not(.keep-ltr *) { padding-left: 0; padding-right: 1.5rem; }
+  html[dir="rtl"] .pl-8:not(.keep-ltr *) { padding-left: 0; padding-right: 2rem; }
+  html[dir="rtl"] .pl-10:not(.keep-ltr *) { padding-left: 0; padding-right: 2.5rem; }
+  html[dir="rtl"] .pr-1:not(.keep-ltr *) { padding-right: 0; padding-left: 0.25rem; }
+  html[dir="rtl"] .pr-2:not(.keep-ltr *) { padding-right: 0; padding-left: 0.5rem; }
+  html[dir="rtl"] .pr-3:not(.keep-ltr *) { padding-right: 0; padding-left: 0.75rem; }
+  html[dir="rtl"] .pr-4:not(.keep-ltr *) { padding-right: 0; padding-left: 1rem; }
+  html[dir="rtl"] .pr-6:not(.keep-ltr *) { padding-right: 0; padding-left: 1.5rem; }
+  html[dir="rtl"] .pr-8:not(.keep-ltr *) { padding-right: 0; padding-left: 2rem; }
+  html[dir="rtl"] .pr-10:not(.keep-ltr *) { padding-right: 0; padding-left: 2.5rem; }
+}
+
+/* Tailwind's space-x-* uses margin-left on siblings, which lands on the wrong
+   side in RTL and collapses the visual rhythm. Tailwind ships a reverse flag
+   exactly for this case. */
+html[dir="rtl"] [class*="space-x-"] > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+html[dir="rtl"] :where([dir="ltr"], .keep-ltr) [class*="space-x-"] > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+}
+
+/* Auto-flip lucide chevron/arrow icons inside back/close buttons in RTL
+   so the arrow points toward the RTL "back" direction (rightward). */
+html[dir="rtl"] button[aria-label="Back" i] > svg,
+html[dir="rtl"] a[aria-label="Back" i] > svg {
+  transform: scaleX(-1);
+}
+
+/* Scrollbars, sliders, progress and range inputs must stay physical. */
+html[dir="rtl"] :where(input[type="range"], progress, [role="slider"], [data-orientation="horizontal"][role="progressbar"]) {
+  direction: ltr;
+}
+
+@media (min-width: 1024px) {
+  html[dir="rtl"] .auth-desktop-split,
+  html[dir="rtl"] .auth-desktop-split.lg\:flex-row {
+    flex-direction: row-reverse;
+  }
+}
+
+
+/* Lenis smooth-scroll required styles. Without these the browser's native
+   scroll fights Lenis's synthetic scroll, causing jitter / instability on
+   the landing page. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Brand Palette — Obsidian & Silver.
+   True black (#000000) / charcoal (#1c1c1f) / silver (#e5e5e7) / slate (#57575b).
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --brand-slate: 240 4% 35%;      /* #57575b */
+  --brand-silver: 240 5% 55%;     /* #89898d */
+  --brand-charcoal: 240 6% 12%;   /* #1c1c1f */
+  --brand-midnight: 0 0% 0%;       /* #000000 */
+  --brand-smoke: 240 5% 90%;      /* #e5e5e7 */
+
+  /* ── Overlay tokens (glass/sidebar/profile shell) ─────────────
+     Centralized rgba constants so we don't scatter hex/rgba in TSX.
+     Naming: --overlay-{white|black}-{opacity*100}. */
+  --overlay-white-03: rgba(255, 255, 255, 0.03);
+  --overlay-white-04: rgba(255, 255, 255, 0.04);
+  --overlay-white-05: rgba(255, 255, 255, 0.05);
+  --overlay-white-06: rgba(255, 255, 255, 0.06);
+  --overlay-white-08: rgba(255, 255, 255, 0.08);
+  --overlay-white-10: rgba(255, 255, 255, 0.10);
+  --overlay-white-12: rgba(255, 255, 255, 0.12);
+  --overlay-white-14: rgba(255, 255, 255, 0.14);
+  --overlay-white-16: rgba(255, 255, 255, 0.16);
+  --overlay-white-22: rgba(255, 255, 255, 0.22);
+  --overlay-white-45: rgba(255, 255, 255, 0.45);
+  --overlay-white-60: rgba(255, 255, 255, 0.60);
+  --overlay-white-62: rgba(255, 255, 255, 0.62);
+  --overlay-white-70: rgba(255, 255, 255, 0.70);
+  --overlay-white-92: rgba(255, 255, 255, 0.92);
+  --overlay-white-95: rgba(255, 255, 255, 0.95);
+  --overlay-white-100: #ffffff;
+  --overlay-black-22: rgba(0, 0, 0, 0.22);
+  --overlay-black-35: rgba(0, 0, 0, 0.35);
+  --overlay-black-50: rgba(0, 0, 0, 0.50);
+  --overlay-black-55: rgba(0, 0, 0, 0.55);
+  --page-bg: #1c1c1c;
+  /* Megsy brand blue — used across ThinkingLoader, AgentStatusLine, ChatMessage sources, MegsyStar */
+  --megsy-blue: #5b8def;
+
+  /* Code block surface tokens — unified across CodeBlock + highlighter */
+  --code-bg: #0b0d10;
+  --code-header-bg: #14171c;
+  --code-fg: #e6e8eb;
+  --code-fg-muted: #c7ccd4;
+  --code-fg-subtle: #8a9099;
+
+  /* Chat mode accent hues — one distinct hue per chat mode; used by MobileModeBar */
+  --mode-code: #7DD3FC;      /* sky */
+  --mode-video: #C9A8FF;     /* lavender */
+  --mode-slides: #FFB347;    /* orange */
+  --mode-docs: #FF9F7A;      /* coral */
+  --mode-learning: #7DD3FC;  /* sky */
+
+
+  /* ── Megsy Brand Tokens (unified) ─────────────────────────────
+     Use the Tailwind aliases `brand-*` / `surface-*` (see tailwind.config.ts)
+     instead of writing literal hex values in components. */
+  --brand-ink: 0 0% 4%;            /* #0A0A0A */
+  --brand-parchment: 35 38% 93%;   /* #F5F0E8 */
+  --brand-action: 217 91% 60%;     /* #3B82F6 */
+  --brand-mint: 147 56% 78%;       /* #A8E6CF */
+  --brand-blush: 333 100% 85%;     /* #FFB3D1 */
+  --brand-muted: 0 0% 54%;         /* #8A8A8A */
+  --surface-1: 0 0% 9%;            /* #161616 */
+  --surface-2: 0 0% 10%;           /* #1A1A1A */
+  --surface-3: 0 0% 12%;           /* #1F1F1F */
+  --surface-4: 0 0% 16%;           /* #2A2A2A */
+
+  /* Lock layout vars at boot so chat / header / banner reserve the same
+     vertical space on cold load AND on warm route re-entry. The promo
+     banner overrides this once it measures its real height. */
+  --promo-banner-h: 0px;
+}
+
+/* Ambient animated background — single layer mounted globally.
+   Pointer-events: none, fixed, behind all content. GPU-only transforms,
+   gracefully disables under prefers-reduced-motion. */
+@keyframes aurora-drift-a {
+  0%   { transform: translate3d(-10%, -5%, 0) scale(1); }
+  50%  { transform: translate3d(15%, 8%, 0) scale(1.15); }
+  100% { transform: translate3d(-10%, -5%, 0) scale(1); }
+}
+@keyframes aurora-drift-b {
+  0%   { transform: translate3d(20%, 10%, 0) scale(1.1); }
+  50%  { transform: translate3d(-15%, -8%, 0) scale(1); }
+  100% { transform: translate3d(20%, 10%, 0) scale(1.1); }
+}
+@keyframes aurora-drift-c {
+  0%   { transform: translate3d(0%, 20%, 0) scale(0.9); }
+  50%  { transform: translate3d(-12%, -10%, 0) scale(1.1); }
+  100% { transform: translate3d(0%, 20%, 0) scale(0.9); }
+}
+/* Referral-style ambient glow + grid overlay (reused on chat page) */
+.chat-ambient-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.7;
+  background:
+    radial-gradient(60% 50% at 50% 0%, hsl(var(--primary) / 0.22), transparent 70%),
+    radial-gradient(50% 40% at 50% 100%, hsl(var(--primary) / 0.14), transparent 70%);
+}
+.chat-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image:
+    linear-gradient(hsl(var(--foreground)) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+@media (max-width: 768px) {
+  .chat-ambient-glow { opacity: 0.55; }
+  .chat-grid-overlay { opacity: 0.035; background-size: 32px 32px; }
+}
+
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: hsl(var(--background));
+  contain: strict;
+}
+.ambient-bg__blob {
+  display: none;
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(56px);
+  opacity: 0.18;
+  transform: translate3d(0, 0, 0);
+  mix-blend-mode: normal;
+}
+.ambient-bg__blob--a {
+  top: -10%; left: -10%;
+  width: 60vw; height: 60vw;
+  background: radial-gradient(circle at 50% 50%, hsl(var(--brand-slate) / 0.45), transparent 70%);
+}
+.ambient-bg__blob--b {
+  bottom: -15%; right: -10%;
+  width: 55vw; height: 55vw;
+  background: radial-gradient(circle at 50% 50%, hsl(var(--brand-silver) / 0.30), transparent 70%);
+}
+.ambient-bg__blob--c {
+  top: 30%; left: 30%;
+  width: 50vw; height: 50vw;
+  background: radial-gradient(circle at 50% 50%, hsl(var(--brand-charcoal) / 0.55), transparent 70%);
+}
+html.dark .ambient-bg__blob { opacity: 0.14; }
+html:not(.dark) .ambient-bg__blob { opacity: 0.10; }
+@media (prefers-reduced-motion: reduce) {
+  .ambient-bg__blob { animation: none !important; }
+}
+/* Mobile perf: hide ambient blur layer (3 large blurred circles at 60fps
+   are barely visible at this size but cost real GPU time on phones). */
+@media (max-width: 768px) {
+  .ambient-bg { display: none !important; }
+}
+@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+  .ambient-bg,
+  .chat-grid-overlay,
+  .landing-grid-overlay,
+  .pricing-bubble,
+  .pricing-point {
+    display: none !important;
+  }
+  .landing-hero-word,
+  .pricing-point,
+  .pricing-bubble {
+    animation: none !important;
+  }
+}
+/* Mobile perf: replace heavy backdrop-filter blur with translucent fills
+   on phones. The glass effect is barely visible on small screens and
+   blur(20px) costs 15-40ms per frame on mid-tier mobile GPUs. */
+@media (max-width: 768px) {
+  .glass-ios,
+  .composer-frost,
+  .glass-panel,
+  .glass-input,
+  .ios26-glass,
+  .ios26-glass-strong,
+  .glass-sheet-content,
+  [data-vaul-drawer],
+  [role="dialog"],
+  .cookie-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: hsl(var(--background) / 0.92) !important;
+  }
+
+  .aurora-glow,
+  .blob,
+  .glow,
+  .hero-glow,
+  .gradient-orb,
+  .decorative-blur {
+    filter: none !important;
+    animation: none !important;
+  }
+}
+
+
+/* iOS 15 fallback: dvh/svh not supported, use vh first then dvh */
+.h-\[100dvh\] {
+  height: 100vh;
+  height: 100dvh;
+}
+.min-h-\[100dvh\] {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Shimmer for AI thinking text — fixed-width sweep so short strings shimmer too */
+@keyframes ai-shimmer {
+  from { background-position: 0 0; }
+  to { background-position: 180px 0; }
+}
+@keyframes ai-shimmer-rtl {
+  from { background-position: 0 0; }
+  to { background-position: -180px 0; }
+}
+
+/* Mobile partners marquee — pure CSS so it works inside overflow:hidden */
+@keyframes mobile-partners-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.mobile-partners-marquee {
+  animation: mobile-partners-marquee 220s linear infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-partners-marquee { animation: none; }
+}
+/* Generic mobile marquees for testimonials + services rows */
+@keyframes mobile-marquee-left {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes mobile-marquee-right {
+  from { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+.mobile-marquee-left  { animation: mobile-marquee-left 140s linear infinite; will-change: transform; }
+.mobile-marquee-right { animation: mobile-marquee-right 150s linear infinite; will-change: transform; }
+.mobile-marquee-slow  { animation-duration: 180s; }
+@media (prefers-reduced-motion: reduce) {
+  .mobile-marquee-left, .mobile-marquee-right { animation: none; }
+}
+@keyframes slides-shimmer {
+  0% {
+    transform: translateX(-150%);
+  }
+  100% {
+    transform: translateX(450%);
+  }
+}
+.animate-slides-shimmer {
+  animation: slides-shimmer 2s linear infinite;
+}
+
+/* Chat skeleton bubble entrance + shimmer */
+@keyframes chat-skeleton-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes chat-skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.chat-skeleton-in {
+  opacity: 0;
+  animation: chat-skeleton-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.chat-skeleton-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    hsl(var(--foreground) / 0.06) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: chat-skeleton-shimmer 1.8s ease-in-out infinite;
+}
+
+/* iOS-style image loading shimmer (used by IOSImage component) */
+@keyframes iosShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.ai-shimmer {
+  /* One gradient tile = 180px, and the animation shifts by exactly one tile,
+     so the sweep loops seamlessly and stays visible on short strings.
+     Base is dimmed and the highlight is a bright, narrow band so the light
+     is clearly visible as it travels through the glyphs. */
+  background-image: linear-gradient(
+    90deg,
+    hsl(var(--muted-foreground) / 0.45) 0%,
+    hsl(var(--muted-foreground) / 0.45) 34%,
+    hsl(var(--foreground)) 46%,
+    hsl(var(--foreground)) 54%,
+    hsl(var(--muted-foreground) / 0.45) 66%,
+    hsl(var(--muted-foreground) / 0.45) 100%
+  );
+  background-size: 180px 100%;
+  background-repeat: repeat-x;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: ai-shimmer 1.3s linear infinite;
+}
+
+[dir="rtl"] .ai-shimmer {
+  animation-name: ai-shimmer-rtl;
+}
+
+/* Brand logo: silver start → metallic light sweep → white finish */
+.brand-logo-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.brand-logo-shine {
+  position: absolute;
+  inset: 0;
+  filter: grayscale(100%) brightness(3.2) contrast(1.1);
+  pointer-events: none;
+  opacity: 0;
+  clip-path: polygon(-45% 0, -8% 0, -28% 100%, -65% 100%);
+  animation: logo-shimmer-sweep 2.25s cubic-bezier(0.45, 0, 0.2, 1) 0.25s 1 forwards;
+}
+.brand-logo-img {
+  filter: grayscale(100%) brightness(1.25) contrast(1.12);
+  animation: logo-silver-to-white 2.25s cubic-bezier(0.4, 0, 0.2, 1) 0.25s 1 forwards;
+}
+@keyframes logo-shimmer-sweep {
+  0% {
+    opacity: 0;
+    clip-path: polygon(-45% 0, -8% 0, -28% 100%, -65% 100%);
+  }
+  12%, 72% {
+    opacity: 1;
+  }
+  78% {
+    clip-path: polygon(128% 0, 165% 0, 145% 100%, 108% 100%);
+  }
+  100% {
+    opacity: 0;
+    clip-path: polygon(128% 0, 165% 0, 145% 100%, 108% 100%);
+  }
+}
+@keyframes logo-silver-to-white {
+  0%,
+  55% {
+    filter: grayscale(100%) brightness(1.15) contrast(1.1);
+  }
+  100% {
+    filter: grayscale(100%) brightness(2.7) contrast(1.05);
+  }
+}
+.brand-word {
+  color: transparent;
+  background: linear-gradient(
+    105deg,
+    rgba(190, 194, 201, 0.82) 0%,
+    rgba(190, 194, 201, 0.82) 38%,
+    rgba(255, 255, 255, 1) 49%,
+    rgba(210, 214, 220, 0.92) 58%,
+    rgba(255, 255, 255, 1) 76%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brand-word-silver-to-white 2.25s cubic-bezier(0.45, 0, 0.2, 1) 0.25s 1 forwards;
+}
+@keyframes brand-word-silver-to-white {
+  0%, 8% { background-position: 100% 0; }
+  78%, 100% { background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo-shine,
+  .brand-logo-img,
+  .brand-word {
+    animation: none;
+  }
+  .brand-logo-shine { display: none; }
+  .brand-logo-img {
+    filter: grayscale(100%) brightness(2.7) contrast(1.05);
+  }
+  .brand-word { background-position: 0 0; }
+}
+
+/* Global: prevent any horizontal scroll site-wide */
+html,
+body,
+#root {
+  max-width: 100vw;
+}
+/* Smooth momentum scroll on iOS. `overflow-x: clip` above (instead of
+   `hidden`) avoids breaking touch scroll on mobile by not creating a
+   nested scrolling context on <html>/<body>. */
+html,
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* App background: always driven by the theme token, no per-mode overrides. */
+html,
+body,
+#root {
+  background-color: hsl(var(--background));
+}
+
+html.settings-page-active,
+html.settings-page-active body,
+html.settings-page-active #root {
+  background-color: hsl(var(--background));
+  overscroll-behavior-y: none;
+}
+html.settings-page-active body::before {
+  content: none;
+}
+
+/* Desktop chat sidebar uses a glass surface — leave the background to the
+   inline style on the AppSidebar panel (unified "+" menu recipe). */
+[data-chat-sidebar="true"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+}
+
+/* Allow text selection globally, protect UI elements */
+* {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+button,
+[role="button"],
+nav,
+.cookie-card,
+.no-select,
+[data-landing] h1,
+[data-landing] h2,
+[data-landing] .hero-text,
+.badge,
+.tab-label {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+img,
+video {
+  -webkit-user-drag: none;
+}
+/* Always allow selection/copy/paste in form fields */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+  touch-action: manipulation;
+  caret-color: currentColor;
+}
+/* Prevent zoom on iOS */
+input,
+textarea,
+select {
+  font-size: 16px !important;
+}
+
+/* Keep user-entered composer text clearly visible. Placeholder styling remains separate.
+   Scoped strictly to the chat composer surfaces — a global rule here would make filled
+   inputs invisible on every light-background form (docs search, settings, etc.). */
+.chat-composer-frame textarea:not(:placeholder-shown),
+.chat-composer-frame input:not(:placeholder-shown),
+.liquid-glass-input textarea:not(:placeholder-shown),
+.liquid-glass-input input:not(:placeholder-shown),
+.ios26-glass-chip textarea:not(:placeholder-shown),
+.ios26-glass-chip input:not(:placeholder-shown) {
+  color: var(--ink-1) !important;
+  -webkit-text-fill-color: var(--ink-1) !important;
+  caret-color: var(--ink-1) !important;
+}
+
+.chat-composer-frame {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid hsl(var(--foreground) / 0.15) !important;
+  background: hsl(var(--foreground) / 0.05) !important;
+  box-shadow: none !important;
+  min-height: 80px;
+  border-radius: 1.1rem !important;
+}
+
+[data-theme="dark"] .chat-composer-frame {
+  border-color: hsl(0 0% 100% / 0.12) !important;
+  background: hsl(0 0% 8%) !important;
+  box-shadow: none !important;
+}
+
+
+@media (min-width: 768px) {
+  .chat-composer-frame {
+    border: 1px solid hsl(var(--border) / 0.75) !important;
+    background: hsl(var(--card)) !important;
+    min-height: auto;
+    border-radius: 1.35rem !important;
+    box-shadow: 0 10px 28px hsl(var(--foreground) / 0.1) !important;
+  }
+
+  [data-theme="dark"] .chat-composer-frame {
+    background: hsl(var(--background)) !important;
+    border-color: hsl(var(--border) / 0.9) !important;
+    box-shadow: 0 10px 28px hsl(0 0% 0% / 0.42) !important;
+  }
+}
+
+/* Fancy button background for sidebar user section */
+.fancy-btn-bg {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.15));
+  border: 1px solid hsl(var(--primary) / 0.2);
+}
+
+.slides-card-shell {
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid hsl(0 0% 12%);
+  border-radius: calc(var(--radius) + 0.25rem);
+  box-shadow: 0 20px 50px hsl(0 0% 0% / 0.18);
+  overflow: hidden;
+}
+
+.slides-card-preview {
+  background: #000000;
+  border-bottom: 1px solid hsl(0 0% 12%);
+}
+
+.slides-card-actions {
+  background: #000000;
+}
+
+.slides-card-button {
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--border));
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease;
+  box-shadow: 0 1px 2px hsl(0 0% 0% / 0.06);
+}
+
+.slides-card-button:hover {
+  transform: translateY(-1px);
+}
+
+.slides-card-button--accent {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  border-color: hsl(0 0% 88%) !important;
+  box-shadow: 0 10px 22px hsl(0 0% 0% / 0.12);
+}
+
+.slides-card-button--accent:hover {
+  background: #f5f5f5 !important;
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  border-color: hsl(0 0% 80%) !important;
+  box-shadow: 0 14px 26px hsl(0 0% 0% / 0.16);
+}
+
+button[data-slides-preview-button],
+.slides-card-button--accent[data-slides-preview-button] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+button[data-slides-preview-button] svg,
+.slides-card-button--accent[data-slides-preview-button] svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
+}
+
+.slides-card-button--secondary {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  border-color: hsl(0 0% 88%) !important;
+  box-shadow: 0 10px 22px hsl(0 0% 0% / 0.12);
+}
+
+.slides-card-button--secondary:hover {
+  background: #f5f5f5 !important;
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  border-color: hsl(0 0% 80%) !important;
+  box-shadow: 0 14px 26px hsl(0 0% 0% / 0.16);
+}
+
+.slides-card-button--secondary svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
+}
+
+@media (min-width: 768px) {
+  img,
+  video {
+    -webkit-user-drag: none;
+  }
+}
+
+/* Hide UnicornStudio watermark globally without touching the canvas */
+.unicorn-bg a[href*="unicorn.studio"],
+.unicorn-bg a[href*="unicornstudio"],
+.unicorn-bg [class*="unicorn-watermark"],
+.unicorn-bg [data-us-watermark] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+@layer base {
+  :root {
+    /* Light theme — soft grey canvas, white cards, healthy pink accent. */
+    --background: 240 6% 96%;
+    --foreground: 240 10% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 12%;
+    --primary: 340 72% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 340 45% 96%;
+    --secondary-foreground: 340 40% 25%;
+    --muted: 340 25% 96%;
+    --muted-foreground: 240 5% 38%;
+    --accent: 340 60% 95%;
+    --accent-foreground: 340 55% 32%;
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 340 12% 86%;
+    --input: 340 12% 88%;
+    --ring: 340 72% 60%;
+    --sf-1: #ffffff;
+    --sf-2: #f2f2f4;
+    --sf-3: #fdf7fa;
+    --ink-1: #17171a;
+    --ink-2: rgba(23,23,26,0.72);
+    --ink-3: rgba(23,23,26,0.52);
+    --hairline: rgba(23,23,26,0.16);
+    --radius: 0.75rem;
+    --glass: 0 0% 100% / 0.86;
+    --glass-border: 340 20% 88%;
+    --glass-blur: 10px;
+    --popover-elevated: 0 0% 100%;
+    --silver: 240 5% 45%;
+    --silver-bright: 240 8% 25%;
+    --silver-dark: 240 5% 55%;
+    --success: 142 50% 42%;
+    --warning: 38 92% 50%;
+    --value-yellow: 340 72% 52%;
+    --value-ink: 0 0% 100%;
+    --sidebar-background: 340 40% 99%;
+    --sidebar-foreground: 240 10% 18%;
+    --sidebar-primary: 340 72% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 340 45% 95%;
+    --sidebar-accent-foreground: 340 50% 28%;
+    --sidebar-border: 340 20% 90%;
+    --sidebar-ring: 340 72% 60%;
+    --font-display: "Space Grotesk", sans-serif;
+    --font-body: "Inter", sans-serif;
+    /* Safe defaults so the Arabic stacks resolve even before
+       styles/font-fallback.css (which adds the metric-matched fallback faces)
+       has been applied. Same families, no metric override. */
+    --font-arabic-stack: "Cairo", "Tajawal", "Readex Pro", system-ui, sans-serif;
+    --font-arabic-serif-stack: "Noto Naskh Arabic", "Tajawal", "Cairo", system-ui, sans-serif;
+    --font-arabic-ui-stack: "Readex Pro", "Cairo", "Tajawal", "Noto Naskh Arabic", system-ui, sans-serif;
+  }
+
+  /* Onyx & Bone — pure black with a neutral bone-white accent (unified brand) */
+  .dark,
+  [data-theme="dark"] {
+    --background: 0 0% 11%;             /* #1c1c1c */
+    --foreground: 0 0% 96%;             /* off-white */
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 14%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 0 0% 98%;                /* bone white */
+    --primary-foreground: 0 0% 6%;
+    --secondary: 0 0% 17%;
+    --secondary-foreground: 0 0% 94%;
+    --muted: 0 0% 17%;
+    --muted-foreground: 0 0% 62%;       /* readable grey */
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 96%;
+    --destructive: 0 78% 66%;           /* readable red on dark surfaces */
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 23%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 80%;                   /* neutral focus ring */
+    --glass: 0 0% 14% / 0.94;
+    --glass-border: 0 0% 24%;
+    --glass-blur: 10px;
+    --silver: 0 0% 72%;
+    --silver-bright: 0 0% 88%;
+    --silver-dark: 0 0% 46%;
+    --success: 152 40% 55%;
+    --warning: 43 60% 66%;
+    --value-yellow: 0 0% 96%;
+    --value-ink: 0 0% 0%;
+
+    --sidebar-background: 0 0% 11%;
+    --sidebar-foreground: 0 0% 88%;
+    --sidebar-primary: 0 0% 96%;
+    --sidebar-primary-foreground: 0 0% 7%;
+    --sidebar-accent: 0 0% 17%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 23%;
+    --sidebar-ring: 0 0% 60%;
+    --sf-1: #121212;
+    --sf-2: #232323;
+    --sf-3: #131313;
+    --ink-1: #ffffff;
+    --ink-2: rgba(255,255,255,0.72);
+    --ink-3: rgba(255,255,255,0.52);
+    --hairline: rgba(255,255,255,0.10);
+  }
+
+
+  /* Megsy theme tokens remain shared across all locales and zones. */
+
+
+
+
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Global theme-adaptive overrides
+   Many pages use hardcoded Tailwind utilities (bg-white, text-black,
+   bg-black, text-white). Remap them to design tokens whenever a dark
+   theme is active so those pages don't break theme switching.
+   ───────────────────────────────────────────────────────────── */
+html.dark:not(.settings-page-active) .bg-white:not(.theme-fixed),
+html.dark:not(.settings-page-active) [class*="bg-white/"]:not(.theme-fixed) {
+  background-color: hsl(var(--card)) !important;
+}
+html.dark .bg-black:not(.theme-fixed),
+html.dark [class*="bg-black/"]:not(.theme-fixed) {
+  background-color: hsl(var(--background)) !important;
+}
+html.dark .text-black:not(.theme-fixed),
+html.dark [class*="text-black/"]:not(.theme-fixed) {
+  color: hsl(var(--foreground)) !important;
+}
+html.dark:not(.settings-page-active) [class*="text-white/"]:not(.theme-fixed) {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Light theme reverse — pages built dark-first using text-white / bg-white/0.0X */
+html:not(.dark) .text-white:not(.theme-fixed) {
+  color: hsl(var(--foreground)) !important;
+}
+html:not(.dark) [class*="text-white/"]:not(.theme-fixed) {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* + button in composer: fully borderless, plain icon (no fill, no accent). */
+.animated-plus-btn,
+button[data-testid="mobile-composer-plus"] {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.animated-plus-btn:hover,
+button[data-testid="mobile-composer-plus"]:hover { background: transparent !important; }
+html.dark .animated-plus-btn,
+html[data-theme="dark"] .animated-plus-btn,
+html.dark button[data-testid="mobile-composer-plus"],
+html[data-theme="dark"] button[data-testid="mobile-composer-plus"] {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html:not(.dark) .bg-black:not(.theme-fixed) {
+  background-color: hsl(var(--card)) !important;
+}
+html:not(.dark) [class*="bg-black/"]:not(.theme-fixed) {
+  background-color: hsl(var(--muted)) !important;
+}
+html:not(.dark) [class*="bg-white/"]:not(.theme-fixed) {
+  background-color: hsl(var(--muted)) !important;
+}
+html:not(.dark) [class*="text-black/"]:not(.theme-fixed) {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* .theme-fixed = opt out of theme remapping; restore original Tailwind values.
+   Specificity must match/exceed the dark/light overrides above (html.dark .bg-white:not(.theme-fixed) = 0,3,1).
+   We use html.dark/html:not(.dark) prefixes here to match, and rely on source order (later wins).
+   Hardcoded color values so opacity variants (text-white/40, bg-black/50) still render correctly. */
+html.dark .theme-fixed .bg-white,
+html.dark .theme-fixed.bg-white,
+html:not(.dark) .theme-fixed .bg-white,
+html:not(.dark) .theme-fixed.bg-white {
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1)) !important;
+}
+html.dark .theme-fixed .bg-black,
+html.dark .theme-fixed.bg-black,
+html:not(.dark) .theme-fixed .bg-black,
+html:not(.dark) .theme-fixed.bg-black {
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1)) !important;
+}
+html.dark .theme-fixed .text-white,
+html.dark .theme-fixed.text-white,
+html:not(.dark) .theme-fixed .text-white,
+html:not(.dark) .theme-fixed.text-white {
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1)) !important;
+}
+html.dark .theme-fixed .text-black,
+html.dark .theme-fixed.text-black,
+html:not(.dark) .theme-fixed .text-black,
+html:not(.dark) .theme-fixed.text-black {
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1)) !important;
+}
+/* NOTE: alpha variants (bg-white/5, text-white/60, border-white/10) are NOT
+   re-declared here. Tailwind v3 compiles them to literal rgb(... / 0.05) and
+   never sets --tw-*-opacity, so an !important override with
+   var(--tw-bg-opacity, 1) collapsed them to SOLID white/black for every
+   descendant of a .theme-fixed element. Letting Tailwind's own value win keeps
+   translucency correct. */
+
+/* Borders */
+html:not(.dark) [class*="border-white/"]:not(.theme-fixed) {
+  border-color: hsl(var(--border)) !important;
+}
+html.dark [class*="border-black/"]:not(.theme-fixed) {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Coder is intentionally a fixed dark builder surface. It uses translucent
+   Tailwind white/black utilities as glass layers; the global theme remapper
+   above must not collapse those utilities into solid card/background colors. */
+html.dark .coder-fixed.coder-fixed :where(.bg-white\/5),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-white\/5) { background-color: rgb(255 255 255 / 0.05) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-white\/10),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-white\/10) { background-color: rgb(255 255 255 / 0.10) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-white\/15),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-white\/15) { background-color: rgb(255 255 255 / 0.15) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-white\/20),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-white\/20) { background-color: rgb(255 255 255 / 0.20) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-white\/30),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-white\/30) { background-color: rgb(255 255 255 / 0.30) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-black\/20),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-black\/20) { background-color: rgb(0 0 0 / 0.20) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-black\/30),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-black\/30) { background-color: rgb(0 0 0 / 0.30) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-black\/40),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-black\/40) { background-color: rgb(0 0 0 / 0.40) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-black\/60),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-black\/60) { background-color: rgb(0 0 0 / 0.60) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-black\/70),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-black\/70) { background-color: rgb(0 0 0 / 0.70) !important; }
+html.dark .coder-fixed.coder-fixed :where(.bg-black\/80),
+html:not(.dark) .coder-fixed.coder-fixed :where(.bg-black\/80) { background-color: rgb(0 0 0 / 0.80) !important; }
+html.dark .coder-fixed.coder-fixed :where(.text-white\/40),
+html:not(.dark) .coder-fixed.coder-fixed :where(.text-white\/40) { color: rgb(255 255 255 / 0.40) !important; }
+html.dark .coder-fixed.coder-fixed :where(.text-white\/50),
+html:not(.dark) .coder-fixed.coder-fixed :where(.text-white\/50) { color: rgb(255 255 255 / 0.50) !important; }
+html.dark .coder-fixed.coder-fixed :where(.text-white\/60),
+html:not(.dark) .coder-fixed.coder-fixed :where(.text-white\/60) { color: rgb(255 255 255 / 0.60) !important; }
+html.dark .coder-fixed.coder-fixed :where(.text-white\/70),
+html:not(.dark) .coder-fixed.coder-fixed :where(.text-white\/70) { color: rgb(255 255 255 / 0.70) !important; }
+html.dark .coder-fixed.coder-fixed :where(.text-white\/80),
+html:not(.dark) .coder-fixed.coder-fixed :where(.text-white\/80) { color: rgb(255 255 255 / 0.80) !important; }
+html.dark .coder-fixed.coder-fixed :where(.text-white\/85),
+html:not(.dark) .coder-fixed.coder-fixed :where(.text-white\/85) { color: rgb(255 255 255 / 0.85) !important; }
+html.dark .coder-fixed.coder-fixed :where(.text-white\/90),
+html:not(.dark) .coder-fixed.coder-fixed :where(.text-white\/90) { color: rgb(255 255 255 / 0.90) !important; }
+html.dark .coder-fixed.coder-fixed :where(.border-white\/10),
+html:not(.dark) .coder-fixed.coder-fixed :where(.border-white\/10) { border-color: rgb(255 255 255 / 0.10) !important; }
+html.dark .coder-fixed.coder-fixed :where(.border-white\/15),
+html:not(.dark) .coder-fixed.coder-fixed :where(.border-white\/15) { border-color: rgb(255 255 255 / 0.15) !important; }
+
+/* Settings sub-pages (Help / Support / Contact / Privacy / SystemStatus)
+   were authored with hardcoded near-black hex utilities. Under the light
+   theme, remap those literal colors so the text and surfaces read cleanly.
+   These rules are scoped to .ms-theme + [data-ms-page] wrapper via the
+   parent body class so they don't leak outside settings. */
+html[data-theme="light"] .text-\[\#f5f5f5\],
+html[data-theme="light"] .text-\[\#EDE4D8\] {
+  color: hsl(var(--foreground)) !important;
+}
+html[data-theme="light"] .text-\[\#a0a0a0\],
+html[data-theme="light"] .text-\[\#6b6b6b\] {
+  color: hsl(var(--muted-foreground)) !important;
+}
+html[data-theme="light"] .bg-\[\#0d0d0d\],
+html[data-theme="light"] .bg-\[hsl\(var\(--background\)\)\],
+html[data-theme="light"] [class*="bg-\[hsl\(var\(--background\)\)\]\/"] {
+  background-color: hsl(var(--card)) !important;
+}
+html[data-theme="light"] .border-\[hsl\(var\(--background\)\)\],
+html[data-theme="light"] .border-\[\#333\] {
+  border-color: hsl(var(--border)) !important;
+}
+html[data-theme="light"] .bg-\[\#f5f5f5\] {
+  background-color: hsl(var(--foreground)) !important;
+  color: hsl(var(--background)) !important;
+}
+html[data-theme="light"] .bg-\[\#1C1C1E\],
+html[data-theme="light"] .bg-\[\#0d0d0d\],
+html[data-theme="light"] .bg-\[\#1c1c1e\] {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+html[data-theme="light"] .text-\[\#EDE4D8\],
+html[data-theme="light"] [class*="text-\[\#EDE4D8\]\/"] {
+  color: hsl(var(--foreground)) !important;
+}
+html[data-theme="light"] [class*="border-white\/\[0\.07\]"],
+html[data-theme="light"] [class*="border-white\/\[0\.1"] {
+  border-color: hsl(var(--border)) !important;
+}
+html[data-theme="light"] [class*="bg-white\/\[0\.08"],
+html[data-theme="light"] [class*="bg-white\/\[0\.06"] {
+  background-color: hsl(var(--muted)) !important;
+}
+
+
+
+/* ─────────────────────────────────────────────────────────────
+   Light theme — force theme-fixed / chat-surface-dark surfaces
+   to adopt the light palette so no page renders as a solid black
+   block when the user picks "Light" in Settings.
+   ───────────────────────────────────────────────────────────── */
+html[data-theme="light"] .theme-fixed.bg-black,
+html[data-theme="light"] .theme-fixed .bg-black,
+html[data-theme="light"] .chat-surface-dark,
+html[data-theme="light"] .chat-surface-dark.bg-black {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+html[data-theme="light"] .theme-fixed.text-white,
+html[data-theme="light"] .theme-fixed .text-white,
+html[data-theme="light"] .chat-surface-dark .text-white {
+  color: hsl(var(--foreground)) !important;
+}
+html[data-theme="light"] [style*="--chat-reference-bg"] {
+  --chat-reference-bg: hsl(var(--background)) !important;
+}
+/* Light-mode remap for common translucent white overlays on chat surface —
+   they were tuned for a black canvas and become invisible on a light one. */
+html[data-theme="light"] .chat-surface-dark :where(.bg-white\/5,.bg-white\/10) {
+  background-color: rgb(0 0 0 / 0.04) !important;
+}
+html[data-theme="light"] .chat-surface-dark :where(.border-white\/10,.border-white\/15) {
+  border-color: hsl(var(--border)) !important;
+}
+html[data-theme="light"] .chat-surface-dark :where(.text-white\/60,.text-white\/70,.text-white\/80) {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+
+
+/* Mobile sidebar footer: fixed white controls that should not be remapped by
+   global dark/light hardcoded-color overrides. Keep this scoped and class-based
+   so hover classes like hover:bg-black/[0.04] cannot accidentally become solid black. */
+.mobile-sidebar-footer-pill {
+  background-color: #ffffff !important;
+  color: rgb(0 0 0 / 0.9) !important;
+  box-shadow: 0 4px 14px -4px rgb(0 0 0 / 0.18);
+  transition:
+    background-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* When docked (scroll state), children lose their own surface so the outer
+   dock card becomes the single white surface. */
+[data-mobile-sidebar-footer-dock="true"] .mobile-sidebar-footer-pill {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+/* The "+" action turns into a dark pill inside the docked bar. */
+[data-mobile-sidebar-footer-dock="true"] button[data-mobile-sidebar-footer-action="new"].mobile-sidebar-footer-pill {
+  background-color: #0c0c0e !important;
+  color: #ffffff !important;
+}
+[data-mobile-sidebar-footer-dock="true"] button[data-mobile-sidebar-footer-action="new"] .mobile-sidebar-footer-icon,
+[data-mobile-sidebar-footer-dock="true"] button[data-mobile-sidebar-footer-action="new"] svg {
+  color: #ffffff !important;
+}
+.mobile-sidebar-footer-action {
+  color: rgb(0 0 0 / 0.9) !important;
+}
+.mobile-sidebar-footer-action:hover {
+  background-color: rgb(0 0 0 / 0.04) !important;
+}
+.mobile-sidebar-footer-text,
+.mobile-sidebar-footer-icon {
+  color: rgb(0 0 0 / 0.9) !important;
+}
+.mobile-sidebar-footer-avatar-fallback {
+  background-color: rgb(0 0 0 / 0.06) !important;
+  color: rgb(0 0 0 / 0.9) !important;
+}
+.mobile-sidebar-footer-divider {
+  background-color: rgb(0 0 0 / 0.1) !important;
+}
+
+/* A solid token-driven canvas avoids transparent compositing and color flash. */
+html,
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply text-foreground;
+    background: hsl(var(--background));
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply rounded-xl border;
+    background: hsl(var(--glass));
+    border-color: hsl(var(--glass-border));
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
+
+  .glass-input {
+    @apply rounded-lg border px-4 py-3 text-sm transition-all duration-200 outline-none;
+    background: hsl(var(--glass));
+    border-color: hsl(var(--glass-border));
+    backdrop-filter: blur(var(--glass-blur));
+    color: hsl(var(--foreground));
+  }
+  .glass-input::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+  .glass-input:focus {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+  }
+
+  /* iOS 26.5 — liquid glass: heavier saturation, layered highlight ring */
+  .ios26-glass {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), var(--overlay-white-10));
+    -webkit-backdrop-filter: blur(10px) saturate(150%) brightness(1.04);
+    backdrop-filter: blur(10px) saturate(150%) brightness(1.04);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 var(--overlay-white-18),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 18px 40px -16px var(--overlay-black-35);
+  }
+  .ios26-glass-strong {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(180deg, var(--overlay-white-30), var(--overlay-white-14));
+    -webkit-backdrop-filter: blur(12px) saturate(155%) brightness(1.05);
+    backdrop-filter: blur(12px) saturate(155%) brightness(1.05);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.38),
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 22px 48px -18px rgba(0, 0, 0, 0.45);
+  }
+  .dark .ios26-glass,
+  .dark .ios26-glass-strong {
+    background: linear-gradient(180deg, var(--overlay-white-10), var(--overlay-white-04));
+    box-shadow:
+      inset 0 1px 0 var(--overlay-white-20),
+      inset 0 -1px 0 var(--overlay-white-05),
+      inset 0 0 0 1px var(--overlay-white-10),
+      0 18px 40px -16px rgba(0, 0, 0, 0.6);
+  }
+  /* Auto specular highlight + chromatic edge (no JSX changes needed) */
+  .ios26-glass::before,
+  .ios26-glass-strong::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+      radial-gradient(140% 70% at 50% -20%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0) 55%),
+      radial-gradient(60% 100% at 0% 50%, var(--overlay-white-18), rgba(255, 255, 255, 0) 60%),
+      radial-gradient(60% 100% at 100% 50%, var(--overlay-white-18), rgba(255, 255, 255, 0) 60%);
+    mix-blend-mode: screen;
+    opacity: 0.95;
+    z-index: 0;
+  }
+  .dark .ios26-glass::before,
+  .dark .ios26-glass-strong::before {
+    background:
+      radial-gradient(140% 70% at 50% -20%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 55%),
+      radial-gradient(60% 100% at 0% 50%, var(--overlay-white-06), rgba(255, 255, 255, 0) 60%),
+      radial-gradient(60% 100% at 100% 50%, var(--overlay-white-06), rgba(255, 255, 255, 0) 60%);
+    opacity: 0.7;
+  }
+  .ios26-glass::after,
+  .ios26-glass-strong::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(
+      115deg,
+      rgba(255, 80, 120, 0.55) 0%,
+      rgba(255, 255, 255, 0) 22%,
+      rgba(255, 255, 255, 0) 78%,
+      rgba(80, 180, 255, 0.55) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    mix-blend-mode: screen;
+    opacity: 0.85;
+    z-index: 0;
+  }
+  /* keep direct children above the pseudo-layers */
+  .ios26-glass > *,
+  .ios26-glass-strong > * {
+    position: relative;
+    z-index: 1;
+  }
+  .ios26-chip {
+    @apply rounded-full px-3 py-1.5 text-xs font-medium transition-all;
+    position: relative;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), var(--overlay-white-25));
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+      0 4px 10px -4px rgba(0, 0, 0, 0.18);
+  }
+  .ios26-chip:hover {
+    background: linear-gradient(180deg, var(--overlay-white-70), rgba(255, 255, 255, 0.35));
+  }
+  .dark .ios26-chip {
+    background: linear-gradient(180deg, var(--overlay-white-14), var(--overlay-white-05));
+    box-shadow:
+      inset 0 1px 0 var(--overlay-white-18),
+      inset 0 0 0 1px var(--overlay-white-08),
+      0 4px 10px -4px rgba(0, 0, 0, 0.5);
+  }
+  .dark .ios26-chip:hover {
+    background: linear-gradient(180deg, var(--overlay-white-20), var(--overlay-white-08));
+  }
+  .ios26-chip--active {
+    background: color-mix(in oklab, hsl(var(--primary)) 18%, transparent);
+    color: hsl(var(--primary));
+    border-color: color-mix(in oklab, hsl(var(--primary)) 35%, transparent);
+  }
+  .ios26-button {
+    @apply rounded-2xl font-semibold transition-all;
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, hsl(var(--primary)) 95%, white 5%),
+      hsl(var(--primary))
+    );
+    color: hsl(var(--primary-foreground));
+    box-shadow:
+      inset 0 1px 0 0 color-mix(in oklab, white 30%, transparent),
+      0 8px 24px -8px color-mix(in oklab, hsl(var(--primary)) 60%, transparent);
+  }
+  .ios26-button:hover {
+    filter: brightness(1.08);
+  }
+  .ios26-button:disabled {
+    opacity: 0.4;
+    filter: none;
+  }
+
+  /* Subtle ambient gradient floor for the build workspace */
+  .ios26-bg {
+    background:
+      radial-gradient(
+        60% 60% at 20% 10%,
+        color-mix(in oklab, hsl(var(--primary)) 14%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        50% 50% at 90% 90%,
+        color-mix(in oklab, #c084fc 12%, transparent),
+        transparent 60%
+      ),
+      hsl(var(--background));
+  }
+
+  .fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Sparkle Thinking Animation */
+@keyframes sparkle-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-8px) scale(1.2);
+    opacity: 1;
+  }
+}
+@keyframes sparkle-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes sparkle-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.sparkle-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sparkle-star {
+  animation: sparkle-pulse 1.4s ease-in-out infinite;
+}
+.sparkle-star:nth-child(1) {
+  animation-delay: 0s;
+  color: #7c5cfc;
+}
+.sparkle-star:nth-child(2) {
+  animation-delay: 0.2s;
+  color: #4ecdc4;
+}
+.sparkle-star:nth-child(3) {
+  animation-delay: 0.4s;
+  color: #ff6b9d;
+}
+.sparkle-star:nth-child(4) {
+  animation-delay: 0.6s;
+  color: #ffd93d;
+}
+
+/* Pegtop Loader Animation */
+.pegtop-loader {
+  --fill-color: hsl(var(--primary));
+  --shine-color: hsl(var(--primary) / 0.2);
+  transform: scale(0.7);
+  width: 100px;
+  height: auto;
+  position: relative;
+  filter: drop-shadow(0 0 10px var(--shine-color));
+}
+.pegtop-loader #pegtopone {
+  position: absolute;
+  animation: flowe-one 1.8s linear infinite;
+}
+.pegtop-loader #pegtoptwo {
+  position: absolute;
+  opacity: 0;
+  transform: scale(0) translateY(-200px) translateX(-100px);
+  animation: flowe-two 1.8s linear infinite;
+  animation-delay: 0.5s;
+}
+.pegtop-loader #pegtopthree {
+  position: absolute;
+  opacity: 0;
+  transform: scale(0) translateY(-200px) translateX(100px);
+  animation: flowe-three 1.8s linear infinite;
+  animation-delay: 1s;
+}
+.pegtop-loader svg g path:first-child {
+  fill: var(--fill-color);
+}
+@keyframes flowe-one {
+  0% {
+    transform: scale(0.5) translateY(-200px);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(0.75) translateY(-100px);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1) translateY(0px);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.5) translateY(50px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0) translateY(100px);
+    opacity: 0;
+  }
+}
+@keyframes flowe-two {
+  0% {
+    transform: scale(0.5) rotateZ(-10deg) translateY(-200px) translateX(-100px);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1) rotateZ(-5deg) translateY(-100px) translateX(-50px);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1) rotateZ(0deg) translateY(0px) translateX(-25px);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.5) rotateZ(5deg) translateY(50px) translateX(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0) rotateZ(10deg) translateY(100px) translateX(25px);
+    opacity: 0;
+  }
+}
+@keyframes flowe-three {
+  0% {
+    transform: scale(0.5) rotateZ(10deg) translateY(-200px) translateX(100px);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1) rotateZ(5deg) translateY(-100px) translateX(50px);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1) rotateZ(0deg) translateY(0px) translateX(25px);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.5) rotateZ(-5deg) translateY(50px) translateX(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0) rotateZ(-10deg) translateY(100px) translateX(-25px);
+    opacity: 0;
+  }
+}
+
+/* Fancy Button (ilkhoeri) */
+.fancy-btn {
+  --h-button: 40px;
+  --round: 1.25rem;
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: transform 0.18s ease, background-color 0.18s ease, opacity 0.18s ease;
+  background: linear-gradient(135deg, #ef4444, #f97316, #eab308);
+  border-radius: var(--round);
+  border: none;
+  outline: none;
+  padding: 10px 22px;
+}
+.fancy-btn::before,
+.fancy-btn::after {
+  content: "";
+  position: absolute;
+  inset: var(--space);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  border-radius: calc(var(--round) - var(--space));
+  z-index: 0;
+}
+.fancy-btn::before {
+  --space: 1px;
+  background: linear-gradient(177.95deg, var(--overlay-white-25) 0%, rgba(255, 255, 255, 0) 100%);
+}
+.fancy-btn::after {
+  --space: 2px;
+  background: linear-gradient(135deg, #ef4444, #f97316, #eab308);
+}
+.fancy-btn:active {
+  transform: scale(0.95);
+}
+.fancy-btn .fold {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 0.75rem;
+  width: 0.75rem;
+  display: inline-block;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.8), rgba(234, 179, 8, 0.5));
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+  border-bottom-left-radius: 0.4rem;
+  border-top-right-radius: var(--round);
+}
+.fancy-btn .fold::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150%;
+  height: 150%;
+  transform: rotate(45deg) translateX(0%) translateY(-14px);
+  background-color: hsl(var(--background));
+  pointer-events: none;
+}
+.fancy-btn:hover .fold {
+  margin-top: -0.75rem;
+  margin-right: -0.75rem;
+}
+.fancy-btn .points_wrapper {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+.fancy-btn .points_wrapper .point {
+  bottom: -10px;
+  position: absolute;
+  animation: floating-points infinite ease-in-out;
+  pointer-events: none;
+  width: 2px;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 9999px;
+}
+@keyframes floating-points {
+  0% {
+    transform: translateY(0);
+  }
+  85% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-45px);
+    opacity: 0;
+  }
+}
+.fancy-btn .point:nth-child(1) {
+  left: 10%;
+  opacity: 1;
+  animation-duration: 2.35s;
+  animation-delay: 0.2s;
+}
+.fancy-btn .point:nth-child(2) {
+  left: 30%;
+  opacity: 0.7;
+  animation-duration: 2.5s;
+  animation-delay: 0.5s;
+}
+.fancy-btn .point:nth-child(3) {
+  left: 25%;
+  opacity: 0.8;
+  animation-duration: 2.2s;
+  animation-delay: 0.1s;
+}
+.fancy-btn .point:nth-child(4) {
+  left: 44%;
+  opacity: 0.6;
+  animation-duration: 2.05s;
+}
+.fancy-btn .point:nth-child(5) {
+  left: 50%;
+  opacity: 1;
+  animation-duration: 1.9s;
+}
+.fancy-btn .point:nth-child(6) {
+  left: 75%;
+  opacity: 0.5;
+  animation-duration: 1.5s;
+  animation-delay: 1.5s;
+}
+.fancy-btn .point:nth-child(7) {
+  left: 88%;
+  opacity: 0.9;
+  animation-duration: 2.2s;
+  animation-delay: 0.2s;
+}
+.fancy-btn .point:nth-child(8) {
+  left: 58%;
+  opacity: 0.8;
+  animation-duration: 2.25s;
+  animation-delay: 0.2s;
+}
+
+/* HowItWorks card particles */
+.hiw-point {
+  position: absolute;
+  bottom: -10px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: hiw-float linear infinite;
+}
+@keyframes hiw-float {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-160px);
+    opacity: 0;
+  }
+}
+.fancy-btn .inner {
+  z-index: 2;
+  gap: 6px;
+  position: relative;
+  width: 100%;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* Fancy Button Color Variants */
+.fancy-btn-blue {
+  background: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6) !important;
+}
+.fancy-btn-blue::after {
+  background: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6) !important;
+}
+.fancy-btn-blue .fold {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.8), rgba(139, 92, 246, 0.5)) !important;
+}
+.fancy-btn-green {
+  background: linear-gradient(135deg, #10b981, #059669, #047857) !important;
+}
+.fancy-btn-green::after {
+  background: linear-gradient(135deg, #10b981, #059669, #047857) !important;
+}
+.fancy-btn-green .fold {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.8), rgba(4, 120, 87, 0.5)) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Markdown prose — clean, readable chat typography */
+.prose-chat {
+  line-height: 1.72;
+  font-size: 1.0625rem;
+  color: hsl(var(--foreground) / 0.92);
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.prose-chat a,
+.prose-chat p,
+.prose-chat li,
+.prose-chat strong,
+.prose-chat em,
+.prose-chat blockquote,
+.prose-chat h1,
+.prose-chat h2,
+.prose-chat h3,
+.prose-chat h4 {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+.prose-chat pre {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+}
+.prose-chat :not(pre) > code {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.prose-chat img,
+.prose-chat video,
+.prose-chat iframe {
+  max-width: 100%;
+  height: auto;
+}
+@media (min-width: 768px) {
+  .chat-surface-dark .prose-chat,
+  .chat-surface-dark .prose-chat p,
+  .chat-surface-dark .prose-chat li,
+  .chat-surface-dark .prose-chat strong,
+  .chat-surface-dark .prose-chat em,
+  .chat-surface-dark .prose-chat blockquote,
+  .chat-surface-dark .prose-chat th,
+  .chat-surface-dark .prose-chat td {
+    color: #ffffff !important;
+  }
+  .chat-surface-dark .prose-chat table th,
+  .chat-surface-dark .prose-chat table td {
+    color: inherit !important;
+  }
+}
+
+.prose-chat > :first-child {
+  margin-top: 0;
+}
+.prose-chat > :last-child {
+  margin-bottom: 0;
+}
+.prose-chat p {
+  margin: 0 0 0.85em;
+}
+.prose-chat p:last-child {
+  margin-bottom: 0;
+}
+.prose-chat strong {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+.prose-chat em {
+  font-style: italic;
+  color: hsl(var(--foreground) / 0.95);
+}
+.prose-chat ul,
+.prose-chat ol {
+  margin: 0.6em 0 0.9em;
+  padding-inline-start: 1.5em;
+}
+.prose-chat ul ul,
+.prose-chat ol ol,
+.prose-chat ul ol,
+.prose-chat ol ul {
+  margin: 0.25em 0;
+}
+.prose-chat li {
+  margin-bottom: 0.35em;
+  padding-inline-start: 0.15em;
+}
+.prose-chat li > p {
+  margin-bottom: 0.35em;
+}
+.prose-chat ul > li {
+  list-style: none;
+  position: relative;
+  padding-inline-start: 1.1em;
+}
+.prose-chat ul > li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.65em;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: hsl(var(--primary));
+  opacity: 0.85;
+}
+.prose-chat ol > li::marker {
+  color: hsl(var(--primary));
+  font-weight: 700;
+}
+/* RTL polish — keep numerals/colons/punctuation on the logical-end side. */
+.prose-chat.lang-ar ol,
+[dir="rtl"] .prose-chat ol {
+  list-style-position: outside;
+}
+.prose-chat.lang-ar,
+[dir="rtl"] .prose-chat {
+  text-align: start;
+}
+.prose-chat.lang-ar li,
+[dir="rtl"] .prose-chat li {
+  unicode-bidi: isolate;
+}
+.prose-chat h1,
+.prose-chat h2,
+.prose-chat h3,
+.prose-chat h4,
+.prose-chat h5,
+.prose-chat h6 {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin: 1.25em 0 0.5em;
+}
+.prose-chat > h1:first-child,
+.prose-chat > h2:first-child,
+.prose-chat > h3:first-child {
+  margin-top: 0;
+}
+.prose-chat h1 {
+  font-size: 1.55em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+}
+.prose-chat h2 {
+  font-size: 1.3em;
+}
+.prose-chat h3 {
+  font-size: 1.12em;
+}
+.prose-chat h4 {
+  font-size: 1em;
+  color: hsl(var(--foreground) / 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.82em;
+}
+.prose-chat hr {
+  border: 0;
+  height: 1px;
+  background: hsl(var(--border) / 0.6);
+  margin: 1.4em 0;
+}
+.prose-chat code {
+  background: hsl(var(--secondary) / 0.7);
+  border: 1px solid hsl(var(--border) / 0.4);
+  padding: 0.1em 0.4em;
+  border-radius: 5px;
+  font-size: 0.875em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.prose-chat pre {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.prose-chat pre code {
+  background: none;
+  padding: 0;
+  border: 0;
+}
+.prose-chat a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: opacity 0.15s;
+}
+.prose-chat a:hover {
+  opacity: 0.75;
+}
+.prose-chat blockquote {
+  border-left: 3px solid hsl(var(--primary) / 0.7);
+  background: hsl(var(--muted) / 0.35);
+  padding: 0.6em 0.9em;
+  margin: 0.9em 0;
+  border-radius: 0 8px 8px 0;
+  color: hsl(var(--foreground) / 0.88);
+  font-style: normal;
+}
+.prose-chat blockquote p:last-child {
+  margin-bottom: 0;
+}
+.prose-chat img {
+  border-radius: 10px;
+  max-width: 100%;
+  margin: 0.6em 0;
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+/* ============================================================
+   Chat markdown tables — universal, accessible, mobile-first
+   Works in light & dark, RTL/LTR, and on tiny screens.
+   ============================================================ */
+:root {
+  --chat-tbl-bg: hsl(var(--card));
+  --chat-tbl-fg: hsl(var(--card-foreground));
+  --chat-tbl-border: hsl(var(--border));
+  --chat-tbl-head-bg: color-mix(in oklab, hsl(var(--primary)) 10%, hsl(var(--card)));
+  --chat-tbl-head-fg: hsl(var(--foreground));
+  --chat-tbl-row-alt: color-mix(in oklab, hsl(var(--foreground)) 4%, transparent);
+  --chat-tbl-row-hover: color-mix(in oklab, hsl(var(--primary)) 8%, transparent);
+  --chat-tbl-shadow: 0 6px 24px -12px rgb(0 0 0 / 0.25);
+}
+.dark, .chat-surface-dark {
+  --chat-tbl-bg: color-mix(in oklab, hsl(var(--card)) 88%, #000 12%);
+  --chat-tbl-fg: hsl(var(--foreground));
+  --chat-tbl-border: color-mix(in oklab, hsl(var(--foreground)) 14%, transparent);
+  --chat-tbl-head-bg: color-mix(in oklab, hsl(var(--primary)) 18%, #0b0b0f 82%);
+  --chat-tbl-head-fg: hsl(var(--primary-foreground, var(--foreground)));
+  --chat-tbl-row-alt: color-mix(in oklab, #fff 4%, transparent);
+  --chat-tbl-row-hover: color-mix(in oklab, hsl(var(--primary)) 14%, transparent);
+  --chat-tbl-shadow: 0 10px 40px -16px rgb(0 0 0 / 0.6);
+}
+
+.prose-chat .chat-md-table-wrap {
+  position: relative;
+  border: 1px solid var(--chat-tbl-border);
+  border-radius: 14px;
+  background: var(--chat-tbl-bg);
+  color: var(--chat-tbl-fg);
+  box-shadow: var(--chat-tbl-shadow);
+  overflow: hidden;
+}
+.prose-chat .chat-md-table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, currentColor 22%, transparent) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.prose-chat .chat-md-table-scroll::-webkit-scrollbar { height: 8px; }
+.prose-chat .chat-md-table-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, currentColor 22%, transparent);
+  border-radius: 999px;
+}
+.prose-chat .chat-md-table {
+  width: 100%;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.92em;
+  color: var(--chat-tbl-fg);
+  background: transparent;
+}
+.prose-chat .chat-md-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--chat-tbl-head-bg);
+  color: var(--chat-tbl-head-fg);
+  font-weight: 700;
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 0.75rem 1rem;
+  text-align: start;
+  border-bottom: 1px solid var(--chat-tbl-border);
+  white-space: nowrap;
+  z-index: 1;
+}
+.prose-chat .chat-md-table tbody td {
+  padding: 0.75rem 1rem;
+  vertical-align: top;
+  border-bottom: 1px solid color-mix(in oklab, var(--chat-tbl-border) 60%, transparent);
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  color: var(--chat-tbl-fg);
+}
+.prose-chat .chat-md-table tbody tr:last-child td { border-bottom: 0; }
+.prose-chat .chat-md-table tbody tr:nth-child(even) td { background: var(--chat-tbl-row-alt); }
+.prose-chat .chat-md-table tbody tr:hover td { background: var(--chat-tbl-row-hover); }
+
+/* Edge fade hint that content scrolls horizontally */
+.prose-chat .chat-md-table-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  inset-inline-end: 0;
+  width: 28px;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--chat-tbl-bg), transparent);
+  opacity: 0.9;
+}
+.prose-chat[dir="rtl"] .chat-md-table-wrap::after {
+  background: linear-gradient(to right, var(--chat-tbl-bg), transparent);
+}
+
+/* Mobile: stacked card layout (labels via data-label injected by JS below) */
+@media (max-width: 640px) {
+  .prose-chat .chat-md-table-wrap::after { display: none; }
+  .prose-chat .chat-md-table-scroll { overflow-x: visible; }
+  .prose-chat .chat-md-table,
+  .prose-chat .chat-md-table thead,
+  .prose-chat .chat-md-table tbody,
+  .prose-chat .chat-md-table tr,
+  .prose-chat .chat-md-table td { display: block; width: 100%; }
+  .prose-chat .chat-md-table thead { display: none; }
+  .prose-chat .chat-md-table tbody tr {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--chat-tbl-border);
+    background: transparent !important;
+  }
+  .prose-chat .chat-md-table tbody tr:last-child { border-bottom: 0; }
+  .prose-chat .chat-md-table tbody td {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.55rem 0.25rem;
+    border: 0;
+    background: transparent !important;
+  }
+  .prose-chat .chat-md-table tbody td + td {
+    border-top: 1px dashed color-mix(in oklab, var(--chat-tbl-border) 80%, transparent);
+  }
+  .prose-chat .chat-md-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    font-size: 0.78em;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: color-mix(in oklab, var(--chat-tbl-fg) 65%, transparent);
+    text-align: start;
+  }
+  .prose-chat .chat-md-table tbody td:not([data-label])::before { content: ""; }
+}
+
+
+/* RTL — flip list indent / blockquote border so Arabic reads cleanly */
+.prose-chat[dir="rtl"] ul,
+.prose-chat[dir="rtl"] ol {
+  padding-left: 0;
+  padding-right: 1.5em;
+}
+.prose-chat[dir="rtl"] ul > li {
+  padding-left: 0;
+  padding-right: 1.1em;
+}
+.prose-chat[dir="rtl"] ul > li::before {
+  left: auto;
+  right: 0;
+}
+.prose-chat[dir="rtl"] blockquote {
+  border-left: 0;
+  border-right: 3px solid hsl(var(--primary) / 0.7);
+  border-radius: 8px 0 0 8px;
+}
+
+/* Slide planning text must stay grouped as a single clean panel, not loose lists. */
+.slides-info-box {
+  max-width: min(100%, 56rem);
+}
+.slides-info-scroll {
+  max-height: 20rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  position: relative;
+}
+.slides-info-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.slides-info-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--foreground) / 0.15);
+  border-radius: 999px;
+}
+.slides-info-prose :first-child {
+  margin-top: 0;
+}
+.slides-info-prose :last-child {
+  margin-bottom: 0;
+}
+.slides-info-prose ul,
+.slides-info-prose ol {
+  margin: 0.5rem 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  counter-reset: slide-item;
+}
+.slides-info-prose li {
+  counter-increment: slide-item;
+  margin: 0;
+  padding: 0.5rem 0 0.5rem 2rem;
+  border: 0;
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  position: relative;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+[dir="rtl"] .slides-info-prose li {
+  padding: 0.5rem 2rem 0.5rem 0;
+}
+.slides-info-prose li:first-child {
+  border-top: 0;
+}
+.slides-info-prose li::marker {
+  content: "";
+}
+.slides-info-prose li::before {
+  content: counter(slide-item, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+[dir="rtl"] .slides-info-prose li::before {
+  left: auto;
+  right: 0;
+}
+.slides-info-prose p,
+.slides-info-prose h1,
+.slides-info-prose h2,
+.slides-info-prose h3 {
+  overflow-wrap: anywhere;
+}
+
+/* Faded brand-star badge before each line of slides streaming preview */
+.slides-info-prose p {
+  position: relative;
+  padding-inline-start: 1.4rem;
+  margin: 0.35rem 0;
+}
+.slides-info-prose p::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.55em;
+  width: 0.7rem;
+  height: 0.7rem;
+  background-color: hsl(var(--muted-foreground) / 0.45);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 5 L60 40 L95 50 L60 60 L50 95 L40 60 L5 50 L40 40 Z'/></svg>")
+    no-repeat center / contain;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 5 L60 40 L95 50 L60 60 L50 95 L40 60 L5 50 L40 40 Z'/></svg>")
+    no-repeat center / contain;
+}
+.slides-info-prose h1::before,
+.slides-info-prose h2::before,
+.slides-info-prose h3::before {
+  display: none;
+}
+
+/* ============================================================
+   Per-language typography for chat messages
+   - lang-ar  : Arabic (RTL, Arabic web font, slightly taller line)
+   - lang-en  : English (LTR, Inter, tight clean rhythm)
+   - lang-other : CJK / Cyrillic / etc. (LTR, system fallback stack)
+   Applied to both .prose-chat (assistant) and .user-bubble (user input).
+   ============================================================ */
+
+/* Arabic */
+.prose-chat.lang-ar,
+.user-bubble.lang-ar {
+  font-family: var(--font-arabic-serif-stack);
+  line-height: 1.95;
+  letter-spacing: 0;
+  text-align: start;
+  word-spacing: 0.02em;
+}
+.prose-chat.lang-ar {
+  font-size: 1.0625rem;
+}
+.prose-chat.lang-ar p {
+  margin-bottom: 0.85em;
+}
+.prose-chat.lang-ar ul,
+.prose-chat.lang-ar ol {
+  padding-left: 0;
+  padding-right: 1.6em;
+}
+.prose-chat.lang-ar li {
+  margin-bottom: 0.4em;
+}
+.prose-chat.lang-ar h1 {
+  font-size: 1.55em;
+  line-height: 1.4;
+}
+.prose-chat.lang-ar h2 {
+  font-size: 1.3em;
+  line-height: 1.45;
+}
+.prose-chat.lang-ar h3 {
+  font-size: 1.1em;
+  line-height: 1.5;
+}
+.prose-chat.lang-ar blockquote {
+  border-left: none;
+  border-right: 3px solid hsl(var(--primary));
+  padding-left: 0;
+  padding-right: 1em;
+}
+.prose-chat.lang-ar th,
+.prose-chat.lang-ar td {
+  text-align: right;
+}
+/* Numbers & inline code stay LTR inside RTL flow */
+.prose-chat.lang-ar code,
+.user-bubble.lang-ar code {
+  unicode-bidi: isolate;
+  direction: ltr;
+  display: inline-block;
+}
+
+/* English */
+.prose-chat.lang-en,
+.user-bubble.lang-en {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Helvetica Neue",
+    system-ui,
+    sans-serif;
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+  text-align: left;
+}
+.prose-chat.lang-en {
+  font-size: 1rem;
+}
+.prose-chat.lang-en h1 {
+  font-size: 1.5em;
+  letter-spacing: -0.018em;
+}
+.prose-chat.lang-en h2 {
+  font-size: 1.25em;
+  letter-spacing: -0.014em;
+}
+.prose-chat.lang-en h3 {
+  font-size: 1.1em;
+  letter-spacing: -0.01em;
+}
+
+/* Other languages (CJK, Cyrillic, Indic, …) */
+.prose-chat.lang-other,
+.user-bubble.lang-other {
+  font-family:
+    "PingFang SC",
+    "Hiragino Sans",
+    "Microsoft YaHei",
+    "Noto Sans CJK SC",
+    "Noto Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
+  line-height: 1.85;
+  letter-spacing: 0;
+  text-align: start;
+}
+.prose-chat.lang-other {
+  font-size: 1.0625rem;
+}
+.prose-chat.lang-other p {
+  margin-bottom: 0.8em;
+}
+
+/* User bubbles — keep them tight but inherit direction */
+.user-bubble {
+  unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+.user-bubble.lang-ar {
+  line-height: 1.85;
+}
+.user-bubble.lang-en {
+  line-height: 1.55;
+}
+.user-bubble.lang-other {
+  line-height: 1.7;
+}
+
+/* ============================================================
+   ARABIC RTL — premium Arabic chat typography
+   Activated by the document language/dir.
+   Designed for Egyptian + all Arab dialect readers.
+   ============================================================ */
+html[dir="rtl"] .prose-chat.lang-ar,
+html[dir="rtl"] .user-bubble.lang-ar {
+  font-family: var(--font-arabic-ui-stack);
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
+  font-variant-numeric: proportional-nums;
+  line-height: 2;
+  letter-spacing: 0;
+  word-spacing: 0.04em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+html[dir="rtl"] .prose-chat.lang-ar {
+  font-size: 1.075rem;
+}
+html[dir="rtl"] .prose-chat.lang-ar p {
+  margin-bottom: 1em;
+}
+html[dir="rtl"] .prose-chat.lang-ar strong {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  background: linear-gradient(180deg, transparent 65%, hsla(45, 90%, 60%, 0.18) 65%);
+  padding: 0 0.1em;
+  border-radius: 2px;
+}
+html[dir="rtl"] .prose-chat.lang-ar h1,
+html[dir="rtl"] .prose-chat.lang-ar h2,
+html[dir="rtl"] .prose-chat.lang-ar h3 {
+  font-family: var(--font-arabic-stack);
+  font-weight: 800;
+  letter-spacing: -0.005em;
+  margin-top: 1.15em;
+  margin-bottom: 0.5em;
+}
+html[dir="rtl"] .prose-chat.lang-ar h1 {
+  font-size: 1.6em;
+  background: linear-gradient(135deg, hsl(45 95% 65%) 0%, hsl(20 90% 60%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+html[dir="rtl"] .prose-chat.lang-ar h2 {
+  font-size: 1.32em;
+  position: relative;
+  padding-right: 0.65em;
+}
+html[dir="rtl"] .prose-chat.lang-ar h2::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0.25em;
+  bottom: 0.25em;
+  width: 4px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, hsl(45 95% 65%), hsl(20 90% 60%));
+}
+html[dir="rtl"] .prose-chat.lang-ar h3 {
+  font-size: 1.13em;
+  color: hsl(var(--foreground));
+}
+html[dir="rtl"] .prose-chat.lang-ar ul > li::before {
+  content: "◆";
+  color: hsl(45 95% 65%);
+  font-size: 0.7em;
+  margin-left: 0.5em;
+  margin-right: 0;
+  vertical-align: middle;
+}
+html[dir="rtl"] .prose-chat.lang-ar ol > li::marker {
+  color: hsl(45 95% 65%);
+  font-weight: 700;
+}
+html[dir="rtl"] .prose-chat.lang-ar li {
+  margin-bottom: 0.55em;
+}
+html[dir="rtl"] .prose-chat.lang-ar blockquote {
+  border-right: 3px solid transparent;
+  border-image: linear-gradient(180deg, hsl(45 95% 65%), hsl(20 90% 60%)) 1;
+  background: linear-gradient(90deg, hsla(45, 90%, 60%, 0.06), transparent 80%);
+  padding: 0.6em 1.1em 0.6em 0.6em;
+  border-radius: 0 12px 12px 0;
+  margin: 1em 0;
+  font-style: normal;
+}
+html[dir="rtl"] .prose-chat.lang-ar code:not(pre code) {
+  background: hsla(45, 90%, 60%, 0.12);
+  color: hsl(45 95% 75%);
+  border: 1px solid hsla(45, 90%, 60%, 0.22);
+  padding: 0.08em 0.45em;
+  border-radius: 6px;
+  font-size: 0.92em;
+}
+html[dir="rtl"] .prose-chat.lang-ar a {
+  color: hsl(45 95% 65%);
+  text-decoration: none;
+  border-bottom: 1px dashed hsla(45, 90%, 60%, 0.5);
+  transition: border-color 0.2s, color 0.2s;
+}
+html[dir="rtl"] .prose-chat.lang-ar a:hover {
+  color: hsl(20 90% 65%);
+  border-bottom-color: hsl(20 90% 65%);
+}
+html[dir="rtl"] .prose-chat.lang-ar hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsla(45, 90%, 60%, 0.4), transparent);
+  margin: 1.5em 0;
+}
+html[dir="rtl"] .user-bubble.lang-ar {
+  line-height: 1.9;
+  font-size: 1.02rem;
+}
+/* Numbers stay LTR but inherit Arabic-friendly spacing */
+html[dir="rtl"] .prose-chat.lang-ar :is(code, kbd, samp) {
+  font-feature-settings: "tnum" 1;
+}
+
+
+
+/* ============================================================
+   ChatGPT / Claude-style assistant message text
+   Clean sans-serif, comfortable rhythm, no editorial flourishes.
+   ============================================================ */
+.prose-chat {
+  line-height: 1.75;
+  font-size: 1rem;
+  color: hsl(var(--foreground));
+}
+.prose-chat.lang-en {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
+}
+.prose-chat.lang-ar {
+  font-family: var(--font-arabic-serif-stack);
+  line-height: 1.95;
+}
+
+/* Paragraphs */
+.prose-chat p {
+  margin: 0 0 1em;
+}
+.prose-chat p:last-child {
+  margin-bottom: 0;
+}
+
+/* Headings — same family as body, just heavier */
+.prose-chat h1,
+.prose-chat h2,
+.prose-chat h3,
+.prose-chat h4 {
+  font-family: inherit;
+  font-weight: 600;
+  font-style: normal;
+  color: hsl(var(--foreground));
+  letter-spacing: -0.01em;
+  margin: 1.5em 0 0.6em;
+  line-height: 1.35;
+}
+.prose-chat h1 {
+  font-size: 1.5em;
+}
+.prose-chat h2 {
+  font-size: 1.25em;
+}
+.prose-chat h3 {
+  font-size: 1.1em;
+}
+.prose-chat h4 {
+  font-size: 1em;
+}
+.prose-chat > :first-child {
+  margin-top: 0;
+}
+
+/* Lists — default disc/decimal markers, just well-spaced */
+.prose-chat ul,
+.prose-chat ol {
+  margin: 0.75em 0;
+  padding-inline-start: 1.5em;
+}
+.prose-chat ul {
+  list-style: disc;
+}
+.prose-chat ol {
+  list-style: decimal;
+}
+.prose-chat li {
+  margin-bottom: 0.4em;
+  line-height: 1.7;
+}
+.prose-chat li::marker {
+  color: hsl(var(--muted-foreground));
+}
+.prose-chat li > p {
+  margin: 0;
+}
+.prose-chat li > ul,
+.prose-chat li > ol {
+  margin: 0.4em 0;
+}
+
+/* Inline bold — no underline, just weight */
+.prose-chat strong {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  border: none;
+}
+
+/* Blockquote — simple left bar */
+.prose-chat blockquote {
+  border: none;
+  border-inline-start: 3px solid hsl(var(--border));
+  padding-inline-start: 1em;
+  margin: 1em 0;
+  color: hsl(var(--muted-foreground));
+  font-style: normal;
+}
+
+/* ============================================================
+   Force original user bubble typography (unchanged by editorial)
+   ============================================================ */
+.user-bubble,
+.user-bubble.lang-en,
+.user-bubble.lang-ar,
+.user-bubble.lang-other {
+  font-style: normal !important;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+.user-bubble.lang-en {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Helvetica Neue",
+    system-ui,
+    sans-serif !important;
+  line-height: 1.55 !important;
+}
+.user-bubble.lang-ar {
+  font-family: var(--font-arabic-serif-stack) !important;
+  line-height: 1.85 !important;
+}
+.user-bubble strong {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  font-weight: 600;
+}
+.user-bubble h1,
+.user-bubble h2,
+.user-bubble h3 {
+  font-family: inherit !important;
+  font-style: normal !important;
+  padding-top: 0 !important;
+}
+.user-bubble h1::before,
+.user-bubble h2::before,
+.user-bubble h3::before {
+  display: none !important;
+}
+.user-bubble ul > li::before,
+.user-bubble ol > li::before {
+  content: none !important;
+}
+
+.animate-pulse-slow {
+  animation: slow-pulse 3s ease-in-out infinite;
+}
+
+/* Pricing Cards - Animated Gradient Cards */
+.pricing-card-starter {
+  background: linear-gradient(135deg, #0f766e, #065f46, #064e3b);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  box-shadow: 0 8px 32px rgba(13, 148, 136, 0.15);
+}
+.pricing-card-pro {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9, #5b21b6);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.25);
+}
+.pricing-card-elite {
+  background: linear-gradient(135deg, #d97706, #b45309, #92400e);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 8px 32px rgba(217, 119, 6, 0.2);
+}
+.pricing-card-starter:hover,
+.pricing-card-pro:hover,
+.pricing-card-elite:hover {
+  transform: translateY(-4px);
+  transition: transform 0.3s ease;
+}
+.pricing-points-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.pricing-point {
+  position: absolute;
+  bottom: -10px;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  animation: pricing-float infinite ease-in-out;
+}
+@keyframes pricing-float {
+  0% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-120px);
+    opacity: 0;
+  }
+}
+.pricing-point:nth-child(1) {
+  left: 8%;
+  animation-duration: 3.5s;
+  animation-delay: 0s;
+}
+.pricing-point:nth-child(2) {
+  left: 18%;
+  animation-duration: 4s;
+  animation-delay: 0.8s;
+}
+.pricing-point:nth-child(3) {
+  left: 28%;
+  animation-duration: 3s;
+  animation-delay: 0.3s;
+}
+.pricing-point:nth-child(4) {
+  left: 38%;
+  animation-duration: 3.8s;
+  animation-delay: 1.2s;
+}
+.pricing-point:nth-child(5) {
+  left: 48%;
+  animation-duration: 4.2s;
+  animation-delay: 0.5s;
+}
+.pricing-point:nth-child(6) {
+  left: 58%;
+  animation-duration: 3.2s;
+  animation-delay: 1.8s;
+}
+.pricing-point:nth-child(7) {
+  left: 68%;
+  animation-duration: 3.6s;
+  animation-delay: 0.1s;
+}
+.pricing-point:nth-child(8) {
+  left: 78%;
+  animation-duration: 4.5s;
+  animation-delay: 1s;
+}
+.pricing-point:nth-child(9) {
+  left: 85%;
+  animation-duration: 3.3s;
+  animation-delay: 0.7s;
+}
+.pricing-point:nth-child(10) {
+  left: 92%;
+  animation-duration: 3.9s;
+  animation-delay: 1.5s;
+}
+
+/* Landing page marquee + hero wall animations */
+@keyframes landing-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes landing-marquee-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes landing-wall-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+.landing-marquee {
+  overflow: hidden;
+  width: 100%;
+}
+
+.landing-marquee-track,
+.landing-marquee-track-reverse {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+}
+
+.landing-marquee-track {
+  animation: landing-marquee 120s linear infinite;
+}
+
+.landing-marquee-track-reverse {
+  animation: landing-marquee-reverse 130s linear infinite;
+}
+
+.landing-grid-overlay {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.28) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at center, black 42%, transparent 88%);
+}
+
+.landing-hero-word {
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  opacity: 0.5;
+  animation: landing-wall-drift 8s ease-in-out infinite;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-marquee-track,
+  .landing-marquee-track-reverse,
+  .landing-hero-word {
+    animation: none !important;
+  }
+}
+
+/* Cookie Consent */
+.cookie-card {
+  width: auto;
+  max-width: calc(100vw - 32px);
+  background: rgba(20, 20, 22, 0.72);
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--overlay-white-08);
+  border-radius: 999px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 6px 6px 6px 14px;
+  gap: 12px;
+  position: fixed;
+  bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
+  left: max(16px, env(safe-area-inset-left));
+  z-index: 9999;
+  overflow: visible;
+  box-shadow:
+    0 18px 50px -26px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 var(--overlay-white-04);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+#cookieSvg {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+#cookieSvg g path {
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.cookieHeading {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: -0.01em;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.cookieDescription {
+  display: none;
+  text-align: start;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--overlay-white-60);
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.cookieDescription a {
+  color: #7ce7b2;
+}
+
+.cookieDescription a:hover {
+  text-decoration-line: underline;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 6px;
+  flex-direction: row;
+  flex: 0 0 auto;
+}
+
+.acceptButton {
+  width: auto;
+  height: 30px;
+  padding: 0 14px;
+  background: linear-gradient(180deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.85) 100%);
+  border: 1px solid var(--overlay-white-14);
+  color: hsl(var(--primary-foreground));
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  border-radius: 999px;
+  box-shadow:
+    0 8px 20px -8px hsl(var(--primary) / 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+.declineButton {
+  width: auto;
+  height: 30px;
+  padding: 0 12px;
+  background: var(--overlay-white-05);
+  color: var(--overlay-white-70);
+  border: 1px solid var(--overlay-white-08);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 999px;
+  box-shadow: none;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.declineButton:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--overlay-white-90);
+}
+
+.acceptButton:hover {
+  filter: brightness(1.1);
+}
+
+.acceptButton:active,
+.declineButton:active {
+  transform: scale(0.96);
+}
+
+@media (max-width: 767px) {
+  .cookie-card {
+    width: auto;
+    max-width: calc(100% - 24px);
+    left: 12px;
+    right: auto;
+    bottom: max(128px, calc(env(safe-area-inset-bottom) + 116px));
+    top: auto;
+    padding: 10px;
+    gap: 8px;
+    border-radius: 14px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .cookie-card #cookieSvg {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .cookieHeading {
+    font-size: 0.95em;
+    margin: 0;
+  }
+  .cookieDescription {
+    font-size: 0.7em;
+    text-align: start;
+    flex: 1 1 auto;
+    margin: 0;
+    display: none !important;
+  }
+  .buttonContainer {
+    width: auto;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .acceptButton,
+  .declineButton {
+    width: auto;
+    padding: 0 14px;
+    height: 28px;
+    font-size: 0.8em;
+  }
+}
+
+/* Generation loader gradient animation */
+.generation-gradient-bg {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary) / 0.3),
+    hsl(var(--accent) / 0.3),
+    hsl(var(--secondary) / 0.4),
+    hsl(var(--primary) / 0.3)
+  );
+  background-size: 400% 400%;
+  animation: generation-gradient 4s ease infinite;
+}
+
+@keyframes generation-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Flow/Info Card Gradient Colors */
+.flow-card-purple {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9, #5b21b6);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+.flow-card-blue {
+  background: linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.flow-card-green {
+  background: linear-gradient(135deg, #10b981, #059669, #047857);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.flow-card-amber {
+  background: linear-gradient(135deg, #f59e0b, #d97706, #b45309);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.flow-card-teal {
+  background: linear-gradient(135deg, #14b8a6, #0d9488, #0f766e);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+}
+
+.flow-points-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.flow-point {
+  position: absolute;
+  bottom: -10px;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  animation: flow-particle-float infinite ease-in-out;
+}
+@keyframes flow-particle-float {
+  0% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+}
+.flow-point:nth-child(1) {
+  left: 10%;
+  animation-duration: 3s;
+  animation-delay: 0s;
+}
+.flow-point:nth-child(2) {
+  left: 25%;
+  animation-duration: 3.5s;
+  animation-delay: 0.6s;
+}
+.flow-point:nth-child(3) {
+  left: 40%;
+  animation-duration: 2.8s;
+  animation-delay: 0.2s;
+}
+.flow-point:nth-child(4) {
+  left: 55%;
+  animation-duration: 3.2s;
+  animation-delay: 1s;
+}
+.flow-point:nth-child(5) {
+  left: 65%;
+  animation-duration: 2.5s;
+  animation-delay: 0.4s;
+}
+.flow-point:nth-child(6) {
+  left: 75%;
+  animation-duration: 3.8s;
+  animation-delay: 1.3s;
+}
+.flow-point:nth-child(7) {
+  left: 85%;
+  animation-duration: 3.1s;
+  animation-delay: 0.1s;
+}
+.flow-point:nth-child(8) {
+  left: 92%;
+  animation-duration: 2.9s;
+  animation-delay: 0.8s;
+}
+
+/* Sidebar Fancy Background */
+.sidebar-fancy-bg {
+  background: linear-gradient(
+    135deg,
+    #1a1a2e 0%,
+    #16213e 25%,
+    #0f3460 50%,
+    #1a1a2e 75%,
+    #16213e 100%
+  );
+  background-size: 400% 400%;
+  animation: sidebar-gradient-shift 8s ease infinite;
+}
+@keyframes sidebar-gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.sidebar-points-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.sidebar-point {
+  position: absolute;
+  bottom: -10px;
+  width: 2px;
+  height: 2px;
+  background: var(--overlay-white-30);
+  border-radius: 50%;
+  animation: sidebar-float infinite ease-in-out;
+}
+@keyframes sidebar-float {
+  0% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-200px);
+    opacity: 0;
+  }
+}
+.sidebar-point:nth-child(1) {
+  left: 5%;
+  animation-duration: 4s;
+  animation-delay: 0s;
+}
+.sidebar-point:nth-child(2) {
+  left: 15%;
+  animation-duration: 5s;
+  animation-delay: 0.8s;
+}
+.sidebar-point:nth-child(3) {
+  left: 25%;
+  animation-duration: 3.5s;
+  animation-delay: 0.3s;
+}
+.sidebar-point:nth-child(4) {
+  left: 35%;
+  animation-duration: 4.5s;
+  animation-delay: 1.2s;
+}
+.sidebar-point:nth-child(5) {
+  left: 45%;
+  animation-duration: 3.8s;
+  animation-delay: 0.5s;
+}
+.sidebar-point:nth-child(6) {
+  left: 55%;
+  animation-duration: 4.2s;
+  animation-delay: 1.8s;
+}
+.sidebar-point:nth-child(7) {
+  left: 65%;
+  animation-duration: 3.2s;
+  animation-delay: 0.1s;
+}
+.sidebar-point:nth-child(8) {
+  left: 75%;
+  animation-duration: 5.5s;
+  animation-delay: 1s;
+}
+.sidebar-point:nth-child(9) {
+  left: 82%;
+  animation-duration: 3.6s;
+  animation-delay: 0.7s;
+}
+.sidebar-point:nth-child(10) {
+  left: 88%;
+  animation-duration: 4.8s;
+  animation-delay: 1.5s;
+}
+.sidebar-point:nth-child(11) {
+  left: 93%;
+  animation-duration: 3.9s;
+  animation-delay: 0.4s;
+}
+.sidebar-point:nth-child(12) {
+  left: 97%;
+  animation-duration: 4.3s;
+  animation-delay: 2s;
+}
+
+/* Orb Loader */
+.orb-loader {
+  --color-one: #ffbf48;
+  --color-two: #be4a1d;
+  --color-three: #ffbf4780;
+  --color-four: #bf4a1d80;
+  --color-five: #ffbf4740;
+  --time-animation: 2s;
+  --size: 1;
+  position: relative;
+  border-radius: 50%;
+  transform: scale(var(--size));
+  box-shadow:
+    0 0 25px 0 var(--color-three),
+    0 20px 50px 0 var(--color-four);
+  animation: orb-colorize calc(var(--time-animation) * 3) ease-in-out infinite;
+}
+.orb-loader::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border-top: solid 1px var(--color-one);
+  border-bottom: solid 1px var(--color-two);
+  background: linear-gradient(180deg, var(--color-five), var(--color-four));
+  box-shadow:
+    inset 0 10px 10px 0 var(--color-three),
+    inset 0 -10px 10px 0 var(--color-four);
+}
+.orb-loader .box {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(180deg, var(--color-one) 30%, var(--color-two) 70%);
+  mask: url(#clipping);
+  -webkit-mask: url(#clipping);
+}
+.orb-loader svg {
+  position: absolute;
+}
+.orb-loader svg #clipping {
+  filter: contrast(15);
+  animation: orb-roundness calc(var(--time-animation) / 2) linear infinite;
+}
+.orb-loader svg #clipping polygon {
+  filter: blur(7px);
+}
+.orb-loader svg #clipping polygon:nth-child(1) {
+  transform-origin: 75% 25%;
+  transform: rotate(90deg);
+}
+.orb-loader svg #clipping polygon:nth-child(2) {
+  transform-origin: 50% 50%;
+  animation: orb-rotation var(--time-animation) linear infinite reverse;
+}
+.orb-loader svg #clipping polygon:nth-child(3) {
+  transform-origin: 50% 60%;
+  animation: orb-rotation var(--time-animation) linear infinite;
+  animation-delay: calc(var(--time-animation) / -3);
+}
+.orb-loader svg #clipping polygon:nth-child(4) {
+  transform-origin: 40% 40%;
+  animation: orb-rotation var(--time-animation) linear infinite reverse;
+}
+.orb-loader svg #clipping polygon:nth-child(5) {
+  transform-origin: 40% 40%;
+  animation: orb-rotation var(--time-animation) linear infinite reverse;
+  animation-delay: calc(var(--time-animation) / -2);
+}
+.orb-loader svg #clipping polygon:nth-child(6) {
+  transform-origin: 60% 40%;
+  animation: orb-rotation var(--time-animation) linear infinite;
+}
+.orb-loader svg #clipping polygon:nth-child(7) {
+  transform-origin: 60% 40%;
+  animation: orb-rotation var(--time-animation) linear infinite;
+  animation-delay: calc(var(--time-animation) / -1.5);
+}
+
+@keyframes orb-rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes orb-roundness {
+  0% {
+    filter: contrast(15);
+  }
+  20% {
+    filter: contrast(3);
+  }
+  40% {
+    filter: contrast(3);
+  }
+  60% {
+    filter: contrast(15);
+  }
+  100% {
+    filter: contrast(15);
+  }
+}
+@keyframes orb-colorize {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    filter: hue-rotate(-30deg);
+  }
+  40% {
+    filter: hue-rotate(-60deg);
+  }
+  60% {
+    filter: hue-rotate(-90deg);
+  }
+  80% {
+    filter: hue-rotate(-45deg);
+  }
+  100% {
+    filter: hue-rotate(0deg);
+  }
+}
+
+/* ─── iOS 26 Liquid Glass System v2 ─── */
+/* Canonical `.liquid-glass` recipe is defined later (single source of truth).
+   This earlier slot intentionally left without a `.liquid-glass` rule so it
+   does not conflict with the masked-border recipe. */
+
+/* Strong liquid-glass variant — heavy backdrop blur with masked hairline
+   border. Use for primary floating surfaces (long-press menus, primary CTAs).
+   Recipe matches the user's canonical spec. */
+.liquid-glass-strong {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  -webkit-backdrop-filter: blur(50px);
+  backdrop-filter: blur(50px);
+  border: none;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.05), inset 0 1px 1px var(--overlay-white-15);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass-strong::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    var(--overlay-white-20) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    var(--overlay-white-20) 80%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+
+/* All glass variants below share the canonical lightweight `.liquid-glass`
+   recipe (faint fill + blur(4px) + inset highlight + gradient-masked border)
+   so glass looks identical everywhere. Only interaction behavior differs. */
+.liquid-glass-subtle,
+.liquid-glass-button,
+.liquid-glass-milk {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px var(--overlay-white-10);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass-subtle::before,
+.liquid-glass-button::before,
+.liquid-glass-milk::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    var(--overlay-white-15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    var(--overlay-white-15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.liquid-glass-button {
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.2s ease;
+}
+.liquid-glass-button:hover {
+  background: var(--overlay-white-05);
+}
+.liquid-glass-button:active {
+  transform: scale(0.97);
+  transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Hover-only variant: glass appears on hover, using the same recipe. */
+.liquid-glass-hover {
+  background: transparent;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.liquid-glass-hover:hover {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  box-shadow: inset 0 1px 1px var(--overlay-white-10);
+}
+.liquid-glass-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    var(--overlay-white-15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    var(--overlay-white-15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.liquid-glass-hover:hover::before {
+  opacity: 1;
+}
+
+/* ─── Liquid Glass Input (iOS 26 / Apple style) ───
+   Inspired by Callstack's React Native liquid-glass article:
+   https://www.callstack.com/blog/how-to-use-liquid-glass-in-react-native
+   Pure CSS approximation: deep saturated blur + rim highlight +
+   soft top sheen + bottom inner shadow + outer floating shadow.
+*/
+.liquid-glass-input {
+  position: relative;
+  background:
+    radial-gradient(
+      120% 140% at 50% -20%,
+      hsl(0 0% 100% / 0.34) 0%,
+      hsl(0 0% 100% / 0.16) 35%,
+      transparent 65%
+    ),
+    linear-gradient(180deg, hsl(var(--background) / 0.88) 0%, hsl(var(--background) / 0.78) 100%);
+  border: 1px solid hsl(0 0% 100% / 0.26);
+  -webkit-backdrop-filter: blur(24px) saturate(1.45) brightness(1.04);
+  backdrop-filter: blur(24px) saturate(1.45) brightness(1.04);
+  box-shadow:
+    /* rim highlight (top) */
+    inset 0 1.2px 0 0 hsl(0 0% 100% / 0.3),
+    /* rim shade (bottom) */ inset 0 -1px 0 0 hsl(0 0% 0% / 0.1),
+    /* inner glow */ inset 0 0 24px 0 hsl(0 0% 100% / 0.05),
+    /* floating outer shadow */ 0 22px 60px -18px hsl(0 0% 0% / 0.45),
+    0 6px 18px -8px hsl(0 0% 0% / 0.25);
+  isolation: isolate;
+}
+.liquid-glass-input::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    125deg,
+    hsl(0 0% 100% / 0.12) 0%,
+    hsl(0 0% 100% / 0) 35%,
+    hsl(0 0% 100% / 0) 65%,
+    hsl(0 0% 100% / 0.06) 100%
+  );
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+.dark .liquid-glass-input {
+  background:
+    radial-gradient(
+      120% 140% at 50% -20%,
+      hsl(0 0% 100% / 0.14) 0%,
+      hsl(0 0% 100% / 0.07) 35%,
+      transparent 65%
+    ),
+    linear-gradient(180deg, hsl(0 0% 10% / 0.84) 0%, hsl(0 0% 3% / 0.74) 100%);
+  border-color: hsl(0 0% 100% / 0.16);
+  box-shadow:
+    inset 0 1.2px 0 0 hsl(0 0% 100% / 0.18),
+    inset 0 -1px 0 0 hsl(0 0% 0% / 0.35),
+    inset 0 0 24px 0 hsl(0 0% 100% / 0.03),
+    0 24px 70px -18px hsl(0 0% 0% / 0.65),
+    0 6px 20px -8px hsl(0 0% 0% / 0.45);
+}
+
+/* iOS 26 Floating Pill */
+.liquid-glass-pill {
+  background: hsl(var(--glass));
+  border: 1px solid hsl(var(--glass-border) / 0.3);
+  -webkit-backdrop-filter: blur(60px) saturate(2);
+  backdrop-filter: blur(60px) saturate(2);
+  box-shadow:
+    inset 0 0.5px 0 0 hsl(0 0% 100% / 0.15),
+    0 8px 32px hsl(0 0% 0% / 0.15);
+  border-radius: 9999px;
+}
+
+/* iOS 26 Segmented Control */
+.ios-segment-control {
+  display: flex;
+  position: relative;
+  border-radius: 9999px;
+  padding: 3px;
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* iOS 26 press animation */
+@keyframes ios-press {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.ios-press:active {
+  animation: ios-press 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* iOS menu stagger — used with framer-motion */
+.ios-menu-item {
+  transition: transform 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.12s ease;
+}
+.ios-menu-item:active {
+  background: hsl(0 0% 100% / 0.1);
+  transform: scale(0.97);
+}
+
+
+/* Horizontal chip strips (chat mode chips / mode bar) scroll past the viewport.
+   Without side padding and a soft edge fade the last chip is sliced flush
+   against the screen edge, which reads as a broken layout instead of
+   "there is more, keep scrolling". */
+.chips-edge-fade {
+  padding-inline: 12px;
+  scroll-padding-inline: 12px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 14px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 14px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
+}
+
+/* ==========================================================================
+   Touch reliability — every interactive element must react to the FIRST tap.
+   `touch-action: manipulation` removes the browser's double-tap-to-zoom wait,
+   and killing the tap highlight avoids the "nothing happened" feeling.
+   ========================================================================== */
+button,
+a,
+label,
+summary,
+select,
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+[role="switch"],
+[role="option"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Long-press callout on iOS cancels the pending click, which is the classic
+     "I tapped ten times and nothing happened" bug. */
+  -webkit-touch-callout: none;
+}
+
+/* Comfortable hit area on touch screens: a visually small icon still gets a
+   44px tap surface, so a slightly off-centre finger still activates it. */
+@media (pointer: coarse) {
+  button,
+  a[href],
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"] {
+    min-height: 32px;
+  }
+  /* Switches keep their intrinsic size — stretching them breaks the thumb geometry. */
+  [role="switch"] {
+    min-height: 0;
+  }
+}
+
+/* A closed mobile sidebar stays mounted behind the page shell. Make it
+   completely untouchable so it can never swallow a tap meant for the page. */
+@media (max-width: 767px) {
+  [data-mobile-sidebar-open="false"] {
+    pointer-events: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Primary CTA system — "liquid glass" sunset.
+   A translucent glass shell with the brand colours drifting inside
+   it like water. Palette: #FF4D8D -> #FF6B5A -> #FF9450 -> #FFC24B.
+   --------------------------------------------------------------- */
+:root {
+  --sunset-pink: 338 100% 65%;
+  --sunset-coral: 6 100% 68%;
+  --sunset-orange: 23 100% 66%;
+  --sunset-gold: 40 100% 65%;
+  --sunset-foreground: 0 0% 100%;
+  --gradient-sunset: linear-gradient(
+    100deg,
+    hsl(var(--sunset-pink)) 0%,
+    hsl(var(--sunset-coral)) 38%,
+    hsl(var(--sunset-orange)) 68%,
+    hsl(var(--sunset-gold)) 100%
+  );
+  /* Soft colour bodies that float inside the glass. */
+  --gradient-sunset-liquid:
+    radial-gradient(60% 120% at 12% 30%, hsl(var(--sunset-pink) / 0.95) 0%, hsl(var(--sunset-pink) / 0) 70%),
+    radial-gradient(55% 130% at 42% 75%, hsl(var(--sunset-coral) / 0.9) 0%, hsl(var(--sunset-coral) / 0) 72%),
+    radial-gradient(55% 120% at 72% 25%, hsl(var(--sunset-orange) / 0.92) 0%, hsl(var(--sunset-orange) / 0) 72%),
+    radial-gradient(60% 130% at 96% 78%, hsl(var(--sunset-gold) / 0.95) 0%, hsl(var(--sunset-gold) / 0) 74%),
+    var(--gradient-sunset);
+  --sunset-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='100' viewBox='0 0 180 100'%3E%3Cfilter id='g' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.62' numOctaves='2' seed='8' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='1.5' intercept='-.18'/%3E%3CfeFuncG type='linear' slope='1.5' intercept='-.18'/%3E%3CfeFuncB type='linear' slope='1.5' intercept='-.18'/%3E%3CfeFuncA type='table' tableValues='0 .1 .32 .55'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='180' height='100' filter='url(%23g)' opacity='.58'/%3E%3C/svg%3E");
+  --sunset-grain-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.48' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 .12 .28 .45'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)' opacity='.7'/%3E%3C/svg%3E");
+}
+
+@keyframes sunset-liquid-drift {
+  0% {
+    background-position: 0% 50%, 100% 50%, 50% 0%, 0% 100%, 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%, 0% 40%, 20% 100%, 90% 0%, 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%, 100% 50%, 50% 0%, 0% 100%, 0% 50%;
+  }
+}
+
+.btn-sunset {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 0;
+  border-radius: 9999px;
+  /* Glass shell: the colour lives in ::before, not in the base layer. */
+  background-color: hsl(var(--sunset-orange) / 0.16);
+  background-image: none;
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  color: hsl(var(--sunset-foreground));
+  -webkit-text-fill-color: hsl(var(--sunset-foreground));
+  font-weight: 600;
+  letter-spacing: 0;
+  text-shadow: 0 1px 2px hsl(0 0% 0% / 0.28);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.35),
+    inset 0 0 0 1px hsl(0 0% 100% / 0.16),
+    0 10px 28px -16px hsl(var(--sunset-coral) / 0.7);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
+}
+
+/* The water: soft colour bodies drifting behind the glass. */
+.btn-sunset::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  z-index: -2;
+  background-image: var(--gradient-sunset-liquid);
+  background-repeat: no-repeat;
+  background-size: 180% 180%, 170% 170%, 175% 175%, 180% 180%, 200% 100%;
+  animation: sunset-liquid-drift 14s ease-in-out infinite;
+  will-change: background-position;
+}
+
+/* The glass: a single soft highlight sweep, plus a top-light gradient. */
+.btn-sunset::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, hsl(0 0% 100% / 0.26) 0%, hsl(0 0% 100% / 0.04) 40%, hsl(0 0% 0% / 0.14) 100%),
+    linear-gradient(0deg, hsl(0 0% 0% / 0.12), hsl(0 0% 0% / 0.12)),
+    var(--sunset-grain);
+  background-size: 100% 100%, 100% 100%, 180px 100px;
+  background-blend-mode: normal, normal, soft-light;
+  opacity: 0.9;
+}
+
+.btn-sunset:hover {
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.42),
+    inset 0 0 0 1px hsl(0 0% 100% / 0.22),
+    0 14px 34px -16px hsl(var(--sunset-coral) / 0.85);
+}
+.btn-sunset:hover::before {
+  animation-duration: 8s;
+}
+.btn-sunset:active {
+  transform: translateY(1px) scale(0.985);
+}
+.btn-sunset svg {
+  color: hsl(var(--sunset-foreground));
+}
+
+
+/* Pricing canvas stays on the plain app background; the sunset treatment is
+   reserved for the CTA buttons only. */
+.pricing-sunset-bg {
+  position: relative;
+  background-color: hsl(var(--background));
+  background-image: none;
+}
+
+.pricing-sunset-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* Apply the signature gradient to every primary call-to-action across the app */
+.btn-sunset,
+button[data-sunset],
+a[data-sunset] {
+  color: #fff !important;
+}
+.pricing-card-glass .liquid-glass,
+.pricing-sunset-bg a[href*="checkout"],
+.pricing-sunset-bg button[type="submit"] {
+  background-color: hsl(var(--sunset-orange)) !important;
+  background-image: var(--sunset-grain), var(--gradient-sunset) !important;
+  background-size: 180px 100px, 100% 100% !important;
+  background-blend-mode: soft-light, normal !important;
+  color: hsl(var(--sunset-foreground)) !important;
+  border: 0 !important;
+  border-radius: 9999px !important;
+}
+
+/* Any hand-rolled primary button/link picks up the same sunset skin */
+button.bg-primary,
+a.bg-primary,
+[role="button"].bg-primary,
+label.bg-primary {
+  background-color: hsl(var(--sunset-orange)) !important;
+  background-image: var(--sunset-grain), var(--gradient-sunset) !important;
+  background-size: 180px 100px, 100% 100% !important;
+  background-blend-mode: soft-light, normal !important;
+  color: hsl(var(--sunset-foreground)) !important;
+  -webkit-text-fill-color: hsl(var(--sunset-foreground)) !important;
+  border: 0 !important;
+  border-radius: 9999px !important;
+}
+button.bg-primary:hover,
+a.bg-primary:hover,
+[role="button"].bg-primary:hover {
+  filter: brightness(1.06) saturate(1.04);
+}
+
+/* ── Accessibility: keyboard focus ring ─────────────────────────────
+   Many components use `outline-none` for a clean mouse experience, which
+   also removes the only affordance keyboard users have. Restore a visible
+   ring for :focus-visible only (keyboard / assistive navigation), so mouse
+   and touch interaction stays unchanged. */
+:where(a, button, [role="button"], input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid hsl(var(--ring, var(--primary)));
+  outline-offset: 2px;
+  border-radius: inherit;
+}

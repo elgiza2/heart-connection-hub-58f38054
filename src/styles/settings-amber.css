@@ -1,0 +1,254 @@
+/**
+ * Unified internal-settings theme.
+ * Matches the main SettingsPage aesthetic: dark background, rounded cards
+ * with foreground/10 border, centered header, muted secondary text.
+ *
+ * The `.amber-settings` wrapper (kept for compatibility with existing pages)
+ * neutralises the previous gold identity and re-maps the utility classes
+ * (`amb-hero`, `amb-plate`, `amb-btn-gold`, etc.) so every internal settings
+ * page instantly inherits the main SettingsPage look and feel.
+ */
+
+.amber-settings {
+  /* Neutral tokens re-using the app theme */
+  --amb-fg: hsl(var(--foreground));
+  --amb-fg-dim: hsl(var(--foreground) / 0.65);
+  --amb-fg-mute: hsl(var(--foreground) / 0.45);
+  --amb-line: hsl(var(--foreground) / 0.1);
+  --amb-line-strong: hsl(var(--foreground) / 0.16);
+  --amb-surface: hsl(var(--card));
+  --amb-surface-soft: hsl(var(--foreground) / 0.03);
+  --amb-primary-grad: linear-gradient(135deg, hsl(162 72% 52%) 0%, hsl(158 68% 45%) 100%);
+  --amb-primary-shadow: 0 12px 28px -12px hsl(162 72% 52% / 0.45);
+
+  /* Kept aliases (used by existing markup) */
+  --amb-cream: hsl(var(--foreground));
+  --amb-cream-dim: hsl(var(--foreground) / 0.65);
+  --amb-cream-mute: hsl(var(--foreground) / 0.45);
+  --amb-gold: hsl(var(--foreground));
+  --amb-gold-2: hsl(var(--foreground));
+
+  color: var(--amb-fg);
+  background: hsl(var(--background));
+  min-height: 100dvh;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Typography helpers — neutral, no serif/italic gold */
+.amber-settings .amb-display {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.amber-settings .amb-eyebrow {
+  font-family: inherit;
+  font-style: normal;
+  letter-spacing: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--amb-fg-mute);
+  text-transform: none;
+}
+.amber-settings .amb-mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--amb-fg-mute);
+}
+.amber-settings .amb-gold-text {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--amb-fg);
+  font-style: normal;
+}
+
+/* Back button — same as main SettingsPage */
+.amber-settings .amb-back {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  color: var(--amb-fg);
+  background: hsl(var(--foreground) / 0.06);
+  border: 1px solid var(--amb-line);
+  transition: transform 0.15s ease;
+}
+.amber-settings .amb-back:active {
+  transform: scale(0.95);
+}
+
+/* Card surfaces — matches main SettingsPage row groups */
+.amber-settings .amb-plate,
+.amber-settings .amb-plate-strong {
+  position: relative;
+  background: var(--amb-surface);
+  border: 1px solid var(--amb-line);
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+/* Thin divider */
+.amber-settings .amb-rule {
+  height: 1px;
+  background: var(--amb-line);
+}
+.amber-settings .amb-divider {
+  border-top: 1px solid var(--amb-line);
+}
+
+/* Numbered badge — neutral pill */
+.amber-settings .amb-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--amb-fg);
+  background: hsl(var(--foreground) / 0.06);
+  border: 1px solid var(--amb-line);
+  box-shadow: none;
+}
+
+/* Icon capsule (row leader) */
+.amber-settings .amb-icon-capsule {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: var(--amb-fg);
+  background: hsl(var(--foreground) / 0.06);
+  border: 1px solid var(--amb-line);
+  box-shadow: none;
+}
+
+/* Inputs */
+.amber-settings .amb-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--amb-fg);
+  background: hsl(var(--foreground) / 0.04);
+  border: 1px solid var(--amb-line);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.amber-settings .amb-input::placeholder {
+  color: var(--amb-fg-mute);
+}
+.amber-settings .amb-input:focus {
+  border-color: hsl(var(--foreground) / 0.28);
+  box-shadow: 0 0 0 3px hsl(var(--foreground) / 0.06);
+}
+
+/* Primary CTA — the same violet gradient as main "Upgrade" pill */
+.amber-settings .amb-btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-1);
+  background: var(--amb-primary-grad);
+  border: 1px solid var(--overlay-white-10);
+  box-shadow: var(--amb-primary-shadow);
+  transition: transform 0.12s ease, filter 0.15s ease;
+}
+.amber-settings .amb-btn-gold:hover {
+  filter: brightness(1.05);
+}
+.amber-settings .amb-btn-gold:active {
+  transform: scale(0.99);
+}
+.amber-settings .amb-btn-gold:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Ghost button */
+.amber-settings .amb-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--amb-fg);
+  background: hsl(var(--foreground) / 0.06);
+  border: 1px solid var(--amb-line);
+  transition: background 0.15s ease;
+}
+.amber-settings .amb-btn-ghost:hover {
+  background: hsl(var(--foreground) / 0.1);
+}
+
+/* Danger */
+.amber-settings .amb-danger-plate {
+  border: 1px solid hsl(0 84% 60% / 0.28);
+  background: hsl(0 84% 60% / 0.06);
+  border-radius: 16px;
+}
+
+/* Hero band — centered like main SettingsPage profile block, but neutral */
+.amber-settings .amb-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 20px;
+  background: var(--amb-surface);
+  border: 1px solid var(--amb-line);
+  box-shadow: none;
+  margin-bottom: 20px;
+}
+.amber-settings .amb-hero::before {
+  content: none;
+}
+.amber-settings .amb-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Emblem — same rounded icon look used across the app */
+.amber-settings .amb-emblem {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  color: var(--ink-1);
+  background: var(--amb-primary-grad);
+  box-shadow: var(--amb-primary-shadow);
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+ * Reset previously-forced overrides so shared components render
+ * with their default (main app) theme rather than the gold theme.
+ * ============================================================ */
+.amber-settings .ios26-glass,
+.amber-settings .ios26-glass-strong {
+  background: var(--amb-surface) !important;
+  border: 1px solid var(--amb-line) !important;
+  box-shadow: none !important;
+  color: var(--amb-fg);
+}
+.amber-settings .bg-card {
+  background: var(--amb-surface) !important;
+}
+.amber-settings header.sticky {
+  background: hsl(var(--background) / 0.85) !important;
+  border-color: var(--amb-line) !important;
+  backdrop-filter: blur(18px);
+}

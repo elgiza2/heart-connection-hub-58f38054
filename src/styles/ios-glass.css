@@ -1,0 +1,318 @@
+/* iOS 26.5 Liquid Glass — unified design layer */
+
+:root {
+  /* Surface tints */
+  --glass-bg: color-mix(in oklab, hsl(var(--background)) 62%, transparent);
+  --glass-bg-strong: color-mix(in oklab, hsl(var(--background)) 82%, transparent);
+  --glass-stroke: color-mix(in oklab, hsl(var(--foreground)) 9%, transparent);
+  --glass-stroke-soft: color-mix(in oklab, hsl(var(--foreground)) 5%, transparent);
+  --glass-shadow:
+    0 1px 0 0 color-mix(in oklab, hsl(var(--foreground)) 4%, transparent) inset,
+    0 12px 40px -12px color-mix(in oklab, hsl(var(--foreground)) 20%, transparent);
+
+  /* Stepped blur scale (Apple Intelligence hierarchy) */
+  --glass-blur-sm: 16px;   /* chips, pills */
+  --glass-blur-md: 28px;   /* cards, headers */
+  --glass-blur-lg: 40px;   /* sheets, dialogs */
+  --glass-blur-xl: 56px;   /* full-screen overlays */
+  --glass-saturate: 180%;
+  --glass-blur: blur(var(--glass-blur-md)) saturate(var(--glass-saturate));
+}
+
+.dark,
+[data-theme="dark"] {
+  --glass-bg: color-mix(in oklab, hsl(var(--background)) 55%, transparent);
+  --glass-bg-strong: color-mix(in oklab, hsl(var(--background)) 78%, transparent);
+  --glass-stroke: color-mix(in oklab, hsl(var(--foreground)) 12%, transparent);
+  --glass-stroke-soft: color-mix(in oklab, hsl(var(--foreground)) 7%, transparent);
+}
+
+/* Surfaces — text color follows the theme via the override block below */
+.ios-glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-stroke);
+}
+.ios-glass-strong {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-stroke);
+}
+.ios-card {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-stroke);
+  border-radius: 22px;
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+}
+.ios-card-row + .ios-card-row {
+  border-top: 1px solid var(--glass-stroke-soft);
+}
+.ios-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  min-height: 52px;
+}
+
+/* Header */
+.ios-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-stroke-soft);
+}
+
+/* Buttons & controls */
+.ios-fab {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-stroke);
+  box-shadow: 0 10px 30px -10px color-mix(in oklab, hsl(var(--foreground)) 30%, transparent);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   LIQUID GLASS family — base definitions (referenced ~69 times).
+   These were previously only color-overridden; now they actually
+   render glass surfaces.
+   ────────────────────────────────────────────────────────────── */
+.liquid-glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-stroke);
+  border-radius: 22px;
+  box-shadow: var(--glass-shadow);
+}
+.liquid-glass-subtle {
+  background: color-mix(in oklab, hsl(var(--background)) 40%, transparent);
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-stroke-soft);
+  border-radius: 18px;
+}
+.liquid-glass-button {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-stroke);
+  border-radius: 14px;
+  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), background 0.16s ease;
+}
+.liquid-glass-button:active {
+  transform: scale(0.97);
+}
+.liquid-glass-milk {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-stroke);
+  border-radius: 22px;
+}
+.liquid-glass-input {
+  background: color-mix(in oklab, hsl(var(--background)) 50%, transparent);
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-stroke);
+  border-radius: 14px;
+}
+.liquid-glass-pill {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-stroke);
+  border-radius: 9999px;
+}
+.glass-panel {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-stroke);
+  border-radius: 22px;
+  box-shadow: var(--glass-shadow);
+}
+.glass-input {
+  background: color-mix(in oklab, hsl(var(--background)) 50%, transparent);
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-stroke);
+  border-radius: 14px;
+}
+
+/* Respect user accessibility preferences — disable blur for reduced
+   transparency, fall back to opaque surfaces. */
+@media (prefers-reduced-transparency: reduce) {
+  .liquid-glass,
+  .liquid-glass-subtle,
+  .liquid-glass-button,
+  .liquid-glass-milk,
+  .liquid-glass-input,
+  .liquid-glass-pill,
+  .glass-panel,
+  .glass-input,
+  .ios-glass,
+  .ios-glass-strong,
+  .ios-card,
+  .ios-header,
+  .ios-fab {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: hsl(var(--background));
+  }
+}
+
+
+/* Section titles */
+.ios-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, hsl(var(--foreground)) 55%, transparent);
+  padding: 0 6px 8px;
+}
+
+/* Aurora ambient backdrop */
+.ios-aurora {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+.ios-aurora::before,
+.ios-aurora::after {
+  content: "";
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.45;
+}
+.ios-aurora::before {
+  top: -160px;
+  inset-inline-start: -120px;
+  background: color-mix(in oklab, hsl(var(--primary)) 55%, transparent);
+}
+.ios-aurora::after {
+  bottom: -180px;
+  inset-inline-end: -120px;
+  background: color-mix(in oklab, hsl(var(--primary)) 35%, transparent);
+  opacity: 0.35;
+}
+.dark .ios-aurora::before {
+  opacity: 0.35;
+}
+.dark .ios-aurora::after {
+  opacity: 0.25;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   GLASS = THEME-AWARE TEXT
+   Glass surfaces inherit the theme foreground by default, but DO NOT
+   override colored children (primary buttons, status badges, links,
+   destructive states, etc.). We only set a base color — no !important.
+   ────────────────────────────────────────────────────────────── */
+.liquid-glass,
+.liquid-glass-subtle,
+.liquid-glass-button,
+.liquid-glass-milk,
+.liquid-glass-input,
+.liquid-glass-pill,
+.glass-panel,
+.glass-input,
+.ios-glass,
+.ios-glass-strong,
+.ios-card,
+.ios-header,
+.ios-fab {
+  color: hsl(var(--foreground));
+}
+
+/* Muted text on glass — softer, theme-aware, no !important */
+.liquid-glass .text-muted-foreground,
+.liquid-glass-subtle .text-muted-foreground,
+.liquid-glass-button .text-muted-foreground,
+.liquid-glass-milk .text-muted-foreground,
+.glass-panel .text-muted-foreground,
+.ios-glass .text-muted-foreground,
+.ios-glass-strong .text-muted-foreground,
+.ios-card .text-muted-foreground,
+.ios-header .text-muted-foreground,
+.ios-fab .text-muted-foreground {
+  color: hsl(var(--foreground) / 0.72);
+}
+
+.ios-fab svg.mobile-header-icon-black,
+.ios-fab svg.mobile-header-icon-black * {
+  color: hsl(var(--foreground));
+  stroke: hsl(var(--foreground));
+}
+
+
+/* Placeholders on glass inputs */
+.glass-input::placeholder,
+.liquid-glass-input::placeholder,
+.ios-glass input::placeholder,
+.ios-card input::placeholder,
+.liquid-glass input::placeholder {
+  color: hsl(var(--foreground) / 0.55) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SAFE-AREA — automatic bottom inset for any glass surface that is
+   pinned to the bottom edge. Covers FABs, composers, bottom bars,
+   sheets, drawers without touching each call-site.
+   ────────────────────────────────────────────────────────────── */
+.ios-glass.fixed.bottom-0,
+.ios-glass-strong.fixed.bottom-0,
+.ios-header.fixed.bottom-0,
+.ios-fab.fixed.bottom-0,
+.liquid-glass.fixed.bottom-0,
+.liquid-glass-milk.fixed.bottom-0,
+.liquid-glass-pill.fixed.bottom-0,
+.glass-panel.fixed.bottom-0 {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+/* Top safe-area for fixed top headers using glass */
+.ios-header.fixed.top-0,
+.ios-glass-strong.fixed.top-0,
+.liquid-glass.fixed.top-0 {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+
+/* Generic utility — opt-in for any element */
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+.safe-top {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+.safe-x {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   iOS spring easings — exposed as CSS custom properties so any
+   transition can match the system feel.
+   ────────────────────────────────────────────────────────────── */
+:root {
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-ios-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-ios-emphasis: cubic-bezier(0.2, 0, 0, 1);
+  --dur-ios-fast: 180ms;
+  --dur-ios-base: 320ms;
+  --dur-ios-slow: 480ms;
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/api/dev-admin",
+      "destination": "/api/manus-admin?provider=freestyle"
+    },
+    {
+      "source": "/((?!api/|assets/|.*\\.(?:js|css|png|jpg|jpeg|webp|avif|svg|gif|ico|json|txt|xml|webmanifest|map|woff2?|ttf|otf|mp4|webm|wasm)$).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

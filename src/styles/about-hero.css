@@ -1,0 +1,13 @@
+/* Scoped Helvetica for About hero — only applied via .font-helvetica-hero */
+@font-face {
+  font-family: "Helvetica Hero";
+  font-display: swap;
+  src: url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.woff2") format("woff2"),
+       url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.woff") format("woff"),
+       url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.ttf") format("truetype");
+}
+
+.font-helvetica-hero,
+.font-helvetica-hero * {
+  font-family: "Helvetica Hero", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}

@@ -1,0 +1,1 @@
+ALTER TABLE public.long_runs ADD COLUMN IF NOT EXISTS pending_guidance text[] NOT NULL DEFAULT '{}';
