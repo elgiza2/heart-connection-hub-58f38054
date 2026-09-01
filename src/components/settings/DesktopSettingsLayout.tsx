@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, PanelLeft } from "lucide-react";
+import { ArrowLeft, Monitor, PanelLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useConfirm } from "@/components/common/ConfirmDialog";
 import AppLayout from "@/layouts/AppLayout";
@@ -48,6 +48,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: "integrations", label: "Integrations", path: "/chat?integrations=1", Icon: IntegrationsIcon },
       { id: "mcp", label: "MCP Servers", path: "/settings/mcp", Icon: IntegrationsIcon },
+      { id: "desktop-bridge", label: "My computer", path: "/settings/desktop-bridge", Icon: Monitor },
     ],
   },
   {

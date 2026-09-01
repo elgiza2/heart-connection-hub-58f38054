@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.chat-fast]
 verify_jwt = false
+
+[functions.device-bridge]
+verify_jwt = false
