@@ -81,12 +81,6 @@ async function modelKeys(admin: ReturnType<typeof createClient>) {
   return result;
 }
 
-function chooseModel(body: RequestBody): string {
-  const requested = typeof body.model === "string" ? body.model.trim() : "";
-  if (/^qwen-[a-z0-9.-]+$/i.test(requested)) return requested;
-  return body.tier === "ultra" || body.tier === "pro" ? "qwen-max" : "qwen-plus";
-}
-
 function normalizeMessages(input: Message[]): Message[] | null {
   if (!input.length || input.length > 80) return null;
   const output: Message[] = [];
@@ -98,29 +92,47 @@ function normalizeMessages(input: Message[]): Message[] | null {
   return output;
 }
 
+/** True when the upstream rejected the request because the model is unavailable. */
+function isModelError(status: number, detail: string): boolean {
+  return (
+    status === 404 ||
+    /model|not_?found|not exist|unsupported|no access|InvalidParameter/i.test(detail)
+  );
+}
+
+/**
+ * Calls Alibaba Model Studio, trying each candidate model in turn (Qwen and the
+ * third-party models Alibaba hosts) and each active key, across both regions.
+ */
 async function callAlibaba(
   admin: ReturnType<typeof createClient>,
+  models: string[],
   payload: Record<string, unknown>,
-): Promise<ChatUpstream | null> {
-  for (const entry of await modelKeys(admin)) {
-    for (const endpoint of ENDPOINTS) {
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
-          body: JSON.stringify(payload),
-        });
-        if (response.ok) return { response, keyId: entry.id, format: "chat" };
-        const detail = (await response.text().catch(() => "")).slice(0, 500);
-        console.error(`chat-alibaba upstream [${response.status}]: ${detail}`);
-        if (![401, 403, 429].includes(response.status) && response.status < 500) return null;
-      } catch (error) {
-        console.error("chat-alibaba upstream request failed", error);
+): Promise<(ChatUpstream & { model: string }) | null> {
+  const keys = await modelKeys(admin);
+  for (const model of models) {
+    for (const entry of keys) {
+      for (const endpoint of ENDPOINTS) {
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
+            body: JSON.stringify({ ...payload, model }),
+          });
+          if (response.ok) return { response, keyId: entry.id, format: "chat", model };
+          const detail = (await response.text().catch(() => "")).slice(0, 500);
+          console.error(`chat-alibaba upstream ${model} [${response.status}]: ${detail}`);
+          if (isModelError(response.status, detail)) break;
+          if (![401, 403, 429].includes(response.status) && response.status < 500) return null;
+        } catch (error) {
+          console.error("chat-alibaba upstream request failed", error);
+        }
       }
     }
   }
   return null;
 }
+
 
 async function callGateway(messages: Message[]): Promise<ChatUpstream | null> {
   const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
