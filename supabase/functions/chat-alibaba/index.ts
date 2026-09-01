@@ -327,6 +327,9 @@ Deno.serve(async (req) => {
       if (body.resume_id) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: "resume_id", resumeId: body.resume_id })}\n\n`));
       }
+      for (const frame of preFrames) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+      }
       try {
         while (true) {
           const { done, value } = await upstreamReader.read();
