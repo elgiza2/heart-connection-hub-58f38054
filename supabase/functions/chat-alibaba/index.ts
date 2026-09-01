@@ -355,7 +355,6 @@ Deno.serve(async (req) => {
             : "";
           if (detail) console.error(`chat-alibaba fallback [${result?.response.status}]: ${detail.slice(0, 500)}`);
           send({ error: detail || "Chat service temporarily unavailable" });
-          send("[DONE]");
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           return;
         }
