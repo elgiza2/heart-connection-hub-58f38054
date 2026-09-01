@@ -303,7 +303,18 @@ Deno.serve(async (req) => {
   const result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
     stream: true,
     stream_options: { include_usage: true },
-    enable_search: body.searchEnabled === true && !liveContext,
+    // Alibaba's built-in search stays on for the streamed answer too; when the
+    // pre-pass already gathered sources it is a supplement, not the only engine.
+    enable_search: body.searchEnabled === true,
+    search_options: body.searchEnabled === true
+      ? {
+        forced_search: !liveContext,
+        enable_source: true,
+        enable_citation: true,
+        citation_format: "[<number>]",
+        search_strategy: "pro",
+      }
+      : undefined,
     enable_thinking: false,
     temperature: profile.temperature,
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
