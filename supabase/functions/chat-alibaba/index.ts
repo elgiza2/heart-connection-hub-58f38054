@@ -54,18 +54,33 @@ function json(value: unknown, status = 200) {
   });
 }
 
-function envKey(): string | null {
-  for (const name of [
+/**
+ * The Model Studio key kept as a Supabase function secret. Any name that looks
+ * like an Alibaba/DashScope/Qwen/Kimi key is accepted, so the secret works
+ * whatever the user named it.
+ */
+function envKeys(): string[] {
+  const preferred = [
     "DASHSCOPE_API_KEY",
     "ALIBABA_API_KEY",
+    "ALIBABA_KEY",
     "QWEN_API_KEY",
     "ALIBABA_DASHSCOPE_API_KEY",
     "DASHSCOPE_KEY",
-  ]) {
-    const value = Deno.env.get(name)?.trim();
-    if (value) return value;
+    "MODEL_STUDIO_API_KEY",
+    "KIMI_API_KEY",
+    "MOONSHOT_API_KEY",
+  ];
+  const out: string[] = [];
+  const push = (value?: string) => {
+    const key = value?.trim();
+    if (key && key.length > 16 && !out.includes(key)) out.push(key);
+  };
+  for (const name of preferred) push(Deno.env.get(name));
+  for (const [name, value] of Object.entries(Deno.env.toObject())) {
+    if (/DASHSCOPE|ALIBABA|QWEN|KIMI|MOONSHOT|MODEL_?STUDIO/i.test(name)) push(value);
   }
-  return null;
+  return out;
 }
 
 async function modelKeys(admin: any) {
