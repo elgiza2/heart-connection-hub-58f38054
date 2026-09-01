@@ -91,56 +91,53 @@ export async function askModel(
     return "";
   }
 
-  // Try each active key in turn: a rejected key is a real, recoverable failure,
-  // so it is retired instead of stalling every future tick on the same 401.
+  // Every (key × endpoint × model) combination is tried before giving up, so a
+  // single region/entitlement gap can never stall the planner.
   for (const entry of keys) {
-    try {
-      const response = await fetch(`${BASE}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${entry.key}`,
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [
-            { role: "system", content: system },
-            { role: "user", content: user },
-          ] satisfies LlmMessage[],
-          temperature: 0.2,
-        }),
-      });
-      if (response.status === 401 || response.status === 403) {
-        // The key is rejected for this endpoint only — other functions may use
-        // it against a different region, so never retire it here.
-        console.error(`agentkernel llm key rejected [${response.status}] — trying next key`);
-        continue;
+    for (const base of BASES) {
+      for (const model of MODELS) {
+        try {
+          const response = await fetch(`${base}/chat/completions`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${entry.key}`,
+            },
+            body: JSON.stringify({
+              model,
+              messages: [
+                { role: "system", content: system },
+                { role: "user", content: user },
+              ] satisfies LlmMessage[],
+              temperature: 0.2,
+            }),
+          });
+          if (!response.ok) {
+            const detail = (await response.text()).slice(0, 300);
+            console.error(`agentkernel llm [${response.status}] ${base} ${model}: ${detail}`);
+            continue;
+          }
+          const data = (await response.json().catch(() => null)) as
+            | { choices?: { message?: { content?: string } }[] }
+            | null;
+          const text = data?.choices?.[0]?.message?.content ?? "";
+          if (!text) continue;
+          if (entry.id) {
+            await supabase
+              .from("alibaba_keys")
+              .update({ last_used_at: new Date().toISOString() })
+              .eq("id", entry.id);
+          }
+          return text;
+        } catch (error) {
+          console.error("agentkernel llm failed", error);
+        }
       }
-      if (response.status === 429 || response.status >= 500) {
-        console.error(`agentkernel llm transient [${response.status}] — trying next key`);
-        continue;
-      }
-      if (!response.ok) {
-        console.error(`agentkernel llm [${response.status}]: ${await response.text()}`);
-        return "";
-      }
-      const data = (await response.json().catch(() => null)) as
-        | { choices?: { message?: { content?: string } }[] }
-        | null;
-      const text = data?.choices?.[0]?.message?.content ?? "";
-      if (entry.id) {
-        await supabase
-          .from("alibaba_keys")
-          .update({ last_used_at: new Date().toISOString() })
-          .eq("id", entry.id);
-      }
-      return text;
-    } catch (error) {
-      console.error("agentkernel llm failed", error);
     }
   }
-  return await askGateway(system, user);
+  return "";
 }
+
 
 /**
  * Fallback provider: the Lovable AI Gateway. Used only when no Alibaba key
