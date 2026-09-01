@@ -254,126 +254,134 @@ Deno.serve(async (req) => {
   const routed = routeProfile(question, body.agent);
   const call: CallFn = makeTextCall(admin);
 
-  // 1) Semantic plan (overrides keyword routing unless an agent was forced).
-  const turn = body.agent?.trim()
-    ? { profile: routed, complexity: "standard" as const, subtasks: [], deliverable: "" }
-    : await plan(call, question, routed);
-  const profile = turn.profile;
-
-  const tierBoost = body.tier === "ultra" || body.tier === "pro";
-  // A client-side model choice only overrides the generalist; specialists keep
-  // their own model ladder (coding stays on Kimi).
-  const candidates = profileModels(profile, profile.id === "general" ? body.model : undefined);
-  const models = tierBoost && profile.id === "general" ? ["qwen-max", ...candidates] : candidates;
-
-  const preFrames: Record<string, unknown>[] = [
-    { status: "thinking", agent: profile.id, agent_label: profile.labelAr },
-  ];
-  let liveContext = "";
-  const wantsResearch = profile.research === "always"
-    ? body.searchEnabled !== false
-    : profile.research === "auto" && body.searchEnabled !== false;
-  if (wantsResearch) {
-    try {
-      const { findings, queries, digest } = await research(
-        admin,
-        question,
-        (frame) => preFrames.push(frame),
-        profile.research === "always",
-        call,
-        makeRawCall(admin),
-      );
-      liveContext = researchContext(findings, queries, digest);
-    } catch (error) {
-      console.error("chat-alibaba research pre-pass failed", error);
-    }
-  }
-
-  // 2) Parallel specialist workers for multi-part jobs.
-  let teamBriefs = "";
-  if (turn.subtasks.length) {
-    try {
-      teamBriefs = await runTeam(call, turn, question, liveContext, (frame) => preFrames.push(frame));
-    } catch (error) {
-      console.error("chat-alibaba team run failed", error);
-    }
-  }
-
-  const system = [
-    SYSTEM,
-    profileSystem(profile),
-    typeof body.customSystem === "string" ? body.customSystem : "",
-    liveContext,
-    teamBriefs,
-    deliveryContract(turn),
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-
-  const result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
-    stream: true,
-    stream_options: { include_usage: true },
-    // Alibaba's built-in search stays on for the streamed answer too; when the
-    // pre-pass already gathered sources it is a supplement, not the only engine.
-    enable_search: body.searchEnabled === true,
-    search_options: body.searchEnabled === true
-      ? {
-        search_strategy: "agent",
-        enable_source: true,
-      }
-      : undefined,
-    enable_thinking: false,
-    temperature: profile.temperature,
-    max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
-    messages: [{ role: "system", content: system }, ...messages],
-  });
-  if (!result) return json({ error: "Chat service temporarily unavailable" }, 503);
-  if (!result.response.ok) {
-    const detail = await result.response.text().catch(() => "");
-    const status = result.response.status;
-    console.error(`chat-alibaba fallback [${status}]: ${detail.slice(0, 500)}`);
-    if ([400, 401, 402, 403, 429].includes(status)) {
-      return json({ error: detail || "AI provider request failed", status }, status);
-    }
-    return json({ error: "Chat service temporarily unavailable" }, 503);
-  }
-  if (!result.response.body) return json({ error: "Chat service temporarily unavailable" }, 503);
-
-  const usedModel = result.model ?? models[0];
-  if (result.keyId) {
-    void admin.from("alibaba_keys").update({ last_used_at: new Date().toISOString() }).eq("id", result.keyId);
-  }
-
-  const upstreamReader = result.response.body.getReader();
+  // The pre-work (semantic plan → research pre-pass → parallel specialists →
+  // upstream connect) can take tens of seconds. We therefore open the SSE
+  // response IMMEDIATELY and run everything inside the stream, sending frames
+  // and heartbeats as we go, so the client never waits on silent headers.
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      controller.enqueue(
-        encoder.encode(
-          `data: ${JSON.stringify({ status: "thinking", model: usedModel, agent: profile.id })}\n\n`,
-        ),
-      );
-      if (body.resume_id) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: "resume_id", resumeId: body.resume_id })}\n\n`));
-      }
-      for (const frame of preFrames) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
-      }
+      let alive = true;
+      const send = (value: unknown) => {
+        if (!alive) return;
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(value)}\n\n`));
+        } catch { /* client gone */ }
+      };
+      const beat = setInterval(() => {
+        if (!alive) return;
+        try {
+          controller.enqueue(encoder.encode(`: keep-alive ${Date.now()}\n\n`));
+        } catch { /* client gone */ }
+      }, 5_000);
+
       try {
+        if (body.resume_id) send({ event: "resume_id", resumeId: body.resume_id });
+
+        // 1) Semantic plan (overrides keyword routing unless an agent was forced).
+        const turn = body.agent?.trim()
+          ? { profile: routed, complexity: "standard" as const, subtasks: [], deliverable: "" }
+          : await plan(call, question, routed);
+        const profile = turn.profile;
+        send({ status: "thinking", agent: profile.id, agent_label: profile.labelAr });
+
+        const tierBoost = body.tier === "ultra" || body.tier === "pro";
+        // A client-side model choice only overrides the generalist; specialists
+        // keep their own model ladder (coding stays on Kimi).
+        const candidates = profileModels(profile, profile.id === "general" ? body.model : undefined);
+        const models = tierBoost && profile.id === "general"
+          ? ["qwen-max", ...candidates]
+          : candidates;
+
+        let liveContext = "";
+        const wantsResearch = profile.research === "always"
+          ? body.searchEnabled !== false
+          : profile.research === "auto" && body.searchEnabled !== false;
+        if (wantsResearch) {
+          try {
+            const { findings, queries, digest } = await research(
+              admin,
+              question,
+              (frame) => send(frame),
+              profile.research === "always",
+              call,
+              makeRawCall(admin),
+            );
+            liveContext = researchContext(findings, queries, digest);
+          } catch (error) {
+            console.error("chat-alibaba research pre-pass failed", error);
+          }
+        }
+
+        // 2) Parallel specialist workers for multi-part jobs.
+        let teamBriefs = "";
+        if (turn.subtasks.length) {
+          try {
+            teamBriefs = await runTeam(call, turn, question, liveContext, (frame) => send(frame));
+          } catch (error) {
+            console.error("chat-alibaba team run failed", error);
+          }
+        }
+
+        const system = [
+          SYSTEM,
+          profileSystem(profile),
+          typeof body.customSystem === "string" ? body.customSystem : "",
+          liveContext,
+          teamBriefs,
+          deliveryContract(turn),
+        ]
+          .filter(Boolean)
+          .join("\n\n");
+
+        const result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
+          stream: true,
+          stream_options: { include_usage: true },
+          // Alibaba's built-in search stays on for the streamed answer too; when
+          // the pre-pass already gathered sources it is a supplement.
+          enable_search: body.searchEnabled === true,
+          search_options: body.searchEnabled === true
+            ? { search_strategy: "agent", enable_source: true }
+            : undefined,
+          enable_thinking: false,
+          temperature: profile.temperature,
+          max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
+          messages: [{ role: "system", content: system }, ...messages],
+        });
+
+        if (!result || !result.response.ok || !result.response.body) {
+          const detail = result && !result.response.ok
+            ? await result.response.text().catch(() => "")
+            : "";
+          if (detail) console.error(`chat-alibaba fallback [${result?.response.status}]: ${detail.slice(0, 500)}`);
+          send({ error: detail || "Chat service temporarily unavailable" });
+          send("[DONE]");
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          return;
+        }
+
+        const usedModel = result.model ?? models[0];
+        send({ status: "thinking", model: usedModel, agent: profile.id });
+        if (result.keyId) {
+          void admin.from("alibaba_keys").update({ last_used_at: new Date().toISOString() })
+            .eq("id", result.keyId);
+        }
+
+        const upstreamReader = result.response.body.getReader();
         while (true) {
           const { done, value } = await upstreamReader.read();
           if (done) break;
-          controller.enqueue(value);
+          if (alive) controller.enqueue(value);
         }
-        controller.close();
       } catch (error) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : "Stream interrupted" })}\n\n`));
+        console.error("chat-alibaba stream failed", error);
+        send({ error: error instanceof Error ? error.message : "Stream interrupted" });
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-        controller.close();
+      } finally {
+        clearInterval(beat);
+        alive = false;
+        try { controller.close(); } catch { /* already closed */ }
       }
-    },
-    cancel() {
-      return upstreamReader.cancel();
     },
   });
 
@@ -383,8 +391,6 @@ Deno.serve(async (req) => {
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
-      "x-model-used": usedModel,
-      "x-agent-used": profile.id,
     },
   });
 });
