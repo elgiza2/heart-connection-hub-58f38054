@@ -333,7 +333,7 @@ Deno.serve(async (req) => {
 
   const question = lastUserText(messages);
   const routed = routeProfile(question, body.agent);
-  const call: CallFn = (models, payload) => callAlibaba(admin, models, payload);
+  const call: CallFn = makeTextCall(admin);
 
   // 1) Semantic plan (overrides keyword routing unless an agent was forced).
   const turn = body.agent?.trim()
