@@ -391,7 +391,7 @@ Deno.serve(async (req) => {
     .filter(Boolean)
     .join("\n\n");
 
-  let result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
+  const result: (ChatUpstream & { model?: string }) | null = await callAlibaba(admin, models, {
     stream: true,
     stream_options: { include_usage: true },
     enable_search: body.searchEnabled === true && !liveContext,
