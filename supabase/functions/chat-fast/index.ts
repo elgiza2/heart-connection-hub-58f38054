@@ -255,7 +255,9 @@ Deno.serve(async (req) => {
     temperature: 0.6,
     // Chat replies stay short; forced callers (dev agent) may ask for more so
     // long code files are not cut off mid-file.
-    max_tokens: Math.min(Math.max(Number(body.maxTokens) || 2048, 256), 8192),
+    // Guests get shorter answers than signed-in users (still useful, but not a
+    // free long-form generation endpoint).
+    max_tokens: Math.min(Math.max(Number(body.maxTokens) || 2048, 256), userId ? 8192 : 1200),
     messages: [{ role: "system", content: system }, ...messages.slice(-16)],
   };
 
