@@ -202,7 +202,7 @@ async function callGateway(messages: Message[], model = "openai/gpt-5.6-sol"): P
         "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "openai/gpt-5.6-sol",
+        model,
         input: messages,
         stream: true,
         store: false,
