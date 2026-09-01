@@ -265,14 +265,33 @@ Deno.serve(async (req) => {
   }
 
   const model = chooseModel(body);
-  const system = [SYSTEM, typeof body.customSystem === "string" ? body.customSystem : ""]
+  const preFrames: Record<string, unknown>[] = [];
+  let liveContext = "";
+  if (body.searchEnabled !== false) {
+    try {
+      const { findings, queries } = await research(
+        admin,
+        lastUserText(messages),
+        (frame) => preFrames.push(frame),
+      );
+      liveContext = researchContext(findings, queries);
+    } catch (error) {
+      console.error("chat-alibaba research pre-pass failed", error);
+    }
+  }
+
+  const system = [
+    SYSTEM,
+    typeof body.customSystem === "string" ? body.customSystem : "",
+    liveContext,
+  ]
     .filter(Boolean)
     .join("\n\n");
   let result = await callAlibaba(admin, {
     model,
     stream: true,
     stream_options: { include_usage: true },
-    enable_search: body.searchEnabled === true,
+    enable_search: body.searchEnabled === true && !liveContext,
     enable_thinking: false,
     temperature: 0.45,
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
