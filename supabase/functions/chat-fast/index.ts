@@ -131,20 +131,37 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Same identity contract as `chat-alibaba`: a signed-in user OR a guest
-  // fingerprint header is enough. The anon key alone is treated as a guest.
-  // A user id is only honoured once the token signature has been verified;
-  // an unverified-but-well-formed token still gets guest-level access.
+  // Guests may chat without signing in. Identity is best-effort: a verified
+  // user id, else a guest bucket keyed by fingerprint or client IP. Guests are
+  // never blocked outright — only rate limited (see `guestAllowance`).
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
   const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
   const isAppToken = Boolean(token) && token !== anonKey;
   const userId = isAppToken ? verifiedUserId(token) : null;
-  const wellFormed = isAppToken && Boolean(decodeClaims(token));
-  if (!userId && !wellFormed && !req.headers.get("x-anon-fingerprint")) {
-    return new Response(
-      JSON.stringify({ error: "Guest identity required", code: "auth_required" }),
-      { status: 403, headers: { ...fastCorsHeaders, "Content-Type": "application/json" } },
-    );
+
+  if (!userId) {
+    const bucket =
+      req.headers.get("x-anon-fingerprint") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "anon";
+    const allowance = guestAllowance(bucket);
+    if (!allowance.ok) {
+      return new Response(
+        JSON.stringify({
+          error: "Guest limit reached. Sign in to keep chatting.",
+          code: "guest_limit",
+          retryAfterSeconds: allowance.retryAfterSeconds,
+        }),
+        {
+          status: 429,
+          headers: {
+            ...fastCorsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": String(allowance.retryAfterSeconds),
+          },
+        },
+      );
+    }
   }
 
 
