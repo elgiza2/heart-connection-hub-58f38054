@@ -126,6 +126,10 @@ async function callAlibaba(
           if (response.ok) return { response, keyId: entry.id, format: "chat", model };
           const detail = (await response.text().catch(() => "")).slice(0, 500);
           console.error(`chat-alibaba upstream ${model} [${response.status}]: ${detail}`);
+          // Retire a rejected key so later turns stop paying its latency.
+          if (response.status === 401 && entry.id && /invalid_api_key|Incorrect API key/i.test(detail)) {
+            void admin.from("alibaba_keys").update({ status: "invalid" }).eq("id", entry.id);
+          }
           if (isModelError(response.status, detail)) continue models;
           if (![401, 403, 429].includes(response.status) && response.status < 500) return null;
         } catch (error) {
@@ -136,6 +140,7 @@ async function callAlibaba(
   }
   return null;
 }
+
 
 
 async function callGateway(messages: Message[]): Promise<ChatUpstream | null> {
