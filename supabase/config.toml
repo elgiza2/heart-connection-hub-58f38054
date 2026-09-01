@@ -1,1 +1,4 @@
 project_id = "ltgampdtawuefwwayncx"
+
+[functions.chat-alibaba]
+verify_jwt = false
