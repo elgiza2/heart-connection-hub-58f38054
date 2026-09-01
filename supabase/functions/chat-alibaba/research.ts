@@ -84,29 +84,24 @@ needed=true when the answer depends on current events, prices, releases, people,
 needed=false for chit-chat, math, translation, coding help, opinion or rewriting.
 Give 1-3 short high-signal queries in the language most likely to hold the sources.`;
 
-async function planQueries(question: string, force = false): Promise<string[]> {
-  const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
-  if (!key) return force ? [question.slice(0, 200)] : heuristicQueries(question);
+/** Query planner. Runs on the project's own Alibaba key, never on a gateway. */
+async function planQueries(
+  call: PlannerCall | undefined,
+  question: string,
+  force = false,
+): Promise<string[]> {
+  if (!call) return force ? [question.slice(0, 200)] : heuristicQueries(question);
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": key,
-        "X-Lovable-AIG-SDK": "fetch",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3.1-flash-lite",
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: PLANNER },
-          { role: "user", content: question.slice(0, 4_000) },
-        ],
-      }),
+    const raw = await call(["qwen3.8-flash", "qwen-flash", "qwen-plus"], {
+      temperature: 0.1,
+      max_tokens: 300,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: PLANNER },
+        { role: "user", content: question.slice(0, 4_000) },
+      ],
     });
-    if (!res.ok) return force ? [question.slice(0, 200)] : heuristicQueries(question);
-    const data = await res.json() as { choices?: { message?: { content?: string } }[] };
-    const raw = data.choices?.[0]?.message?.content ?? "";
+    if (!raw) return force ? [question.slice(0, 200)] : heuristicQueries(question);
     const parsed = JSON.parse(raw.replace(/^```json\s*|\s*```$/g, "")) as {
       needed?: boolean;
       queries?: unknown;
