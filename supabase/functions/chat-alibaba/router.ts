@@ -101,7 +101,7 @@ const ANALYST_HINTS =
 const WRITER_HINTS =
   /\b(write|draft|rewrite|edit|essay|article|blog|post|caption|script|email|letter|story|poem|summar[iy]|translate|slogan|ad copy)\b|اكتب|اكتبلي|صيغ|صياغة|مقال|مقالة|منشور|رسالة|إيميل|قصة|شعر|سكربت|ترجم|تلخيص|لخص|إعلان/i;
 const OPERATOR_HINTS =
-  /\b(automate|workflow|pipeline|integrate|schedule|scrape|crawl|monitor|agent|task|do it|execute|run|set ?up|configure|connect)\b|نفذ|شغل|اعمل|جهز|أتمت|أتمتة|اربط|تكامل|جدول|راقب|اسحب|مهمة|وكيل/i;
+  /\b(automate|workflow|pipeline|integrate|schedule|scrape|crawl|monitor|agent|task|do it|execute|run|set ?up|configure|connect)\b|\bplan\b|launch|campaign|strategy|نفذ|تنفيذ|شغل|اعمل|اعملي|جهز|ابدأ|ابدا|خطط|خطة|حملة|استراتيجية|أتمت|أتمتة|اربط|تكامل|جدول|راقب|اسحب|مهمة|مهام|وكيل/i;
 
 function score(text: string, pattern: RegExp): number {
   return (text.match(new RegExp(pattern.source, "gi")) ?? []).length;
