@@ -93,7 +93,6 @@ async function planQueries(
   if (!call) return force ? [question.slice(0, 200)] : heuristicQueries(question);
   try {
     const raw = await call(["qwen3.8-flash", "qwen-flash", "qwen-plus"], {
-      temperature: 0.1,
       max_tokens: 300,
       response_format: { type: "json_object" },
       messages: [
@@ -225,7 +224,6 @@ async function nativeSearch(
   const today = new Date().toISOString().slice(0, 10);
   try {
     const data = await raw(["qwen-plus", "qwen-flash", "qwen-max"], {
-      temperature: 0.2,
       enable_search: true,
       search_options: {
         forced_search: true,

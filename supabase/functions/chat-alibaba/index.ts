@@ -317,7 +317,7 @@ Deno.serve(async (req) => {
       }
       : undefined,
     enable_thinking: false,
-    temperature: profile.temperature,
+    ...(usedModel.startsWith("kimi-") ? {} : { temperature: profile.temperature }),
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
     messages: [{ role: "system", content: system }, ...messages],
   });
