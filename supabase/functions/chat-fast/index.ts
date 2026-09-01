@@ -100,6 +100,34 @@ function verifiedUserId(token: string): string | null {
 }
 
 
+/**
+ * Guest budget: signed-out visitors chat freely, but within limits so the fast
+ * lane can't be farmed. Sliding window per fingerprint/IP bucket.
+ */
+const GUEST_WINDOW_MS = 60 * 60 * 1000;
+const GUEST_MAX_PER_WINDOW = 25;
+const GUEST_MAX_PER_MINUTE = 6;
+const guestHits = new Map<string, number[]>();
+
+function guestAllowance(bucket: string): { ok: boolean; retryAfterSeconds: number } {
+  const now = Date.now();
+  if (guestHits.size > 5000) guestHits.clear();
+  const hits = (guestHits.get(bucket) || []).filter((t) => now - t < GUEST_WINDOW_MS);
+  const lastMinute = hits.filter((t) => now - t < 60_000);
+  if (lastMinute.length >= GUEST_MAX_PER_MINUTE) {
+    guestHits.set(bucket, hits);
+    return { ok: false, retryAfterSeconds: 30 };
+  }
+  if (hits.length >= GUEST_MAX_PER_WINDOW) {
+    guestHits.set(bucket, hits);
+    const oldest = hits[0] ?? now;
+    return { ok: false, retryAfterSeconds: Math.max(30, Math.ceil((GUEST_WINDOW_MS - (now - oldest)) / 1000)) };
+  }
+  hits.push(now);
+  guestHits.set(bucket, hits);
+  return { ok: true, retryAfterSeconds: 0 };
+}
+
 const ENDPOINTS = [
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
   "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
@@ -131,20 +159,37 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Same identity contract as `chat-alibaba`: a signed-in user OR a guest
-  // fingerprint header is enough. The anon key alone is treated as a guest.
-  // A user id is only honoured once the token signature has been verified;
-  // an unverified-but-well-formed token still gets guest-level access.
+  // Guests may chat without signing in. Identity is best-effort: a verified
+  // user id, else a guest bucket keyed by fingerprint or client IP. Guests are
+  // never blocked outright — only rate limited (see `guestAllowance`).
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
   const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
   const isAppToken = Boolean(token) && token !== anonKey;
   const userId = isAppToken ? verifiedUserId(token) : null;
-  const wellFormed = isAppToken && Boolean(decodeClaims(token));
-  if (!userId && !wellFormed && !req.headers.get("x-anon-fingerprint")) {
-    return new Response(
-      JSON.stringify({ error: "Guest identity required", code: "auth_required" }),
-      { status: 403, headers: { ...fastCorsHeaders, "Content-Type": "application/json" } },
-    );
+
+  if (!userId) {
+    const bucket =
+      req.headers.get("x-anon-fingerprint") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "anon";
+    const allowance = guestAllowance(bucket);
+    if (!allowance.ok) {
+      return new Response(
+        JSON.stringify({
+          error: "Guest limit reached. Sign in to keep chatting.",
+          code: "guest_limit",
+          retryAfterSeconds: allowance.retryAfterSeconds,
+        }),
+        {
+          status: 429,
+          headers: {
+            ...fastCorsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": String(allowance.retryAfterSeconds),
+          },
+        },
+      );
+    }
   }
 
 
@@ -210,7 +255,9 @@ Deno.serve(async (req) => {
     temperature: 0.6,
     // Chat replies stay short; forced callers (dev agent) may ask for more so
     // long code files are not cut off mid-file.
-    max_tokens: Math.min(Math.max(Number(body.maxTokens) || 2048, 256), 8192),
+    // Guests get shorter answers than signed-in users (still useful, but not a
+    // free long-form generation endpoint).
+    max_tokens: Math.min(Math.max(Number(body.maxTokens) || 2048, 256), userId ? 8192 : 1200),
     messages: [{ role: "system", content: system }, ...messages.slice(-16)],
   };
 
