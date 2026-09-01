@@ -104,14 +104,26 @@ interface Plan {
   risk: "low" | "medium" | "high";
 }
 
+/** Live clock + inventory, so plans never assume an old year or a tiny toolset. */
+const nowBrief = () => {
+  const now = new Date();
+  return `Today is ${now.toISOString().slice(0, 10)} and the current year is ${now.getUTCFullYear()} — never treat anything from an earlier year as current.`;
+};
+
 const PLAN_SYSTEM = `You plan a task an autonomous agent will execute in the user's browser.
-Available tools: run_code (sandboxed JS), fetch_url (read a public page as text),
+${nowBrief()}
+Core tools: run_code (sandboxed JS), fetch_url (read a public page as text),
 write_file / read_file (task workspace), remember (save a durable fact),
+tool_search + tool_call (a catalog of ${CATALOG_SIZE} tools across ${catalogCategories().length} domains:
+${catalogCategories().slice(0, 12).map((c) => c.category).join(", ")} …),
+spawn_agent (delegate a sub-task to a specialist),
 ask_user (pause and ask), finish (deliver the result).
+Assume a tool exists for almost anything — plan the real work, not a reduced version of it.
 Reply with JSON only: {"steps":["...", "..."],"risk":"low|medium|high"}
 3 to 8 short imperative steps, in the same language the user used.
 risk is "high" when the task involves payments, deletions, sending messages on the
 user's behalf, or credentials; "medium" when it changes data the user owns; else "low".`;
+
 
 async function makePlan(goal: string, memory: string): Promise<Plan> {
   const parsed = await askJson<{ steps?: unknown; risk?: unknown }>(PLAN_SYSTEM, [
