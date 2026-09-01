@@ -128,14 +128,35 @@ export class DevWorkspace {
     return last;
   }
 
-  /** Imports a public GitHub repository into the workdir. */
+  /**
+   * Imports a GitHub repository into the workdir.
+   * Accepts a full URL or the `owner/repo` shorthand, supports private repos
+   * when a GitHub token is configured, and installs with the repo's own
+   * package manager (bun / pnpm / yarn / npm) instead of always using npm.
+   */
   async importGithub(repoUrl: string, branch?: string): Promise<ExecResult> {
+    const raw = repoUrl.trim().replace(/\.git$/, "");
+    const slug = /^https?:\/\//i.test(raw)
+      ? raw.replace(/^https?:\/\/(www\.)?github\.com\//i, "")
+      : raw.replace(/^github\.com\//i, "");
+    const token = process.env.GITHUB_TOKEN || process.env.GITHUB_API_KEY || "";
+    const cloneUrl = token
+      ? `https://x-access-token:${token}@github.com/${slug}.git`
+      : `https://github.com/${slug}.git`;
     const b = branch ? `-b ${branch}` : "";
+    const install = [
+      "if [ -f bun.lock ] || [ -f bun.lockb ]; then bun install",
+      "elif [ -f pnpm-lock.yaml ]; then (corepack enable >/dev/null 2>&1; pnpm install --no-frozen-lockfile)",
+      "elif [ -f yarn.lock ]; then (corepack enable >/dev/null 2>&1; yarn install)",
+      "elif [ -f package.json ]; then npm install --legacy-peer-deps",
+      "fi",
+    ].join("; ");
     return this.bash(
-      `rm -rf ./* ./.[!.]* 2>/dev/null; git clone --depth 1 ${b} ${repoUrl} . && (npm install || true)`,
-      480_000,
+      `rm -rf ./* ./.[!.]* 2>/dev/null; git clone --depth 50 ${b} ${cloneUrl} . && (${install} || true) && git log --oneline -3`,
+      600_000,
     );
   }
+
 
   /**
    * Makes sure the workspace can actually serve: vite + react plugin installed
