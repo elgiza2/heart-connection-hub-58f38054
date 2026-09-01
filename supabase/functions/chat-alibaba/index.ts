@@ -35,6 +35,12 @@ type RequestBody = {
   maxTokens?: number;
 };
 
+type ChatUpstream = {
+  response: Response;
+  keyId?: string;
+  format: "chat" | "responses";
+};
+
 function json(value: unknown, status = 200) {
   return new Response(JSON.stringify(value), {
     status,
@@ -94,7 +100,7 @@ function normalizeMessages(input: Message[]): Message[] | null {
 async function callAlibaba(
   admin: ReturnType<typeof createClient>,
   payload: Record<string, unknown>,
-): Promise<{ response: Response; keyId?: string } | null> {
+): Promise<ChatUpstream | null> {
   for (const entry of await modelKeys(admin)) {
     for (const endpoint of ENDPOINTS) {
       try {
@@ -103,7 +109,7 @@ async function callAlibaba(
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${entry.key}` },
           body: JSON.stringify(payload),
         });
-        if (response.ok) return { response, keyId: entry.id };
+        if (response.ok) return { response, keyId: entry.id, format: "chat" };
         const detail = (await response.text().catch(() => "")).slice(0, 500);
         console.error(`chat-alibaba upstream [${response.status}]: ${detail}`);
         if (![401, 403, 429].includes(response.status) && response.status < 500) return null;
@@ -113,6 +119,83 @@ async function callAlibaba(
     }
   }
   return null;
+}
+
+async function callGateway(messages: Message[]): Promise<ChatUpstream | null> {
+  const key = Deno.env.get("LOVABLE_API_KEY")?.trim();
+  if (!key) return null;
+  try {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Lovable-API-Key": key,
+        "X-Lovable-AIG-SDK": "fetch",
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-5.6-sol",
+        input: messages,
+        stream: true,
+        store: false,
+        reasoning: { effort: "medium", summary: "auto" },
+        include: ["reasoning.encrypted_content"],
+      }),
+    });
+    return { response, format: "responses" };
+  } catch (error) {
+    console.error("chat-alibaba gateway request failed", error);
+    return null;
+  }
+}
+
+function gatewayAsChatStream(body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  let buffer = "";
+  return new ReadableStream({
+    async pull(controller) {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          if (buffer.trim()) emitGatewayLine(buffer, controller, encoder);
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+          return;
+        }
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        let emitted = false;
+        for (const line of lines) emitted = emitGatewayLine(line, controller, encoder) || emitted;
+        if (emitted) return;
+      }
+    },
+    cancel() {
+      return reader.cancel();
+    },
+  });
+}
+
+function emitGatewayLine(
+  line: string,
+  controller: ReadableStreamDefaultController<Uint8Array>,
+  encoder: TextEncoder,
+): boolean {
+  if (!line.startsWith("data:")) return false;
+  const raw = line.slice(5).trim();
+  if (!raw || raw === "[DONE]") return false;
+  try {
+    const event = JSON.parse(raw) as Record<string, any>;
+    const text = event.type === "response.output_text.delta" ? event.delta : null;
+    const reasoning = event.type === "response.reasoning_summary_text.delta" ? event.delta : null;
+    if (!text && !reasoning) return false;
+    const delta = text ? { content: text } : { reasoning_content: reasoning };
+    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta }] })}\n\n`));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function personalization(admin: ReturnType<typeof createClient>, userId: string) {
@@ -184,7 +267,7 @@ Deno.serve(async (req) => {
   const system = [SYSTEM, typeof body.customSystem === "string" ? body.customSystem : ""]
     .filter(Boolean)
     .join("\n\n");
-  const result = await callAlibaba(admin, {
+  let result = await callAlibaba(admin, {
     model,
     stream: true,
     stream_options: { include_usage: true },
@@ -194,13 +277,29 @@ Deno.serve(async (req) => {
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
     messages: [{ role: "system", content: system }, ...messages],
   });
-  if (!result?.response.body) return json({ error: "Chat service temporarily unavailable" }, 503);
+  if (!result) {
+    result = await callGateway([{ role: "system", content: system }, ...messages]);
+  }
+  if (!result) return json({ error: "Chat service temporarily unavailable" }, 503);
+  if (!result.response.ok) {
+    const detail = await result.response.text().catch(() => "");
+    const status = result.response.status;
+    console.error(`chat-alibaba fallback [${status}]: ${detail.slice(0, 500)}`);
+    if ([400, 401, 402, 403, 429].includes(status)) {
+      return json({ error: detail || "AI provider request failed", status }, status);
+    }
+    return json({ error: "Chat service temporarily unavailable" }, 503);
+  }
+  if (!result.response.body) return json({ error: "Chat service temporarily unavailable" }, 503);
 
   if (result.keyId) {
     void admin.from("alibaba_keys").update({ last_used_at: new Date().toISOString() }).eq("id", result.keyId);
   }
 
-  const upstreamReader = result.response.body.getReader();
+  const source = result.format === "responses"
+    ? gatewayAsChatStream(result.response.body)
+    : result.response.body;
+  const upstreamReader = source.getReader();
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
