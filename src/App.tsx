@@ -180,6 +180,7 @@ const App = () => {
                       <CommandPalette />
                       <ShortcutsHelp />
                       <CostConfirmationHost />
+                      <BackgroundJobNotifier />
                     </Suspense>
 
                     <Suspense fallback={<LazyFallback />}>
