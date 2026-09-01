@@ -12,11 +12,34 @@ import { tickAllRuns } from "../_shared/agentkernel/kernel.ts";
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const expected = Deno.env.get("AGENT_TICK_SECRET");
   const provided =
     req.headers.get("x-agent-tick-secret") ??
     new URL(req.url).searchParams.get("secret") ??
     "";
+
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) {
+    return new Response(JSON.stringify({ error: "Server misconfigured" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const supabase = createClient(url, key, { auth: { persistSession: false } });
+
+  // The cron job signs its call with the secret stored in `agent_tick_config`.
+  // The env secret stays supported, but the table is the source of truth so a
+  // missing/renamed env var can never silently stop every long run.
+  let expected = Deno.env.get("AGENT_TICK_SECRET")?.trim() ?? "";
+  if (!expected) {
+    const { data } = await supabase
+      .from("agent_tick_config")
+      .select("secret")
+      .limit(1)
+      .maybeSingle();
+    expected = String((data as { secret?: string } | null)?.secret ?? "").trim();
+  }
   // Fail closed: without a configured secret this endpoint would run with the
   // service role and be callable by anyone who knows the URL.
   if (!expected) {
@@ -32,16 +55,6 @@ Deno.serve(async (req) => {
     });
   }
 
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!url || !key) {
-    return new Response(JSON.stringify({ error: "Server misconfigured" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const supabase = createClient(url, key, { auth: { persistSession: false } });
   try {
     const advanced = await tickAllRuns(supabase, 25);
     return new Response(JSON.stringify({ ok: true, advanced }), {
