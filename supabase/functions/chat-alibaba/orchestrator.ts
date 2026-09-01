@@ -18,8 +18,8 @@ import { AGENTS, type AgentProfile } from "./router.ts";
 
 /**
  * Non-streaming text call used by the manager and the workers. The host wires it
- * to Alibaba Model Studio with an automatic gateway fallback, so the internal
- * team keeps working even when no DashScope key is usable.
+ * to Alibaba Model Studio (International) using the project's own key. No other
+ * AI provider is involved.
  */
 export type CallFn = (
   models: string[],
@@ -34,7 +34,7 @@ export type TurnPlan = {
   deliverable: string;
 };
 
-const PLANNER_MODELS = ["qwen-flash", "qwen-turbo", "qwen-plus"];
+const PLANNER_MODELS = ["qwen3.8-flash", "qwen-flash", "qwen-plus", "qwen-max"];
 const WORKER_TIMEOUT_MS = 55_000;
 const MAX_SUBTASKS = 4;
 
