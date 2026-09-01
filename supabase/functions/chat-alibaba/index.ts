@@ -243,6 +243,7 @@ Deno.serve(async (req) => {
         question,
         (frame) => preFrames.push(frame),
         profile.research === "always",
+        call,
       );
       liveContext = researchContext(findings, queries, digest);
     } catch (error) {
