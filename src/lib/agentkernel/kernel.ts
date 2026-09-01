@@ -13,6 +13,9 @@ import type { LongRun } from "@/lib/longrun/types";
 import { loginIdentityFor } from "./credentials";
 import { listMail } from "@/lib/mail/mailClient";
 import { askJson, askModel } from "./llm";
+import { CATALOG_SIZE, catalogCategories } from "@/lib/agentTools/catalog";
+import { runCatalogTool, searchToolsFor } from "@/lib/agentTools/runtime";
+import { renderSubAgents, runSubAgent } from "@/lib/agentTools/subagents";
 import {
   fetchUrl,
   filesToArtifacts,
@@ -21,6 +24,7 @@ import {
   writeFile,
   type ToolContext,
 } from "./tools";
+
 
 
 const AUTO_CONTINUE_MS = 60_000;
