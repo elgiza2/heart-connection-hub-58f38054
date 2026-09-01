@@ -280,7 +280,9 @@ Deno.serve(async (req) => {
   const question = lastUserText(messages);
   const profile = routeProfile(question, body.agent);
   const tierBoost = body.tier === "ultra" || body.tier === "pro";
-  const candidates = profileModels(profile, body.model);
+  // A client-side model choice only overrides the generalist; specialists keep
+  // their own model ladder (coding stays on Kimi).
+  const candidates = profileModels(profile, profile.id === "general" ? body.model : undefined);
   const models = tierBoost && profile.id === "general" ? ["qwen-max", ...candidates] : candidates;
 
   const preFrames: Record<string, unknown>[] = [
