@@ -611,10 +611,33 @@ export async function tick(runId: string): Promise<RunRow | null> {
 
       let output = "";
       let ok = true;
-      if (tool === "run_code") {
+      if (tool === "tool_search") {
+        const res = searchToolsFor(String(args.need ?? args.query ?? run.goal ?? ""));
+        ok = res.ok;
+        output = res.output;
+      } else if (tool === "tool_call") {
+        const res = await runCatalogTool(
+          String(args.id ?? args.tool ?? ""),
+          (args.args ?? args.input ?? {}) as Record<string, any>,
+          { ctx, userId, runId },
+        );
+        ok = res.ok;
+        output = res.output;
+      } else if (tool === "spawn_agent") {
+        const sub = await runSubAgent(String(args.agent ?? args.slug ?? "researcher"), String(args.task ?? run.goal ?? ""), {
+          ctx,
+          userId,
+          runId,
+          agentSlug: String(args.agent ?? "researcher"),
+          onStep: (label, detail) => void event(runId, "tool", label, detail),
+        });
+        ok = !!sub.report;
+        output = `SUB-AGENT ${sub.slug} (${sub.steps.length} steps)\n${sub.report}`;
+      } else if (tool === "run_code") {
         const res = await runCode(String(args.code ?? ""));
         ok = res.ok;
         output = res.output;
+
       } else if (tool === "fetch_url") {
         const res = await fetchUrl(String(args.url ?? ""));
         ok = res.ok;
