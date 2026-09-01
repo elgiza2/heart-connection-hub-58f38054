@@ -269,12 +269,12 @@ Deno.serve(async (req) => {
   let liveContext = "";
   if (body.searchEnabled !== false) {
     try {
-      const { findings, queries } = await research(
+      const { findings, queries, digest } = await research(
         admin,
         lastUserText(messages),
         (frame) => preFrames.push(frame),
       );
-      liveContext = researchContext(findings, queries);
+      liveContext = researchContext(findings, queries, digest);
     } catch (error) {
       console.error("chat-alibaba research pre-pass failed", error);
     }
