@@ -6,6 +6,7 @@
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { lastUserText, research, researchContext } from "./research.ts";
 
 const headers = {
   ...corsHeaders,
@@ -264,14 +265,33 @@ Deno.serve(async (req) => {
   }
 
   const model = chooseModel(body);
-  const system = [SYSTEM, typeof body.customSystem === "string" ? body.customSystem : ""]
+  const preFrames: Record<string, unknown>[] = [];
+  let liveContext = "";
+  if (body.searchEnabled !== false) {
+    try {
+      const { findings, queries, digest } = await research(
+        admin,
+        lastUserText(messages),
+        (frame) => preFrames.push(frame),
+      );
+      liveContext = researchContext(findings, queries, digest);
+    } catch (error) {
+      console.error("chat-alibaba research pre-pass failed", error);
+    }
+  }
+
+  const system = [
+    SYSTEM,
+    typeof body.customSystem === "string" ? body.customSystem : "",
+    liveContext,
+  ]
     .filter(Boolean)
     .join("\n\n");
   let result = await callAlibaba(admin, {
     model,
     stream: true,
     stream_options: { include_usage: true },
-    enable_search: body.searchEnabled === true,
+    enable_search: body.searchEnabled === true && !liveContext,
     enable_thinking: false,
     temperature: 0.45,
     max_tokens: Math.min(Math.max(Number(body.maxTokens) || 8192, 512), 16384),
@@ -306,6 +326,9 @@ Deno.serve(async (req) => {
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: "thinking", model })}\n\n`));
       if (body.resume_id) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: "resume_id", resumeId: body.resume_id })}\n\n`));
+      }
+      for (const frame of preFrames) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
       }
       try {
         while (true) {
