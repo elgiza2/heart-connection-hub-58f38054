@@ -7,19 +7,50 @@
  */
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 
-const BASE =
-  Deno.env.get("ALIBABA_API_BASE") ||
-  "https://dashscope-intl.aliyuncs.com/compatible-mode/v1";
-const MODEL = Deno.env.get("AGENT_KERNEL_MODEL") || "qwen-plus";
-const GATEWAY_MODEL = Deno.env.get("AGENT_KERNEL_FALLBACK_MODEL") || "google/gemini-3-flash";
+/**
+ * Endpoints tried in order: the international DashScope region first, then the
+ * mainland one. A key entitled to only one region used to look "rejected".
+ */
+const BASES = [
+  Deno.env.get("ALIBABA_API_BASE") || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+  "https://dashscope.aliyuncs.com/compatible-mode/v1",
+];
+/** Model ladder: a model the key is not entitled to must not kill the run. */
+const MODELS = [
+  Deno.env.get("AGENT_KERNEL_MODEL") || "qwen-plus",
+  "qwen-max",
+  "qwen-turbo",
+];
 
 export interface LlmMessage {
   role: "system" | "user" | "assistant";
   content: string;
 }
 
-/** Every active text-capable key, least-recently-used first, plus the env key. */
+/** Every env secret name the project uses for the DashScope/Alibaba key. */
+const ENV_KEY_NAMES = [
+  "DASHSCOPE_API_KEY",
+  "ALIBABA_API_KEY",
+  "QWEN_API_KEY",
+  "ALIBABA_DASHSCOPE_API_KEY",
+  "DASHSCOPE_KEY",
+];
+
+/**
+ * The project secret comes FIRST: it is the key that is actually entitled to
+ * the text models. Rows in `alibaba_keys` are workspace/media keys that answer
+ * 401/403 for chat, so relying on them left the planner with no answer at all.
+ */
 async function apiKeys(supabase: SupabaseClient): Promise<Array<{ id?: string; key: string }>> {
+  const out: Array<{ id?: string; key: string }> = [];
+  const seen = new Set<string>();
+  for (const name of ENV_KEY_NAMES) {
+    const value = Deno.env.get(name)?.trim();
+    if (value && !seen.has(value)) {
+      seen.add(value);
+      out.push({ key: value });
+    }
+  }
   const { data } = await supabase
     .from("alibaba_keys")
     .select("id,api_key,category")
@@ -27,16 +58,18 @@ async function apiKeys(supabase: SupabaseClient): Promise<Array<{ id?: string; k
     .in("category", ["qwen", "memory", "text"])
     .order("last_used_at", { ascending: true, nullsFirst: true })
     .limit(6);
-  const out: Array<{ id?: string; key: string }> = [];
   for (const row of (data ?? []) as { id?: string; api_key?: string }[]) {
     const key = row.api_key?.trim();
-    if (key) out.push({ id: row.id, key });
+    // Only real DashScope keys — the table also holds junk/placeholder rows.
+    if (key && key.startsWith("sk-") && !seen.has(key)) {
+      seen.add(key);
+      out.push({ id: row.id, key });
+    }
   }
-  const envKey = Deno.env.get("ALIBABA_API_KEY")?.trim();
-  if (envKey) out.push({ key: envKey });
   if (!out.length) throw new Error("no_model_key");
   return out;
 }
+
 
 /**
  * One non-streaming completion. Returns "" on any failure so the caller can
