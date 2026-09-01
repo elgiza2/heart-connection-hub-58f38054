@@ -1,6 +1,6 @@
 import { useEffect, useState, type FC, type SVGProps } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Sparkles, Globe, Brain, Info, Mail, KeyRound } from "lucide-react";
+import { ChevronRight, Sparkles, Globe, Brain, Info, Mail, KeyRound, Monitor } from "lucide-react";
 import { getStoredTheme, setTheme, type ThemeMode } from "@/lib/theme";
 import { Moon as MoonIcon, Sun as SunIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -92,6 +92,7 @@ export function DesktopSettingsHome() {
         { icon: (p) => <Brain {...p} />, label: tx("Memory"), path: "/settings/memory" },
         { icon: IntegrationsIcon, label: tx("Integrations"), path: "/chat?integrations=1" },
         { icon: IntegrationsIcon, label: tx("MCP Servers"), path: "/settings/mcp" },
+        { icon: (p) => <Monitor {...p} />, label: tx("My computer"), path: "/settings/desktop-bridge" },
         {
           icon: (p) => <Globe {...p} />,
           label: tx("Language"),
