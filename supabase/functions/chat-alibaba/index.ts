@@ -141,6 +141,53 @@ async function callAlibaba(
   return null;
 }
 
+/**
+ * Streams a Responses-API call and returns only its final text. Used by the
+ * manager/worker calls when no Alibaba key can serve the request.
+ */
+async function gatewayText(messages: Message[], maxTokens = 1400): Promise<string> {
+  const upstream = await callGateway(messages, "openai/gpt-5.6-luna");
+  if (!upstream?.response.ok || !upstream.response.body) return "";
+  const reader = upstream.response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+  while (text.length < maxTokens * 8) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const raw = line.slice(5).trim();
+      if (!raw || raw === "[DONE]") continue;
+      try {
+        const event = JSON.parse(raw) as any;
+        if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
+          text += event.delta;
+        }
+      } catch { /* ignore partial frames */ }
+    }
+  }
+  await reader.cancel().catch(() => {});
+  return text.trim();
+}
+
+/** Non-streaming text helper: Alibaba first, Lovable AI Gateway as the fallback. */
+function makeTextCall(admin: any): CallFn {
+  return async (models, payload) => {
+    const result = await callAlibaba(admin, models, { ...payload, stream: false });
+    if (result) {
+      const data = await result.response.json().catch(() => null) as any;
+      const content = data?.choices?.[0]?.message?.content;
+      if (typeof content === "string" && content.trim()) return content.trim();
+    }
+    const messages = Array.isArray((payload as any).messages) ? (payload as any).messages as Message[] : [];
+    if (!messages.length) return "";
+    return gatewayText(messages, Number((payload as any).max_tokens) || 1400);
+  };
+}
 
 
 async function callGateway(messages: Message[]): Promise<ChatUpstream | null> {
